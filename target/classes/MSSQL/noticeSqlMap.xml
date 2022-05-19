@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="noticeSqlMap">
+	<!-- 유저 정보가 어드민인지 확인 -->
+	<!-- <select id="checkAdminYn" resultType="NoticeBoardVO" parameterType="NoticeBoardVO">
+		select admin_yn from p_users
+		where user_id = user_id
+	</select>  -->
+	<!-- 선택한 게시판 등록 유저 확인 -->
+	<select id="checkUserId" resultType="NoticeBoardVO" parameterType="NoticeBoardVO">
+		select a.reg_id from p_pub_bbs_contents  AS a LEFT OUTER JOIN p_users AS b
+		on a.reg_id=b.user_id
+		where bbs_seq = #{bbs_seq}
+	</select>
+	
+	<select id="getNoticeList" resultType="NoticeBoardVO">
+		select a.* , b.user_kor_nm, b.user_id, c.code_nm
+		from p_pub_bbs_contents AS a LEFT OUTER JOIN p_users AS b
+		on a.reg_id=b.user_id
+		LEFT OUTER JOIN p_code_info AS c
+		on c.code_gubun = 'JOB'
+		and b.job_tit_cd = c.code
+		order by bbs_seq desc;
+	</select>
+	
+	<select id="findNoticeList" resultType="NoticeBoardVO" parameterType="NoticeBoardVO">
+		select * from p_pub_bbs_contents AS a LEFT OUTER JOIN p_users AS b
+		on a.reg_id=b.user_id
+		LEFT OUTER JOIN p_code_info AS c
+		on c.code_gubun = 'JOB'
+		and b.job_tit_cd = c.code
+		<if test="searchAtc == 'all'">
+			where user_kor_nm like concat('%',#{textAtc},'%')
+			or title like concat('%',#{textAtc},'%')
+			or contents like concat('%',#{textAtc},'%')
+		</if>
+		<if test="searchAtc == 'title'">
+			where title like concat('%',#{textAtc},'%')
+		</if>
+		<if test="searchAtc == 'contents'">
+			where contents like concat('%',#{textAtc},'%')
+		</if>
+		order by bbs_seq desc;
+	</select>
+	
+	<select id="insertNotice" parameterType="NoticeBoardVO" resultType="NoticeBoardVO">
+		insert into p_pub_bbs_contents(parent_no, order_no, depth_no, title, contents, hit_cnt, remote_ip, reg_id, reg_date)
+		values(IDENT_CURRENT('p_pub_bbs_contents'),0,0,#{title},#{contents},0,#{remote_ip},#{reg_id},#{reg_date})
+		SELECT @@IDENTITY AS bbs_seq
+	</select>
+	
+	<update id="updateNotice" parameterType="NoticeBoardVO">
+		update p_pub_bbs_contents
+		set title = #{title}, contents = #{contents}, mod_id = #{mod_id}, mod_date = #{mod_date}
+		where bbs_seq = #{bbs_seq}
+		<!-- 
+		and reg_id = #{reg_id}
+		or bbs_seq = #{bbs_seq}
+		and (select admin_yn from p_users where user_id = #{reg_id}) = 'y'
+		 -->
+	</update>
+	
+	<delete id="deleteNotice" parameterType="NoticeBoardVO">
+		delete from p_pub_bbs_contents
+		where bbs_seq = #{bbs_seq}
+		<!--
+		and reg_id = #{reg_id}
+		or bbs_seq = #{bbs_seq}
+		and (select admin_yn from p_users where user_id = #{reg_id} and admin_yn='y')
+		 -->
+	</delete>
+	
+	<update id="updateHit" parameterType="NoticeBoardVO">
+		update p_pub_bbs_contents
+		set hit_cnt = (select hit_cnt+1 from p_pub_bbs_contents where bbs_seq = #{bbs_seq})
+		where bbs_seq = #{bbs_seq}
+	</update>
+	
+	<select id="getNoticeBoard" resultType="NoticeBoardVO" parameterType="NoticeBoardVO">
+		select a.*, b.user_kor_nm, b.user_id, c.code_nm
+		from p_pub_bbs_contents a join p_users b
+		on a.reg_id = b.user_id
+		LEFT OUTER JOIN p_code_info AS c
+		on c.code_gubun = 'JOB'
+		and b.job_tit_cd = c.code
+		where bbs_seq=#{bbs_seq}
+	</select>
+	
+	<select id="getNoticeFilelist" resultType="NoticeBoardVO" parameterType="NoticeBoardVO">
+		select b.rfile_nm, b.file_size, b.file_seq, b.file_path, b.sfile_nm
+		from p_pub_bbs_contents AS a 
+		LEFT OUTER JOIN p_pub_bbs_attach_file AS b
+		on a.bbs_seq = b.bbs_seq
+		where a.bbs_seq = #{bbs_seq}
+	</select>
+	
+	<select id="getFilePathNotice" resultType="NoticeBoardVO" parameterType="NoticeBoardVO">
+		select file_path
+		from p_pub_bbs_attach_file
+		where sfile_nm = #{sfile_nm}
+	</select>
+	
+	<insert id="fileUploadNotice" parameterType="NoticeBoardVO">
+		insert into p_pub_bbs_attach_file(
+			bbs_seq,
+			rfile_nm,
+			sfile_nm,
+			file_size,
+			file_path,
+			reg_id,
+			reg_date,
+			mod_id,
+			mod_date		
+		)
+		values(
+			#{bbs_seq},
+			#{rfile_nm},
+			#{sfile_nm},
+			#{file_size},
+			#{file_path},
+			#{reg_id},
+			#{reg_date},
+			#{mod_id},
+			#{mod_date}
+		)
+	</insert>
+	
+	<select id="getDeleteFile" resultType="NoticeBoardVO" parameterType="NoticeBoardVO">
+		select sfile_nm, file_path
+		from p_pub_bbs_attach_file
+		where file_seq = #{file_seq}
+	</select>
+	
+	<delete id="deleteFile" parameterType="NoticeBoardVO">
+		delete from p_pub_bbs_attach_file
+		where file_seq = #{file_seq}
+	</delete>
+	
+	<select id="getDeleteFileList" resultType="NoticeBoardVO" parameterType="NoticeBoardVO">
+		select sfile_nm, file_path, bbs_seq, file_seq
+		from p_pub_bbs_attach_file
+		where bbs_seq = #{bbs_seq}
+	</select>
+</mapper>

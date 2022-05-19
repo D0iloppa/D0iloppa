@@ -1,0 +1,784 @@
+.tabulator .tabulator-header .tabulator-col .tabulator-col-content .tabulator-col-sorter .tabulator-arrow {
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+}
+
+/* sorting table design customize */
+.tabulator .tabulator-header .tabulator-col {
+    color: #0b4da2;
+    background: #ededed;
+    padding: 5px 0px;
+    border: none;
+    font-size: 12px;
+    font-weight: bold;
+    border-bottom: solid 1px #dddddd;
+    text-align: center;
+    text-transform: uppercase;
+    /*display: table-cell;*/
+}
+
+.tabulator .tabulator-header {
+    border-bottom: none;
+}
+
+.tabulator .tabulator-header .tabulator-col .tabulator-col-content {
+    padding: 0;
+}
+
+.tabulator-row .tabulator-cell {
+    border-right: none;
+    border-bottom: solid 1px #ddd;
+    background: #fff;
+    padding: 10px 5px;
+    font-size: 11px;
+    background: #fff;
+    border-bottom: solid 1px #e1e1e1;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.tabulator-row .tabulator-cell {
+    border-right: none;
+    border-bottom: solid 1px #ddd;
+    background: #fff;
+    padding: 5px 5px;
+    font-size: 11px;
+    background: #fff;
+    border-bottom: solid 1px #e1e1e1;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.tabulator-row.tabulator-row {
+    background: #fff;
+}
+
+.tabulator-row.tabulator-row:hover .tabulator-cell {
+    background: #eff3f8;
+}
+
+.tabulator {
+    background: transparent;
+    border: none;
+}
+
+/*다중 선택*/
+.multi_sel_wrap {
+    position: relative;
+    margin-right: 30px;
+}
+
+.multi_sel {
+    padding: 4px 30px 4px 10px;
+    background: url(../images/select.png) no-repeat right center #fff;
+    border: solid 1px #ddd;
+    font-size: 11px;
+}
+
+.multi_sel_wrap.on .multi_sel {
+    background: url(../images/select_down.png) no-repeat right center #fff;
+}
+
+.multi_box {
+    z-index: 10;
+    position: absolute;
+    top: 100%;
+    display: none;
+    left: 0;
+    box-shadow: 0 0 30px 0px rgba(0, 0, 0, 0.4);
+    width: max-content;
+    background: #fff;
+}
+
+.multi_sel_wrap.on .multi_box {
+    display: block;
+}
+
+.multi_sel_wrap .multi_box table {
+    display: table-cell;
+    width: auto;
+}
+
+.multi_sel_wrap .multi_box table tr th {
+    text-align: center;
+    padding: 5px;
+    border: solid 1px #ddd;
+    background: #efefef;
+}
+
+.multi_sel_wrap .multi_box table tr td {
+    border: solid 1px #ddd;
+    padding: 4px;
+    text-align: center;
+}
+
+.multi_sel_wrap .multi_box table tr:hover td {
+    cursor: pointer;
+    background: #eff3f8;
+}
+
+.sel_tab > div {
+    display: none;
+}
+
+.sel_tab > div.on {
+    display: block;
+}
+
+/*.multi_box > ul {
+    display: flex;
+    background: #fff;
+}
+
+.multi_box > ul > li {
+    border-right: solid 1px #ddd;
+}
+
+.multi_box > ul > li:last-child {
+    border-right: 0;
+}
+
+.multi_box ul ul {
+    display: block;
+    width: 100%;
+}
+
+.multi_box > ul > li ul li {
+    display: block;
+    width: 100%;
+}
+
+.multi_box ul li span {
+    background: #f4f4f4;
+    padding: 5px 10px;
+    display: block;
+    font-weight: bold;
+    border-bottom: solid 1px #ddd;
+    font-size: 11px;
+    width: 100%;
+}
+
+.multi_box ul li ul li a {
+    display: block;
+    padding: 5px 10px;
+    font-size: 11px;
+    width: 100%;
+}
+
+.multi_box ul li ul li a.on {
+    background: #e1e1e1;
+}*/
+
+/*로그인*/
+.login {
+    background: url(../images/login_bg.gif) no-repeat center left;
+    background-size: cover;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.login .login_box {
+    width: 95%;
+    margin: 0 auto;
+    background: #fff;
+    box-shadow: 0 0 50px 0px rgba(0, 0, 0, 0.15);
+    max-width: 1200px;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.login .login_box .login_left {
+    padding: 130px 0px 120px;
+    background: url(../images/login_right_blue.png) no-repeat right bottom #0f7be7;
+    text-align: center;
+    width: 50%;
+}
+
+.login .login_box .login_left h1 {
+    font-size: 45px;
+    font-weight: bold;
+    margin-bottom: 280px;
+    font-family: 'S-CoreDream';
+    letter-spacing: -0.02em;
+    color: #ffd800;
+}
+
+.login .login_box .login_left .logo {}
+
+.login .login_box .login_left .logo img {
+    max-width: 100%;
+}
+
+.login .login_box .login_right {
+    width: 50%;
+    text-align: center;
+}
+
+.login .login_box .login_right h2 {
+    padding: 80px 0px 20px;
+    font-size: 50px;
+    color: #007af7;
+    font-family: 'Noto Sans KR';
+    font-weight: bold;
+}
+
+.login .login_box .login_right .lg_form {
+    padding: 0px 40px;
+}
+
+.login .login_box .login_right .lg_form ul {
+    display: flex;
+    flex-direction: column;
+}
+
+.login .login_box .login_right .lg_form ul li {
+    margin-bottom: 10px;
+}
+
+.login .login_box .login_right .lg_form ul li input {
+    border: none;
+    width: 100%;
+    display: block;
+    line-height: 40px;
+    font-size: 16px;
+    padding-left: 40px;
+    height: 40px;
+    border-bottom: solid 1px #ddd;
+}
+
+.login .login_box .login_right .lg_form ul li input.id {
+    background: url(../images/login_id.png) no-repeat 10px center;
+}
+
+.login .login_box .login_right .lg_form ul li input.pw {
+    background: url(../images/login_pw.png) no-repeat 10px center;
+}
+
+.login .login_box .login_right .lg_form .login_fnc {
+    display: flex;
+    justify-content: space-between;
+}
+
+.login .login_box .login_right .lg_form .login_fnc .lt {}
+
+.login .login_box .login_right .lg_form .login_fnc .lt input {}
+
+.login .login_box .login_right .lg_form .login_fnc .lt label {
+    font-family: 'Noto Sans KR';
+}
+
+.login .login_box .login_right .lg_form .login_fnc .rt {}
+
+.login .login_box .login_right .lg_form .login_fnc .rt a {
+    font-size: 14px;
+    font-family: 'Noto Sans KR';
+}
+
+.login .login_box .login_right .lg_form .btn_wrap {
+    text-align: center;
+    padding: 20px 0px;
+}
+
+.login .login_box .login_right .lg_form .btn_wrap .btn_signin {
+    padding: 10px 40px;
+    color: #007af7;
+    display: inline-block;
+    border: solid 1px #007af7;
+    font-weight: bold;
+    font-family: 'Noto Sans KR';
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 3px;
+}
+
+.login .login_box .login_right .lg_form .btn_wrap .btn_signin:hover {
+    border: solid 1px #0253a7;
+    color: #0253a7;
+}
+
+.login .login_box .login_right .login_board {
+    border-top: dashed 1px #ddd;
+    margin-top: 70px;
+    padding: 30px 40px;
+}
+
+.login .login_box .login_right .login_board h3 {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    text-align: left;
+    font-family: 'Noto Sans KR';
+    color: #000;
+}
+
+.login .login_box .login_right .login_board .tbl_wrap {}
+
+.login .login_box .login_right .login_board .tbl_wrap .login_list {
+    border-top: none;
+}
+
+.login .login_box .login_right .login_board .tbl_wrap .login_list tr {}
+
+.login .login_box .login_right .login_board .tbl_wrap .login_list tr th {
+    background: #007af7;
+    font-family: 'Noto Sans KR';
+    text-align: center;
+    font-weight: bold;
+    font-size: 12px;
+    color: #fff;
+    border-bottom: solid 1px #007af7;
+    padding: 8px 2px;
+    text-transform: uppercase;
+}
+
+.login .login_box .login_right .login_board .tbl_wrap .login_list tr td {
+    font-family: 'Noto Sans KR';
+    color: #575757;
+    font-size: 12px;
+    border-bottom: solid 1px #dddddd;
+    padding: 7px 3px;
+    line-height: 1.4;
+}
+
+.login .login_box .login_right .login_board .tbl_wrap .login_list tr th.pc,
+.login .login_box .login_right .login_board .tbl_wrap .login_list tr td.pc {
+    display: table-cell;
+}
+
+
+
+
+
+
+.tab_wrap {}
+
+.tab_wrap .tab_tit {}
+
+.tab_wrap .tab_tit li {}
+
+.tab_wrap .tab_tit li a {}
+
+.tab_wrap .tab_tit li a.on {}
+
+.tab_wrap .tab_cont {}
+
+.tab_wrap .tab_cont .tab_div {
+    display: none;
+}
+
+.tab_wrap .tab_cont .tab_div.on {
+    display: block;
+}
+
+.line {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.line .left {
+    margin-bottom: 5px;
+    margin-right: auto;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.line .right {
+    margin-left: auto;
+    margin-bottom: 5px;
+}
+
+.gray_small_box .user_name {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.gray_small_box .user_name li {
+    margin-right: 15px;
+    font-size: 11px;
+}
+
+
+
+
+@media all and (max-width:1200px) {}
+
+@media all and (max-width:960px) {}
+
+@media all and (max-width:768px) {
+    .login .login_box {
+        margin: 40px auto;
+    }
+
+    .login .login_box .login_left {
+        width: 100%;
+        padding: 50px 0px;
+    }
+
+    .login .login_box .login_left h1 {
+        margin-bottom: 50px;
+        font-size: 35px;
+    }
+
+    .login .login_box .login_left .logo img {
+        max-width: 100px;
+        width: 100%;
+    }
+
+    .login .login_box .login_right {
+        width: 100%;
+    }
+
+    .login .login_box .login_right h2 {
+        padding-top: 30px;
+        font-size: 30px;
+    }
+
+    .login .login_box .login_right .login_board {
+        margin-top: 30px;
+    }
+
+    .line .right {
+        margin-left: inherit;
+    }
+
+    .multi_sel_wrap.on .multi_box {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 90%;
+    }
+
+    .multi_sel_wrap.on .multi_box > ul {
+        flex-wrap: wrap;
+        width: 100%;
+    }
+}
+
+.multi_sel_wrap.on .multi_box > ul > li {}
+
+.proj_general {
+    margin-bottom: 30px;
+    width: 250px;
+    float: left;
+    padding-right: 30px;
+}
+
+.proj_general ul {}
+
+.proj_general ul li {
+    margin-bottom: 16px;
+    position: relative;
+}
+
+.proj_general ul li::after {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: url(../images/menu_2dth_off.png) no-repeat center center;
+    display: block;
+    content: '';
+    width: 30px;
+    height: 10px;
+    background-size: 10px;
+}
+
+.proj_general ul li:last-child::after {
+    display: none;
+}
+
+.proj_general ul li a {
+    display: block;
+    word-break: keep-all;
+    padding: 10px;
+    background: #f1f1f1;
+    border-top-right-radius: 7px;
+    border-bottom-left-radius: 7px;
+}
+
+.proj_general ul li a.on {
+    background: #db7334;
+    color: #ffff;
+    border: solid 2px #db7334;
+}
+
+#pg01 .pg_tree {
+    display: inline-block;
+    border: solid 1px #ddd;
+    border-bottom: solid 3px #ddd;
+    padding: 10px 20px;
+}
+
+.pg_cont {
+    float: left;
+    width: calc(100% - 250px);
+}
+
+.pg_cont .pg.on {
+    display: block;
+}
+
+.pg_cont .pg {
+    display: none;
+}
+
+.pg_cont .pg h4 {}
+
+.pg_cont .pg .pg_top {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+    flex-wrap: wrap;
+}
+
+.pg_cont .pg .pg_top .left {
+    margin-bottom: 5px;
+}
+
+.pg_cont .pg .pg_top .left > * {
+    margin-bottom: 5px;
+}
+
+.pg_cont .pg .pg_top .right {}
+
+.pg_cont .pg .num_set {}
+
+.pg_cont .pg .num_set .tables {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.pg_cont .pg .num_set .tables .tbl4 {
+    width: 24%;
+    background: #f7f7f7;
+    padding: 10px;
+}
+
+.pg_cont .pg .num_set .tables .tbl4 .tbl_wrap {
+    margin-bottom: 0;
+}
+
+.jstree-default .jstree-node {
+    min-height: 20px;
+    line-height: 20px;
+
+}
+
+.jstree-default .jstree-open > .jstree-ocl {
+    background-position: -132px -7px;
+}
+
+.jstree-default .jstree-closed > .jstree-ocl {
+    background-position: -100px -7px;
+}
+
+.jstree-default .jstree-anchor {
+    line-height: 20px;
+    height: 20px;
+}
+
+.jstree-default .jstree-icon:empty {
+    width: 20px;
+    height: 20px;
+    line-height: 20px;
+}
+
+.jstree-default .jstree-themeicon {
+    background-position: -260px -5px;
+}
+
+.acco {
+    margin-bottom: 5px;
+}
+
+.acco h4 {
+    cursor: pointer;
+    background: #98a3ad;
+    margin-bottom: 0;
+    padding: 5px;
+    color: #fff;
+}
+
+.acco h4::before {
+    position: static;
+    content: '';
+    width: 10px;
+    margin-right: 2px;
+    height: 16px;
+    vertical-align: middle;
+    background: url(../images/nav_select.png) no-repeat left center;
+    display: inline-block;
+}
+
+.acco.on h4::before {
+    background: url(../images/nav_select_on.png) no-repeat left center;
+}
+
+.acco .tbl_wrap {
+    display: none;
+}
+
+.acco .tbl_wrap::before {
+    display: none;
+}
+
+.acco .tbl_wrap table {
+    border-top: solid 1px #ddd;
+}
+
+.sch_area{
+    background: #dddddd;
+    padding: 10px;
+    margin-bottom: 20px;
+    border: solid 1px #cccccc;
+}
+.sch_opt h4 {
+    font-size:14px;
+}
+.tab_cont hr {
+    display: block;
+    height: 3px;
+    border-bottom: 1px dotted #aaa;
+    margin: 15px 0px 15px;
+    border-top: 1px dotted #aaa;
+}
+.ui-dialog .ui-dialog-titlebar {
+    padding:10px;
+}
+.sch_top {padding: 10px 10px 5px;border-bottom:dashed 1px #aaa;}
+
+@media all and (max-width:1600px) {
+
+    .pg_cont .pg .num_set .tables .tbl4 {
+        width: 49%;
+        margin-bottom: 10px;
+    }
+}
+
+@media all and (max-width:1200px) {
+    .pg_cont .pg .num_set .tables .tbl4 {
+        width: 99%;
+    }
+}
+
+@media all and (max-width:768px) {
+    .multi_sel_wrap.on .multi_box > ul > li {
+        width: 100%;
+    }
+
+    .proj_general {
+        padding-right: 0;
+        width: 100%;
+    }
+
+    .proj_general ul {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+    }
+
+    .proj_general ul li {
+        width: calc(50% - 3px);
+    }
+
+    .pg_cont {
+        width: 100%;
+    }
+
+    .proj_general ul li a {
+        height: 100%;
+        display: flex;
+        align-items: center;
+    }
+
+    .proj_general ul li {
+        margin-bottom: 7px;
+    }
+
+    .proj_general ul li::after {
+        display: none;
+    }
+}
+
+@media all and (max-width:640px) {
+    .login {
+        display: grid;
+    }
+
+    .login .login_box .login_left {
+        padding: 30px 0;
+    }
+
+    .login .login_box .login_left h1 {
+        font-size: 24px;
+        margin-bottom: 0px;
+    }
+
+    .login .login_box .login_left .logo {
+        display: none;
+    }
+
+    .login .login_box .login_right h2 {
+        padding: 20px 0px 10px;
+        font-size: 20px;
+    }
+
+    .login .login_box .login_right .lg_form {
+        padding: 0px 20px;
+    }
+
+    .login .login_box .login_right .lg_form .btn_wrap .btn_signin {
+        padding: 7px 50px;
+    }
+
+    .login .login_box .login_right .login_board {
+        padding: 30px 20px;
+        margin-top: 10px;
+    }
+
+    .login .login_box .login_right .login_board .tbl_wrap .login_list tr th.pc,
+    .login .login_box .login_right .login_board .tbl_wrap .login_list tr td.pc {
+        display: none;
+    }
+
+    .proj_general ul li {
+        width: 100%;
+    }
+
+    .proj_general ul li a {
+        padding: 6px;
+        height: 100%;
+        display: flex;
+        align-items: center;
+    }
+
+    #pg01 .pg_tree {
+        width: 100%;
+    }
+
+    .proj_general ul {
+        justify-content: flex-start;
+    }
+
+    .proj_general ul li {
+        display: inline-block;
+        margin-right: 7px;
+        width: auto;
+    }
+
+    .proj_general ul li::after {
+        display: none;
+    }
+}
+
+@media all and (max-width:480px) {
+
+    .proj_general ul li {
+        width: 100%;
+        margin-right: 0;
+    }
+}

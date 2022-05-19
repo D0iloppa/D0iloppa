@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  - Middle tier application context definition for the image database.
+  -->
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:task="http://www.springframework.org/schema/task"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:p="http://www.springframework.org/schema/p"
+ 	xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.2.xsd
+                        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.2.xsd
+						http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.2.xsd
+						http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.2.xsd
+						http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-4.2.xsd
+						http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.2.xsd
+						http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.2.xsd"
+	default-lazy-init="true">
+
+	<!-- properties 정보를 가지고 오기 위한 property-placeholder 지정 -->
+	<context:property-placeholder  location="classpath:/properties/app.properties"/>
+	<util:properties id="config" location="classpath:/properties/app.properties" />
+	
+	<!-- 어노테이션 사용 선언 -->
+	<context:annotation-config />
+	
+	<bean id="multipartResolver"  class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+	    <property name="maxUploadSize"   value="10000000000" />
+	    <property name="maxInMemorySize" value="100000000" />
+	    <property name="defaultEncoding" value="utf-8" />
+	</bean>
+	
+	<bean class="org.springframework.web.servlet.view.BeanNameViewResolver">
+        <property name="order" value="0"></property>
+    </bean>
+    
+	<bean id="viewResolver" class="org.springframework.web.servlet.view.UrlBasedViewResolver">
+		<property name="viewClass" value="org.springframework.web.servlet.view.JstlView" />
+		<property name="prefix" value="/WEB-INF/jsp/" />
+		<property name="suffix" value=".jsp" />
+		<property name="order" value="1" />
+	</bean>
+	
+	<bean id="fileDownload" class="kr.co.hhi.excel.DownloadView"/>
+
+    <!-- Context 전체 설정 -->
+   	<!-- <context:component-scan base-package="com.wellconn"> -->
+   	<context:component-scan base-package="kr.co.hhi">
+		<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller" />
+	</context:component-scan>
+	
+	<!-- scheduleJob bean -->
+    <bean id="scheduleJob" class="kr.co.hhi.common.schedule.Schedule">
+    	<!-- <property name="mailer" ref="mailer" />  -->
+    </bean>
+    	
+    <task:scheduled-tasks> <!-- scheduled job list -->
+    	<!-- 초 분 시 월 년 -->
+<!--         <task:scheduled ref="scheduleJob" method="expiredDrnTempSaveDel" cron="0 0 0 * * ?" /> -->
+        <task:scheduled ref="scheduleJob" method="expiredDrnTempSaveDel" cron="0 0 0 * * *" />
+        <task:scheduled ref="scheduleJob" method="dailyNotification" cron="0 0 4 * * *" />
+        <task:scheduled ref="scheduleJob" method="updatePoNo" cron="0 0 0/1 * * *" />
+        <task:scheduled ref="scheduleJob" method="updateBulkPoNo" cron="0 5 0/1 * * *" />
+        <task:scheduled ref="scheduleJob" method="corrReplyNotification" cron="0 0 5 * * *" />
+        <!-- 
+        0/5 * * * * * 5초마다
+        5 * * * * * 매 5초에
+        
+        0 0 12 * * * 		매일 12시
+        0 15 10 * * *       매일 10시 15분에 실행
+        0 15 10 * * *       매일 10시 15분에 실행
+		0 * 14 * * *        매일 14시에 실행
+		0 0/5 14 18 * * *   매일 14시, 18시에 시작해서 5분간격으로 실행
+		0 0-5 14 * * *      매일 14시에 시작해서 0분동안 실행
+        -->
+             
+    </task:scheduled-tasks>    	
+	
+    <task:annotation-driven/>
+    
+    <!-- SMTP Server  -->
+<!--     <bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl"> -->
+<!--         <property name="host" value="${mail.smtp.server}" /> -->
+<!--         <property name="port" value="${mail.smtp.host}" /> -->
+<!--         <property name="username" value="${mail.send.user}" /> -->
+<!--         <property name="password" value="${mail.send.user.pw}" />  -->
+<!--         <property name="javaMailProperties"> -->
+<!--             <props> -->
+<!--                 <prop key="mail.smtp.ssl.trust">${mail.smtp.ssl.trust}</prop> -->
+<!--                 <prop key="mail.smtp.starttls.enable">${mail.smtp.starttls}</prop>                                 -->
+<!--                 <prop key="mail.smtp.auth">${mail.smtp.auth}</prop> -->
+<!--             </props> -->
+<!--         </property> -->
+<!--     </bean> -->
+
+</beans>

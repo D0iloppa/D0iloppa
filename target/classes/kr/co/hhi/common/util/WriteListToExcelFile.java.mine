@@ -1,0 +1,403 @@
+package kr.co.hhi.common.util;
+
+
+import java.io.FileInputStream;
+import java.io.InputStream;
+
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
+public class WriteListToExcelFile {
+
+	static int idx=0;
+	
+	public static void writeNoticeListToFile(String report, HttpServletResponse response, String templatePath, String fileName, String reportType, String projecetName, String discipline, String columnList, String[] valueList,  String cut_off_date, String workStep, String date_s, String date_d) throws Exception{
+		
+		InputStream fis = null;
+		
+        try {
+        	templatePath = templatePath+"report_type_"+report+"_"+reportType+".xlsx";
+			fis = new FileInputStream(templatePath);
+			
+			XSSFWorkbook workbook = new XSSFWorkbook(fis);
+			
+			//******** SET FONT  ******** //
+			Font font_bold_14 = workbook.createFont();
+			font_bold_14.setFontName("Times New Roman"); 
+			font_bold_14.setFontHeight((short)(14*20)); 
+			font_bold_14.setBoldweight(Font.BOLDWEIGHT_BOLD);
+	    	
+	    	Font font_bold_12 = workbook.createFont();
+	    	font_bold_12.setFontName("Times New Roman"); 
+	    	font_bold_12.setFontHeight((short)(12*20)); 
+	    	font_bold_12.setBoldweight(Font.BOLDWEIGHT_BOLD);
+	    	
+	    	Font font_bold_11 = workbook.createFont();
+	    	font_bold_11.setFontName("Times New Roman"); 
+	    	font_bold_11.setFontHeight((short)(11*20)); 
+	    	font_bold_11.setBoldweight(Font.BOLDWEIGHT_BOLD);
+	    	
+	    	Font font_bold_10 = workbook.createFont();
+	    	font_bold_10.setFontName("Times New Roman"); 
+	    	font_bold_10.setFontHeight((short)(10*20)); 
+			
+	    	CellStyle left_14_bold = workbook.createCellStyle();
+	    	left_14_bold.setAlignment(CellStyle.ALIGN_LEFT);
+	    	left_14_bold.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
+	    	left_14_bold.setFont(font_bold_14);
+			
+	    	CellStyle left_12_bold = workbook.createCellStyle();
+	    	left_12_bold.setAlignment(CellStyle.ALIGN_LEFT);
+	    	left_12_bold.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
+	    	left_12_bold.setFont(font_bold_12);
+	    	
+	    	CellStyle right_12_bold = workbook.createCellStyle();
+	    	right_12_bold.setAlignment(CellStyle.ALIGN_RIGHT);
+	    	right_12_bold.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
+	    	right_12_bold.setFont(font_bold_12);
+			
+	    	CellStyle center_11_bold = workbook.createCellStyle();
+	    	center_11_bold.setAlignment(CellStyle.ALIGN_CENTER);
+	    	center_11_bold.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
+	    	center_11_bold.setFont(font_bold_11);
+	    	center_11_bold.setBorderRight(HSSFCellStyle.BORDER_THIN);
+	    	center_11_bold.setBorderLeft(HSSFCellStyle.BORDER_THIN);
+	    	center_11_bold.setBorderTop(HSSFCellStyle.BORDER_THIN);
+	    	center_11_bold.setBorderBottom(HSSFCellStyle.BORDER_THIN);
+	    	
+	    	
+	    	CellStyle center_10 = workbook.createCellStyle();
+	    	center_10.setAlignment(CellStyle.ALIGN_CENTER);
+	    	center_10.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
+	    	center_10.setFont(font_bold_10);
+	    	center_10.setBorderRight(HSSFCellStyle.BORDER_THIN);
+	    	center_10.setBorderLeft(HSSFCellStyle.BORDER_THIN);
+	    	center_10.setBorderTop(HSSFCellStyle.BORDER_THIN);
+	    	center_10.setBorderBottom(HSSFCellStyle.BORDER_THIN);
+			
+	    	//******** SET FONT END ******** //
+	    	
+			XSSFSheet sheet = workbook.getSheetAt(0);
+			
+			int startRow=0;
+			
+			if(report.equals("1")) {
+				if ( report.equals("1") && reportType.equals("1")) { // DCI List
+					startRow=5; 
+					sheet.getRow(2).createCell(0).setCellValue("Project : "+projecetName);
+					sheet.getRow(3).createCell(0).setCellValue("Discipline : "+discipline);
+					
+					sheet.getRow(2).getCell(0).setCellStyle(left_14_bold);
+					sheet.getRow(3).getCell(0).setCellStyle(left_12_bold);
+				} else if ( report.equals("1") && reportType.equals("2")) { // DCI Detail List
+					startRow=5; 
+					sheet.getRow(2).createCell(0).setCellValue("Project : "+projecetName);
+					sheet.getRow(3).createCell(0).setCellValue("Discipline : "+discipline);
+					
+					sheet.getRow(2).getCell(0).setCellStyle(left_14_bold);
+					sheet.getRow(3).getCell(0).setCellStyle(left_12_bold);
+				} else if ( report.equals("1") &&  reportType.equals("3")) { // DCI History List
+					startRow=7; 
+					sheet.getRow(2).createCell(0).setCellValue("Project : "+projecetName);
+					sheet.getRow(3).createCell(0).setCellValue("Discipline : "+discipline);
+					
+					sheet.getRow(2).getCell(0).setCellStyle(left_14_bold);
+					sheet.getRow(3).getCell(0).setCellStyle(left_12_bold);
+				} else if ( report.equals("1") &&  reportType.equals("4")) { // DCI Behind List
+					startRow=6; 
+					sheet.getRow(2).createCell(0).setCellValue("Project : "+projecetName);
+					sheet.getRow(3).createCell(0).setCellValue("Discipline : "+discipline);
+					sheet.getRow(3).createCell(4).setCellValue("Work Step : "+workStep);
+					sheet.getRow(3).createCell(11).setCellValue("Cut-off date : "+cut_off_date);
+					
+					sheet.getRow(2).getCell(0).setCellStyle(left_14_bold);
+					sheet.getRow(3).getCell(0).setCellStyle(left_12_bold);
+					sheet.getRow(3).getCell(4).setCellStyle(left_12_bold);
+					sheet.getRow(3).getCell(11).setCellStyle(right_12_bold);
+				} else if ( report.equals("1") && reportType.equals("5")) { // DCI Transmittal List
+					startRow=5; 
+					sheet.getRow(2).createCell(0).setCellValue("Project : "+projecetName);
+					sheet.getRow(3).createCell(0).setCellValue("Discipline : "+discipline);
+					sheet.getRow(3).createCell(13).setCellValue("Duration : "+date_s +"~"+date_d);
+					
+					sheet.getRow(2).getCell(0).setCellStyle(left_14_bold);
+					sheet.getRow(3).getCell(0).setCellStyle(left_12_bold);
+					sheet.getRow(3).getCell(13).setCellStyle(right_12_bold);
+				} else if ( report.equals("1") &&  reportType.equals("6")) { // DCI Progress Status
+					
+				} else if ( report.equals("1") &&  reportType.equals("7")) { // DCI Workdone List
+					startRow=6; 
+					sheet.getRow(2).createCell(0).setCellValue("Project : "+projecetName);
+					sheet.getRow(3).createCell(0).setCellValue("Discipline : "+discipline);
+					sheet.getRow(3).createCell(4).setCellValue("Work Step : "+workStep);
+					sheet.getRow(3).createCell(11).setCellValue("Duration : "+date_s +"~"+date_d);
+					
+					sheet.getRow(2).getCell(0).setCellStyle(left_14_bold);
+					sheet.getRow(3).getCell(0).setCellStyle(left_12_bold);
+					sheet.getRow(3).getCell(4).setCellStyle(left_12_bold);
+					sheet.getRow(3).getCell(11).setCellStyle(right_12_bold);
+				} else if ( report.equals("1") && reportType.equals("8")) { // DCI Workdone Status
+					
+				} else if ( report.equals("1") && reportType.equals("9")) { // Weekly Progress Graph
+					
+				} else if ( report.equals("1") && reportType.equals("10")) { // Monthly Progress Graph
+					
+				} else if ( report.equals("1") && reportType.equals("11")) { // WBS Detail
+					
+				} else if ( report.equals("1") && reportType.equals("12")) { // WBS Summary(IFA/FAC)
+					
+				} else if ( report.equals("1") && reportType.equals("13")) { // WBS Detail(IFA/FAC)
+					
+				}
+			}else if(report.equals("2")) {
+				if ( report.equals("2") && reportType.equals("1")) { // PCI List
+					startRow=5; 
+					sheet.getRow(2).createCell(0).setCellValue("Project : "+projecetName);
+					sheet.getRow(3).createCell(0).setCellValue("Discipline : "+discipline);
+					
+					sheet.getRow(2).getCell(0).setCellStyle(left_14_bold);
+					sheet.getRow(3).getCell(0).setCellStyle(left_12_bold);
+				} else if ( report.equals("2") && reportType.equals("2")) { // PCI Detail List
+					startRow=5; 
+					sheet.getRow(2).createCell(0).setCellValue("Project : "+projecetName);
+					sheet.getRow(3).createCell(0).setCellValue("Discipline : "+discipline);
+					
+					sheet.getRow(2).getCell(0).setCellStyle(left_14_bold);
+					sheet.getRow(3).getCell(0).setCellStyle(left_12_bold);
+				} else if ( report.equals("2") &&  reportType.equals("3")) { // PCI Behind List
+					startRow=6; 
+					sheet.getRow(2).createCell(0).setCellValue("Project : "+projecetName);
+					sheet.getRow(3).createCell(0).setCellValue("Discipline : "+discipline);
+					sheet.getRow(3).createCell(4).setCellValue("Work Step : "+workStep);
+					sheet.getRow(3).createCell(11).setCellValue("Cut-off date : "+cut_off_date);
+					
+					sheet.getRow(2).getCell(0).setCellStyle(left_14_bold);
+					sheet.getRow(3).getCell(0).setCellStyle(left_12_bold);
+					sheet.getRow(3).getCell(4).setCellStyle(left_12_bold);
+					sheet.getRow(3).getCell(11).setCellStyle(right_12_bold);
+				} else if ( report.equals("2") &&  reportType.equals("4")) { // PCI Progress Status
+					
+				} else if ( report.equals("2") &&  reportType.equals("5")) { // DCI Workdone List
+					startRow=6; 
+					sheet.getRow(2).createCell(0).setCellValue("Project : "+projecetName);
+					sheet.getRow(3).createCell(0).setCellValue("Discipline : "+discipline);
+					sheet.getRow(3).createCell(4).setCellValue("Work Step : "+workStep);
+					sheet.getRow(3).createCell(11).setCellValue("Duration : "+date_s +"~"+date_d);
+					
+					sheet.getRow(2).getCell(0).setCellStyle(left_14_bold);
+					sheet.getRow(3).getCell(0).setCellStyle(left_12_bold);
+					sheet.getRow(3).getCell(4).setCellStyle(left_12_bold);
+					sheet.getRow(3).getCell(11).setCellStyle(right_12_bold);
+				} else if ( report.equals("2") && reportType.equals("6")) { // DCI Workdone Status
+					
+				} else if ( report.equals("2") && reportType.equals("7")) { // Weekly Progress Graph
+					
+				} else if ( report.equals("2") && reportType.equals("8")) { // Monthly Progress Graph
+					
+				} else if ( report.equals("2") && reportType.equals("9")) { // WBS Detail
+					
+				}
+			}else if(report.equals("3")) {
+				if ( report.equals("3") && reportType.equals("1")) { // VDCI List
+					startRow=5; 
+					sheet.getRow(2).createCell(0).setCellValue("Project : "+projecetName);
+					sheet.getRow(3).createCell(0).setCellValue("Discipline : "+discipline);
+					
+					sheet.getRow(2).getCell(0).setCellStyle(left_14_bold);
+					sheet.getRow(3).getCell(0).setCellStyle(left_12_bold);
+				} else if ( report.equals("3") && reportType.equals("2")) { // VDCI Detail List
+					startRow=5; 
+					sheet.getRow(2).createCell(0).setCellValue("Project : "+projecetName);
+					sheet.getRow(3).createCell(0).setCellValue("Discipline : "+discipline);
+					
+					sheet.getRow(2).getCell(0).setCellStyle(left_14_bold);
+					sheet.getRow(3).getCell(0).setCellStyle(left_12_bold);
+				} else if ( report.equals("3") &&  reportType.equals("3")) { // VDCI History List
+					startRow=7; 
+					sheet.getRow(2).createCell(0).setCellValue("Project : "+projecetName);
+					sheet.getRow(3).createCell(0).setCellValue("Discipline : "+discipline);
+					
+					sheet.getRow(2).getCell(0).setCellStyle(left_14_bold);
+					sheet.getRow(3).getCell(0).setCellStyle(left_12_bold);
+				} else if ( report.equals("3") &&  reportType.equals("4")) { // VDCI Behind List
+					startRow=6; 
+					sheet.getRow(2).createCell(0).setCellValue("Project : "+projecetName);
+					sheet.getRow(3).createCell(0).setCellValue("Discipline : "+discipline);
+					sheet.getRow(3).createCell(4).setCellValue("Work Step : "+workStep);
+					sheet.getRow(3).createCell(11).setCellValue("Cut-off date : "+cut_off_date);
+					
+					sheet.getRow(2).getCell(0).setCellStyle(left_14_bold);
+					sheet.getRow(3).getCell(0).setCellStyle(left_12_bold);
+					sheet.getRow(3).getCell(4).setCellStyle(left_12_bold);
+					sheet.getRow(3).getCell(11).setCellStyle(right_12_bold);
+				} else if ( report.equals("3") && reportType.equals("5")) { // VDCI Transmittal List
+					startRow=5; 
+					sheet.getRow(2).createCell(0).setCellValue("Project : "+projecetName);
+					sheet.getRow(3).createCell(0).setCellValue("Discipline : "+discipline);
+					sheet.getRow(3).createCell(13).setCellValue("Duration : "+date_s +"~"+date_d);
+					
+					sheet.getRow(2).getCell(0).setCellStyle(left_14_bold);
+					sheet.getRow(3).getCell(0).setCellStyle(left_12_bold);
+					sheet.getRow(3).getCell(13).setCellStyle(right_12_bold);
+				} else if ( report.equals("3") &&  reportType.equals("6")) { // VDCI Progress Status
+					
+				} else if ( report.equals("3") &&  reportType.equals("7")) { // VDCI Workdone List
+					startRow=6; 
+					sheet.getRow(2).createCell(0).setCellValue("Project : "+projecetName);
+					sheet.getRow(3).createCell(0).setCellValue("Discipline : "+discipline);
+					sheet.getRow(3).createCell(4).setCellValue("Work Step : "+workStep);
+					sheet.getRow(3).createCell(11).setCellValue("Duration : "+date_s +"~"+date_d);
+					
+					sheet.getRow(2).getCell(0).setCellStyle(left_14_bold);
+					sheet.getRow(3).getCell(0).setCellStyle(left_12_bold);
+					sheet.getRow(3).getCell(4).setCellStyle(left_12_bold);
+					sheet.getRow(3).getCell(11).setCellStyle(right_12_bold);
+				} else if ( report.equals("3") && reportType.equals("8")) { // VDCI Workdone Status
+					
+				} else if ( report.equals("3") && reportType.equals("9")) { // Weekly Progress Graph
+					
+				} else if ( report.equals("3") && reportType.equals("10")) { // Monthly Progress Graph
+					
+				} else if ( report.equals("3") && reportType.equals("11")) { // WBS Detail
+					
+				}
+			}else if(report.equals("4")) {
+				if ( report.equals("4") && reportType.equals("1")) { // SDCI List
+					startRow=5; 
+					sheet.getRow(2).createCell(0).setCellValue("Project : "+projecetName);
+					sheet.getRow(3).createCell(0).setCellValue("Discipline : "+discipline);
+					
+					sheet.getRow(2).getCell(0).setCellStyle(left_14_bold);
+					sheet.getRow(3).getCell(0).setCellStyle(left_12_bold);
+				} else if ( report.equals("4") && reportType.equals("2")) { // SDCI Detail List
+					startRow=5; 
+					sheet.getRow(2).createCell(0).setCellValue("Project : "+projecetName);
+					sheet.getRow(3).createCell(0).setCellValue("Discipline : "+discipline);
+					
+					sheet.getRow(2).getCell(0).setCellStyle(left_14_bold);
+					sheet.getRow(3).getCell(0).setCellStyle(left_12_bold);
+				} else if ( report.equals("4") &&  reportType.equals("3")) { // SDCI History List
+					startRow=7; 
+					sheet.getRow(2).createCell(0).setCellValue("Project : "+projecetName);
+					sheet.getRow(3).createCell(0).setCellValue("Discipline : "+discipline);
+					
+					sheet.getRow(2).getCell(0).setCellStyle(left_14_bold);
+					sheet.getRow(3).getCell(0).setCellStyle(left_12_bold);
+				} else if ( report.equals("4") &&  reportType.equals("4")) { // SDCI Behind List
+					startRow=6; 
+					sheet.getRow(2).createCell(0).setCellValue("Project : "+projecetName);
+					sheet.getRow(3).createCell(0).setCellValue("Discipline : "+discipline);
+					sheet.getRow(3).createCell(4).setCellValue("Work Step : "+workStep);
+					sheet.getRow(3).createCell(11).setCellValue("Cut-off date : "+cut_off_date);
+					
+					sheet.getRow(2).getCell(0).setCellStyle(left_14_bold);
+					sheet.getRow(3).getCell(0).setCellStyle(left_12_bold);
+					sheet.getRow(3).getCell(4).setCellStyle(left_12_bold);
+					sheet.getRow(3).getCell(11).setCellStyle(right_12_bold);
+				} else if ( report.equals("4") && reportType.equals("5")) { // SDCI Transmittal List
+					startRow=5; 
+					sheet.getRow(2).createCell(0).setCellValue("Project : "+projecetName);
+					sheet.getRow(3).createCell(0).setCellValue("Discipline : "+discipline);
+					sheet.getRow(3).createCell(13).setCellValue("Duration : "+date_s +"~"+date_d);
+					
+					sheet.getRow(2).getCell(0).setCellStyle(left_14_bold);
+					sheet.getRow(3).getCell(0).setCellStyle(left_12_bold);
+					sheet.getRow(3).getCell(13).setCellStyle(right_12_bold);
+				} else if ( report.equals("4") &&  reportType.equals("6")) { // SDCI Progress Status
+					
+				} else if ( report.equals("4") &&  reportType.equals("7")) { // SDCI Workdone List
+					startRow=6; 
+					sheet.getRow(2).createCell(0).setCellValue("Project : "+projecetName);
+					sheet.getRow(3).createCell(0).setCellValue("Discipline : "+discipline);
+					sheet.getRow(3).createCell(4).setCellValue("Work Step : "+workStep);
+					sheet.getRow(3).createCell(11).setCellValue("Duration : "+date_s +"~"+date_d);
+					
+					sheet.getRow(2).getCell(0).setCellStyle(left_14_bold);
+					sheet.getRow(3).getCell(0).setCellStyle(left_12_bold);
+					sheet.getRow(3).getCell(4).setCellStyle(left_12_bold);
+					sheet.getRow(3).getCell(11).setCellStyle(right_12_bold);
+				} else if ( report.equals("4") && reportType.equals("8")) { // SDCI Workdone Status
+					
+				} else if ( report.equals("4") && reportType.equals("9")) { // Weekly Progress Graph
+					
+				} else if ( report.equals("4") && reportType.equals("10")) { // Monthly Progress Graph
+					
+				} else if ( report.equals("4") && reportType.equals("11")) { // WBS Detail
+					
+				}
+			}else if(report.equals("5")) { // Correspondence Status
+				startRow=5; 
+				sheet.getRow(2).createCell(0).setCellValue("Project : "+projecetName);
+				sheet.getRow(3).createCell(0).setCellValue("Discipline : "+discipline);
+				
+				sheet.getRow(2).getCell(0).setCellStyle(left_14_bold);
+			}
+			
+			String tmpColumnList[] = columnList.split("###");
+			
+			for ( int i=0; i<tmpColumnList.length; ++i ) {
+				String cloumn = tmpColumnList[i];
+				sheet.getRow(startRow-1).createCell(i).setCellValue(cloumn);
+				sheet.getRow(startRow-1).getCell(i).setCellStyle(center_11_bold);
+			}
+			
+			for ( int i=0; i<valueList.length; ++i) {
+				String tmpString = valueList[i];
+				String tmp[] = tmpString.split("@@@");
+				
+				int maxK=0;
+				int maxCnt=0;
+				
+				for ( int j=0; j< tmp.length; ++j ) {
+					String tmpT = tmp[j];
+					if ( tmpT == null || tmpT.equals("null")) tmpT="";
+					
+					String tmptT[] = tmpT.split(",");
+					if ( maxCnt <=  tmptT.length ) { maxCnt =  tmptT.length; } 
+				}
+								
+				for ( int j=0; j< tmp.length; ++j ) {
+					String tmpT = tmp[j];
+					if ( tmpT == null || tmpT.equals("null")) tmpT="";
+					
+					String tmptT[] = tmpT.split(",");
+					for ( int k=0; k<tmptT.length; ++k ) {
+						
+						if ( sheet.getRow(startRow+i+k) == null ) {
+							sheet.createRow(startRow+i+k);
+						}
+						
+						sheet.getRow(startRow+i+k).createCell(j).setCellValue(tmptT[k]);
+						sheet.getRow(startRow+i+k).getCell(j).setCellStyle(center_10);
+					}
+					
+					if ( tmptT.length < maxCnt ) {
+						sheet.addMergedRegion(new CellRangeAddress(startRow+i, (startRow+i+maxCnt-1 ), j, j));
+					}
+					
+					if ( maxK <= tmptT.length-1 ) maxK = tmptT.length-1;
+				}
+				
+				startRow = startRow + maxK;
+			}
+
+			response.reset();
+			response.setHeader("Set-Cookie", "fileDownload=true; path=/"); 
+		    response.setHeader("Content-Disposition", String.format("attachment; filename=\""+fileName+"\"")); 
+		    workbook.write(response.getOutputStream());
+		} catch ( Exception e ) {
+			e.printStackTrace();
+		} finally {
+			fis.close();
+		}
+
+        System.out.println(fileName + " written successfully");
+    }
+	
+}

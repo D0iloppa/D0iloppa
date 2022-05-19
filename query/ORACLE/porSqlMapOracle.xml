@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="porSqlMapOracle">
+	<select id="getPORInfoList" resultType="OraclePrjDocumentIndexVO" parameterType="OraclePrjInfoVO">
+		SELECT A.PRJNO || '-' || SER || '-' || SEQ AS "POR_NO",
+		   	A.ORDNO AS "PO_NO",
+		   	A.PORDATE AS "POR_ISSUE_DATE",
+		   	A.ORDDATE AS "PO_ISSUE_DATE",
+		   	PKGQ_COMMON_GETNAME.FN_GET_VNDNAME(A.VNDCOD) AS "VENDOR"
+		FROM JBBPOR A
+		WHERE PRJNO = #{prj_no}
+		ORDER BY A.PRJNO || '-' || SER || '-' || SEQ
+    </select>
+	<select id="getPORInfo" resultType="OraclePrjDocumentIndexVO" parameterType="OraclePrjInfoVO">
+		SELECT main.*
+		FROM (SELECT A.PRJNO || '-' || SER || '-' || SEQ AS "POR_NO",
+		   	A.ORDNO AS "PO_NO",
+		   	A.PORDATE AS "POR_ISSUE_DATE",
+		   	A.ORDDATE AS "PO_ISSUE_DATE",
+		   	PKGQ_COMMON_GETNAME.FN_GET_VNDNAME(A.VNDCOD) AS "VENDOR"
+		FROM JBBPOR A
+		WHERE PRJNO = #{prj_no}) main
+		WHERE main.POR_NO=#{por_no}
+    </select>
+	<select id="getPORInfoList_test" resultType="OraclePrjDocumentIndexVO">
+		select * from P_POR_INFO
+    </select>
+	<select id="getPORInfo_test" parameterType="OraclePrjDocumentIndexVO" resultType="OraclePrjDocumentIndexVO">
+		select * from P_POR_INFO where por_no=#{por_no}
+    </select>
+</mapper>

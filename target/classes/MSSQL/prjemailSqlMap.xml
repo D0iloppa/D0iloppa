@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="prjemailSqlMap">
+    <insert id="insertPrjEmail" parameterType="PrjEmailVO">
+    	insert into p_prj_email_send_info(prj_id,email_type_id,email_id,subject,contents,email_sender_user_id,email_sender_addr,email_receiver_addr,email_send_date,email_receiverd_date,user_data00,email_refer_to,email_bcc,send_yn,reg_id,reg_date,mod_id,mod_date)
+    	values(#{prj_id},#{email_type_id},#{email_id},#{subject},#{contents},#{email_sender_user_id},#{email_sender_addr},#{email_receiver_addr},#{email_send_date},#{email_receiverd_date},#{user_data00},#{email_refer_to},#{email_bcc},'N',#{reg_id},#{reg_date},#{reg_id},#{reg_date})
+    </insert>
+    <insert id="insertPrjEmailAttachInfo" parameterType="PrjEmailVO">
+    	insert into p_prj_email_attach_info(prj_id,email_type_id,email_id,doc_id,rev_id,doc_no,rev_no,reg_id,reg_date,mod_id,mod_date)
+    	values(#{prj_id},#{email_type_id},#{email_id},#{doc_id},#{rev_id},#{doc_no},#{rev_no},#{reg_id},#{reg_date},#{reg_id},#{reg_date})    	
+    </insert>
+    <insert id="insertPrjEmailReceiptInfo" parameterType="PrjEmailVO">
+    	insert into p_prj_email_receipt_info(prj_id,email_type_id,email_id,email_receiver_addr)
+    	values(#{prj_id},#{email_type_id},#{email_id},#{email_receiver_addr})
+    </insert>
+    <select id="getEmailSentTimes" resultType="int" parameterType="PrjEmailVO">
+    	select count(*) from p_prj_email_send_info
+    	where prj_id=#{prj_id} and user_data00=#{user_data00}
+    </select>
+    <select id="getEmailSentTimesForDC" resultType="int" parameterType="PrjEmailVO">
+    	select count(*) from p_prj_email_send_info
+    	where prj_id=#{prj_id} and user_data00 like CONCAT('%',#{user_data00},'%')
+    </select>
+    <select id="getEmailSentHistory" resultType="PrjEmailVO" parameterType="PrjEmailVO">
+    	select (select b.email_type from p_prj_email_type b where b.prj_id=#{prj_id} and b.email_type_id=a.email_type_id) as email_type,a.reg_id,a.reg_date
+    	from p_prj_email_send_info a
+    	where a.prj_id=#{prj_id} and a.user_data00=#{user_data00}
+    </select>
+    <select id="getEmailFileDownBefore" resultType="PrjEmailVO" parameterType="PrjEmailVO">
+    	select email_receiverd_date from p_prj_email_send_info
+    	where prj_id=#{prj_id} and email_type_id=#{email_type_id} and email_id=#{email_id}
+    </select>
+    <update id="updatePrjEmailSendInfo" parameterType="PrjEmailVO">
+    	update p_prj_email_send_info
+    	set email_receiverd_date=#{email_receiverd_date},
+    		mod_date=#{mod_date}
+    	where prj_id=#{prj_id} and email_type_id=#{email_type_id} and email_id=#{email_id}
+    </update>
+    <update id="updatePrjEmailAttachInfo" parameterType="PrjEmailVO">
+    	update p_prj_email_attach_info
+    	set down_ip=#{down_ip},
+    		down_id=#{down_id},
+    		down_date=#{down_date},
+    		mod_date=#{mod_date}
+    	where prj_id=#{prj_id} and email_type_id=#{email_type_id} and email_id=#{email_id} and doc_id=#{doc_id} and rev_id=#{rev_id}
+    </update>
+    <update id="updatePrjEmailReceiptInfo" parameterType="PrjEmailVO">
+    	update p_prj_email_receipt_info
+    	set email_receiverd_date=#{email_receiverd_date},
+    		mod_date=#{mod_date}
+    	where prj_id=#{prj_id} and email_type_id=#{email_type_id} and email_id=#{email_id}
+    </update>
+    
+    
+    <insert id="insertPasswdResetEmailSendInfo" parameterType="PrjEmailVO">
+    	insert into p_email_send_info(email_type,email_id,subject,contents,email_sender_user_id,email_sender_addr,email_receiver_addr,email_send_date,email_refer_to,email_bcc,send_yn,reg_id,reg_date,mod_id,mod_date)
+    	values('passwd',#{email_id},#{subject},#{contents},#{email_sender_user_id},#{email_sender_addr},#{email_receiver_addr},#{email_send_date},#{email_refer_to},#{email_bcc},'N',#{reg_id},#{reg_date},#{reg_id},#{reg_date})
+    </insert>
+    
+    
+	<insert id="insertCopyDefaultEmailType" parameterType="PrjEmailTypeVO">
+		insert p_prj_email_type(prj_id,email_type_id,email_type,email_feature,email_desc,reg_id,reg_date)
+		select #{prj_id},email_type_id,email_type,email_feature,email_desc,#{reg_id},#{reg_date}
+		from p_prj_email_type
+		where prj_id=#{copy_prj_id}
+    </insert>
+	<insert id="insertCopyDefaultEmailTypeContents" parameterType="PrjEmailVO">
+		insert p_prj_email_type_contents(prj_id,email_type_id,email_sender_addr,email_receiver_addr,email_referto_addr,email_bcc_addr,file_link_yn,file_rename_yn,file_nm_prefix,subject_prefix,contents,file_direct_attach_type,reg_id,reg_date)
+		select #{prj_id},email_type_id,email_sender_addr,email_receiver_addr,email_referto_addr,email_bcc_addr,file_link_yn,file_rename_yn,file_nm_prefix,subject_prefix,contents,file_direct_attach_type,#{reg_id},#{reg_date}
+		from p_prj_email_type_contents
+		where prj_id=#{copy_prj_id}
+    </insert>
+    
+    
+</mapper>

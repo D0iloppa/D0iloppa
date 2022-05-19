@@ -1,0 +1,621 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="prjstepSqlMap">
+	<select id="getPrjStepCode" resultType="PrjCodeSettingsVO" parameterType="PrjCodeSettingsVO">
+		select set_code_id,set_code,set_val from p_prj_code_settings b where prj_id=#{prj_id} and set_code_type=#{set_code_type} order by set_order asc
+    </select>
+	<select id="getPrjStep" resultType="PrjStepVO" parameterType="PrjCodeSettingsVO">
+		select *,(select tr_no from p_prj_tr_info where prj_id=#{prj_id} and tr_id=b.tr_id) as tr_no from p_prj_code_settings a left outer join p_prj_eng_step b on b.prj_id=#{prj_id} and a.set_code_id=b.step_code_id and b.doc_id=#{doc_id} and b.rev_id=#{rev_id} where a.prj_id=#{prj_id} and a.set_code_type=#{set_code_type} order by a.set_order asc
+    </select>
+	<select id="getVendorPrjStep" resultType="PrjStepVO" parameterType="PrjCodeSettingsVO">
+		select *,(select tr_no from p_prj_vtr_info where prj_id=#{prj_id} and tr_id=b.tr_id) as tr_no from p_prj_code_settings a left outer join p_prj_vdr_step b on b.prj_id=#{prj_id} and a.set_code_id=b.step_code_id and b.doc_id=#{doc_id} and b.rev_id=#{rev_id} where a.prj_id=#{prj_id} and a.set_code_type=#{set_code_type} order by a.set_order asc
+    </select>
+	<select id="getProcPrjStep" resultType="PrjStepVO" parameterType="PrjCodeSettingsVO">
+		select * from p_prj_code_settings a left outer join p_prj_pro_step b on b.prj_id=#{prj_id} and a.set_code_id=b.step_code_id and b.doc_id=#{doc_id} and b.rev_id=#{rev_id} where a.prj_id=#{prj_id} and a.set_code_type=#{set_code_type} order by a.set_order asc
+    </select>
+	<select id="getBulkPrjStep" resultType="PrjStepVO" parameterType="PrjCodeSettingsVO">
+		select * from p_prj_code_settings a left outer join p_prj_mdc_step b on b.prj_id=#{prj_id} and a.set_code_id=b.step_code_id and b.doc_id=#{doc_id} and b.rev_id=#{rev_id} where a.prj_id=#{prj_id} and a.set_code_type=#{set_code_type} order by a.set_order asc
+    </select>
+	<select id="getSitePrjStep" resultType="PrjStepVO" parameterType="PrjCodeSettingsVO">
+		select *,(select tr_no from p_prj_str_info where prj_id=#{prj_id} and tr_id=b.tr_id) as tr_no from p_prj_code_settings a left outer join p_prj_sdc_step b on b.prj_id=#{prj_id} and a.set_code_id=b.step_code_id and b.doc_id=#{doc_id} and b.rev_id=#{rev_id} where a.prj_id=#{prj_id} and a.set_code_type=#{set_code_type} order by a.set_order asc
+    </select>
+	<select id="getStepByStepCodeId" resultType="int" parameterType="PrjStepVO">
+		select count(*) from p_prj_eng_step where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id} and step_code_id=#{step_code_id}
+    </select>
+	<insert id="insertPrjStep" parameterType="PrjStepVO">
+		insert into p_prj_eng_step(prj_id,doc_id,rev_id,step_code_id,plan_date,actual_date,fore_date,folder_id,reg_id,reg_date)
+		values(#{prj_id},#{doc_id},#{rev_id},#{step_code_id},#{plan_date},#{actual_date},#{fore_date},#{folder_id},#{reg_id},#{reg_date}) 
+    </insert>
+	<update id="updatePrjStep" parameterType="PrjStepVO">
+		update p_prj_eng_step
+		set plan_date=#{plan_date},
+			actual_date=#{actual_date},
+			fore_date=#{fore_date},
+			mod_id=#{mod_id},
+			mod_date=#{mod_date}
+		where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id} and step_code_id=#{step_code_id}
+    </update>
+	<insert id="insertPrjStepForUpdateRevision" parameterType="PrjStepVO">
+		insert into p_prj_eng_step(prj_id,doc_id,rev_id,step_code_id,plan_date,actual_date,fore_date,folder_id,reg_id,reg_date)
+		SELECT prj_id,doc_id,#{rev_id},step_code_id,plan_date,actual_date,fore_date,folder_id,#{reg_id},#{reg_date}
+		FROM p_prj_eng_step
+		WHERE prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{origin_rev_id} and step_code_id=#{step_code_id}
+    </insert>
+	<update id="insertStartActualDateByFirstRevision" parameterType="PrjStepVO">
+		update p_prj_eng_step
+		set actual_date=#{actual_date},
+			mod_id=#{mod_id},
+			mod_date=#{mod_date}
+		where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id} and step_code_id in (select set_code_id from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='ENGINEERING STEP' and set_val2 like '%CHECK IN%')
+    </update>
+	<select id="getInfoByTRReturnSpecificValue" parameterType="PrjStepVO" resultType="PrjCodeSettingsVO">
+		select * from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='TR RETURN STATUS' and set_code_id=#{rtn_status}
+	</select>
+	<select id="getInfoByVTRReturnSpecificValue" parameterType="PrjStepVO" resultType="PrjCodeSettingsVO">
+		select * from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='VTR RETURN STATUS' and set_code_id=#{rtn_status}
+	</select>
+	<select id="getInfoBySTRReturnSpecificValue" parameterType="PrjStepVO" resultType="PrjCodeSettingsVO">
+		select * from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='STR RETURN STATUS' and set_code_id=#{rtn_status}
+	</select>
+	<update id="updateActualDateByAnyTRReturn" parameterType="PrjStepVO">
+		update p_prj_eng_step
+		set actual_date=#{actual_date},
+			mod_id=#{mod_id},
+			mod_date=#{mod_date}
+		where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id} and step_code_id in (select set_code_id from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='ENGINEERING STEP' and set_val2=#{set_val2})
+    </update>
+	<update id="updateActualDateByTRReturnSpecificValue" parameterType="PrjStepVO">
+		update p_prj_eng_step
+		set actual_date=#{actual_date},
+			mod_id=#{mod_id},
+			mod_date=#{mod_date}
+		where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id} and step_code_id in (select set_code_id from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='ENGINEERING STEP' and set_val2=#{set_val2})
+    </update>
+	<update id="updateActualDateByVTRReturnSpecificValue" parameterType="PrjStepVO">
+		update p_prj_vdr_step
+		set actual_date=#{actual_date},
+			mod_id=#{mod_id},
+			mod_date=#{mod_date}
+		where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id} and step_code_id in (select set_code_id from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='VENDOR DOC STEP' and set_val2=#{set_val2})
+    </update>
+	<update id="updateActualDateBySTRReturnSpecificValue" parameterType="PrjStepVO">
+		update p_prj_sdc_step
+		set actual_date=#{actual_date},
+			mod_id=#{mod_id},
+			mod_date=#{mod_date}
+		where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id} and step_code_id in (select set_code_id from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='SITE DOC STEP' and set_val2=#{set_val2})
+    </update>
+	<update id="updateActualDateByTRDRNAPPROVAL" parameterType="PrjStepVO">
+		update p_prj_eng_step
+		set actual_date=#{actual_date},
+			mod_id=#{mod_id},
+			mod_date=#{mod_date}
+		where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id} and step_code_id in (select set_code_id from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='ENGINEERING STEP' and set_val2=#{set_val2})
+    		and (actual_date='' or actual_date is null)
+    </update>
+	<update id="updateActualDateByVTRDRNAPPROVAL" parameterType="PrjStepVO">
+		update p_prj_vdr_step
+		set actual_date=#{actual_date},
+			mod_id=#{mod_id},
+			mod_date=#{mod_date}
+		where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id} and step_code_id in (select set_code_id from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='VENDOR DOC STEP' and set_val2=#{set_val2})
+    		and (actual_date='' or actual_date is null)
+    </update>
+	<update id="updateActualDateBySTRDRNAPPROVAL" parameterType="PrjStepVO">
+		update p_prj_sdc_step
+		set actual_date=#{actual_date},
+			mod_id=#{mod_id},
+			mod_date=#{mod_date}
+		where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id} and step_code_id in (select set_code_id from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='SITE DOC STEP' and set_val2=#{set_val2})
+    		and (actual_date='' or actual_date is null)
+    </update>
+	<select id="getVendorStepByStepCodeId" resultType="int" parameterType="PrjStepVO">
+		select count(*) from p_prj_vdr_step where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id} and step_code_id=#{step_code_id}
+    </select>
+	<insert id="insertVendorPrjStep" parameterType="PrjStepVO">
+		insert into p_prj_vdr_step(prj_id,doc_id,rev_id,step_code_id,plan_date,actual_date,fore_date,folder_id,reg_id,reg_date)
+		values(#{prj_id},#{doc_id},#{rev_id},#{step_code_id},#{plan_date},#{actual_date},#{fore_date},#{folder_id},#{reg_id},#{reg_date}) 
+    </insert>
+	<update id="updateVendorPrjStep" parameterType="PrjStepVO">
+		update p_prj_vdr_step
+		set plan_date=#{plan_date},
+			actual_date=#{actual_date},
+			fore_date=#{fore_date},
+			mod_id=#{mod_id},
+			mod_date=#{mod_date}
+		where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id} and step_code_id=#{step_code_id}
+    </update>
+	<insert id="insertVendorPrjStepForUpdateRevision" parameterType="PrjStepVO">
+		insert into p_prj_vdr_step(prj_id,doc_id,rev_id,step_code_id,plan_date,actual_date,fore_date,folder_id,reg_id,reg_date)
+		SELECT prj_id,doc_id,#{rev_id},step_code_id,plan_date,actual_date,fore_date,folder_id,#{reg_id},#{reg_date}
+		FROM p_prj_vdr_step
+		WHERE prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{origin_rev_id} and step_code_id=#{step_code_id}
+    </insert>
+	<update id="insertVendorStartActualDateByFirstRevision" parameterType="PrjStepVO">
+		update p_prj_vdr_step
+		set actual_date=#{actual_date},
+			mod_id=#{mod_id},
+			mod_date=#{mod_date}
+		where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id} and step_code_id in (select set_code_id from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='VENDOR DOC STEP' and set_val2 like '%CHECK IN%')
+    </update>
+	<update id="updateActualDateByAnyVTRReturn" parameterType="PrjStepVO">
+		update p_prj_vdr_step
+		set actual_date=#{actual_date},
+			mod_id=#{mod_id},
+			mod_date=#{mod_date}
+		where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id} and step_code_id in (select set_code_id from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='VENDOR DOC STEP' and set_val2=#{set_val2})
+    </update>
+	<select id="getProcStepByStepCodeId" resultType="int" parameterType="PrjStepVO">
+		select count(*) from p_prj_pro_step where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id} and step_code_id=#{step_code_id}
+    </select>
+	<insert id="insertProcPrjStep" parameterType="PrjStepVO">
+		insert into p_prj_pro_step(prj_id,doc_id,rev_id,step_code_id,plan_date,actual_date,fore_date,folder_id,reg_id,reg_date)
+		values(#{prj_id},#{doc_id},#{rev_id},#{step_code_id},#{plan_date},#{actual_date},#{fore_date},#{folder_id},#{reg_id},#{reg_date}) 
+    </insert>
+	<update id="updateProcPrjStep" parameterType="PrjStepVO">
+		update p_prj_pro_step
+		set plan_date=#{plan_date},
+			actual_date=#{actual_date},
+			fore_date=#{fore_date},
+			mod_id=#{mod_id},
+			mod_date=#{mod_date}
+		where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id} and step_code_id=#{step_code_id}
+    </update>
+	<insert id="insertProcPrjStepForUpdateRevision" parameterType="PrjStepVO">
+		insert into p_prj_pro_step(prj_id,doc_id,rev_id,step_code_id,plan_date,actual_date,fore_date,folder_id,reg_id,reg_date)
+		SELECT prj_id,doc_id,#{rev_id},step_code_id,plan_date,actual_date,fore_date,folder_id,#{reg_id},#{reg_date}
+		FROM p_prj_pro_step
+		WHERE prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{origin_rev_id} and step_code_id=#{step_code_id}
+    </insert>
+	<update id="insertProcStartActualDateByFirstRevision" parameterType="PrjStepVO">
+		update p_prj_pro_step
+		set actual_date=#{actual_date},
+			mod_id=#{mod_id},
+			mod_date=#{mod_date}
+		where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id} and step_code_id in (select set_code_id from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='PROCUREMENT STEP' and set_val2 like '%CHECK IN%')
+    </update>
+    <select id="getBulkStepByStepCodeId" resultType="int" parameterType="PrjStepVO">
+		select count(*) from p_prj_mdc_step where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id} and step_code_id=#{step_code_id}
+    </select>
+	<insert id="insertBulkPrjStep" parameterType="PrjStepVO">
+		insert into p_prj_mdc_step(prj_id,doc_id,rev_id,step_code_id,plan_date,actual_date,fore_date,folder_id,reg_id,reg_date)
+		values(#{prj_id},#{doc_id},#{rev_id},#{step_code_id},#{plan_date},#{actual_date},#{fore_date},#{folder_id},#{reg_id},#{reg_date}) 
+    </insert>
+	<update id="updateBulkPrjStep" parameterType="PrjStepVO">
+		update p_prj_mdc_step
+		set plan_date=#{plan_date},
+			actual_date=#{actual_date},
+			fore_date=#{fore_date},
+			mod_id=#{mod_id},
+			mod_date=#{mod_date}
+		where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id} and step_code_id=#{step_code_id}
+    </update>
+	<insert id="insertBulkPrjStepForUpdateRevision" parameterType="PrjStepVO">
+		insert into p_prj_mdc_step(prj_id,doc_id,rev_id,step_code_id,plan_date,actual_date,fore_date,folder_id,reg_id,reg_date)
+		SELECT prj_id,doc_id,#{rev_id},step_code_id,plan_date,actual_date,fore_date,folder_id,#{reg_id},#{reg_date}
+		FROM p_prj_mdc_step
+		WHERE prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{origin_rev_id} and step_code_id=#{step_code_id}
+    </insert>
+	<update id="insertBulkStartActualDateByFirstRevision" parameterType="PrjStepVO">
+		update p_prj_mdc_step
+		set actual_date=#{actual_date},
+			mod_id=#{mod_id},
+			mod_date=#{mod_date}
+		where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id} and step_code_id in (select set_code_id from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='BULK STEP' and set_val2 like '%CHECK IN%')
+    </update>
+    <select id="getSiteStepByStepCodeId" resultType="int" parameterType="PrjStepVO">
+		select count(*) from p_prj_sdc_step where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id} and step_code_id=#{step_code_id}
+    </select>
+	<insert id="insertSitePrjStep" parameterType="PrjStepVO">
+		insert into p_prj_sdc_step(prj_id,doc_id,rev_id,step_code_id,plan_date,actual_date,fore_date,folder_id,reg_id,reg_date)
+		values(#{prj_id},#{doc_id},#{rev_id},#{step_code_id},#{plan_date},#{actual_date},#{fore_date},#{folder_id},#{reg_id},#{reg_date}) 
+    </insert>
+	<update id="updateSitePrjStep" parameterType="PrjStepVO">
+		update p_prj_sdc_step
+		set plan_date=#{plan_date},
+			actual_date=#{actual_date},
+			fore_date=#{fore_date},
+			mod_id=#{mod_id},
+			mod_date=#{mod_date}
+		where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id} and step_code_id=#{step_code_id}
+    </update>
+	<insert id="insertSitePrjStepForUpdateRevision" parameterType="PrjStepVO">
+		insert into p_prj_sdc_step(prj_id,doc_id,rev_id,step_code_id,plan_date,actual_date,fore_date,folder_id,reg_id,reg_date)
+		SELECT prj_id,doc_id,#{rev_id},step_code_id,plan_date,actual_date,fore_date,folder_id,#{reg_id},#{reg_date}
+		FROM p_prj_sdc_step
+		WHERE prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{origin_rev_id} and step_code_id=#{step_code_id}
+    </insert>
+	<update id="insertSiteStartActualDateByFirstRevision" parameterType="PrjStepVO">
+		update p_prj_sdc_step
+		set actual_date=#{actual_date},
+			mod_id=#{mod_id},
+			mod_date=#{mod_date}
+		where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id} and step_code_id in (select set_code_id from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='SITE DOC STEP' and set_val2 like '%CHECK IN%')
+    </update>
+	<update id="updateActualDateByAnySTRReturn" parameterType="PrjStepVO">
+		update p_prj_sdc_step
+		set actual_date=#{actual_date},
+			mod_id=#{mod_id},
+			mod_date=#{mod_date}
+		where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id} and step_code_id in (select set_code_id from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='SITE DOC STEP' and set_val2=#{set_val2})
+    </update>
+	<update id="updateProcActualDateBySetPORorPO" parameterType="PrjStepVO">
+		update p_prj_pro_step
+		set actual_date=#{actual_date},
+			mod_id=#{mod_id},
+			mod_date=#{mod_date}
+		where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id} and step_code_id in (select set_code_id from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='PROCUREMENT STEP' and set_val2=#{set_val2})
+			 and (actual_date is null or actual_date='')
+    </update>
+	<update id="updateBulkActualDateBySetPORorPO" parameterType="PrjStepVO">
+		update p_prj_mdc_step
+		set actual_date=#{actual_date},
+			mod_id=#{mod_id},
+			mod_date=#{mod_date}
+		where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id} and step_code_id in (select set_code_id from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='BULK STEP' and set_val2=#{set_val2})
+    		 and (actual_date is null or actual_date='')
+    </update>
+    
+	<update id="updateTrIdOnEngStepTable" parameterType="PrjStepVO">
+		update p_prj_eng_step
+		set tr_id=#{tr_id},
+			mod_id=#{mod_id},
+			mod_date=#{mod_date}
+		where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id}
+			and step_code_id=(
+				select a.set_code_id
+				from p_prj_code_settings a
+				where a.prj_id=#{prj_id} and a.set_code_type='ENGINEERING STEP'
+				and a.set_code=(select b.set_code from p_prj_code_settings b where b.prj_id=#{prj_id} and b.set_code_type='TR ISSUE PURPOSE' and b.set_code_id=#{set_code_id})
+			)
+    </update>
+	<update id="updateRtnStatusByTrIncoming" parameterType="PrjStepVO">
+		update p_prj_eng_step
+		set rtn_status=#{rtn_status},
+			tr_id=#{tr_id}
+		where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id} and step_code_id in (select set_code_id from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='ENGINEERING STEP' and set_val2 like #{set_val2})
+    	and (tr_id is NULL or tr_id='')
+    </update>
+	<select id="getTrReviewStepCodeId" parameterType="PrjStepVO" resultType="PrjCodeSettingsVO">
+		select set_code_id from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='ENGINEERING STEP' and set_val2 like #{set_val2}
+    </select>
+	<select id="getForeDateRuleForTrReview" parameterType="PrjStepVO" resultType="PrjCodeSettingsVO">
+		select (select b.actual_date from p_prj_eng_step b where b.prj_id=#{prj_id} and b.doc_id=#{doc_id} and b.rev_id=#{rev_id} and b.step_code_id=a.set_val3) as actual_date,a.set_val4
+		from p_prj_code_settings a
+		where a.prj_id=#{prj_id} and a.set_code_type='ENGINEERING STEP' and a.set_code_id=#{set_code_id}
+	</select>
+	<select id="getForeDateRuleForTrReview2" parameterType="PrjStepVO" resultType="PrjCodeSettingsVO">
+		select (select b.actual_date from p_prj_eng_step b where b.prj_id=#{prj_id} and b.doc_id=#{doc_id} and b.rev_id=#{rev_id} and b.step_code_id=a.set_val3) as actual_date,a.set_val3,a.set_val4
+		from p_prj_code_settings a
+		where a.prj_id=#{prj_id} and a.set_code_type='ENGINEERING STEP' and a.set_code_id=#{set_code_id}
+	</select>
+	<update id="updateReviewForeDateByTrIncoming" parameterType="PrjStepVO">
+		update p_prj_eng_step
+		set fore_date=#{fore_date}
+		where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id} and step_code_id in (select set_code_id from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='ENGINEERING STEP' and set_val2 like #{set_val2})
+    </update>
+	<update id="updateRtnStatusByTrIncomingDelete" parameterType="PrjStepVO">
+		update p_prj_eng_step
+		set rtn_status=null,
+			tr_id=null
+		where prj_id=#{prj_id} and tr_id=#{tr_id}
+    </update>
+	<update id="updateVTrIdOnVdrStepTable" parameterType="PrjStepVO">
+		update p_prj_vdr_step
+		set tr_id=#{tr_id},
+			mod_id=#{mod_id},
+			mod_date=#{mod_date}
+		where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id}
+			and step_code_id=(
+				select a.set_code_id
+				from p_prj_code_settings a
+				where a.prj_id=#{prj_id} and a.set_code_type='VENDOR DOC STEP'
+				and a.set_code=(select b.set_code from p_prj_code_settings b where b.prj_id=#{prj_id} and b.set_code_type='VTR ISSUE PURPOSE' and b.set_code_id=#{set_code_id})
+			)
+    </update>
+	<update id="updateRtnStatusByVTrIncoming" parameterType="PrjStepVO">
+		update p_prj_vdr_step
+		set rtn_status=#{rtn_status},
+			tr_id=#{tr_id}
+		where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id} and step_code_id in (select set_code_id from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='VENDOR DOC STEP' and set_val2 like #{set_val2})
+		and (tr_id is NULL or tr_id='')
+    </update>
+	<select id="getVTrReviewStepCodeId" parameterType="PrjStepVO" resultType="PrjCodeSettingsVO">
+		select set_code_id from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='VENDOR DOC STEP' and set_val2 like #{set_val2}
+    </select>
+	<select id="getForeDateRuleForVTrReview" parameterType="PrjStepVO" resultType="PrjCodeSettingsVO">
+		select (select b.actual_date from p_prj_vdr_step b where b.prj_id=#{prj_id} and b.doc_id=#{doc_id} and b.rev_id=#{rev_id} and b.step_code_id=a.set_val3) as actual_date,a.set_val4
+		from p_prj_code_settings a
+		where a.prj_id=#{prj_id} and a.set_code_type='VENDOR DOC STEP' and a.set_code_id=#{set_code_id}
+	</select>
+	<update id="updateReviewForeDateByVTrIncoming" parameterType="PrjStepVO">
+		update p_prj_vdr_step
+		set fore_date=#{fore_date}
+		where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id} and step_code_id in (select set_code_id from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='VENDOR DOC STEP' and set_val2 like #{set_val2})
+    </update>
+	<update id="updateRtnStatusByVTrIncomingDelete" parameterType="PrjStepVO">
+		update p_prj_vdr_step
+		set rtn_status=null,
+			tr_id=null
+		where prj_id=#{prj_id} and tr_id=#{tr_id}
+    </update>
+	<update id="updateSTrIdOnSdcStepTable" parameterType="PrjStepVO">
+		update p_prj_sdc_step
+		set tr_id=#{tr_id},
+			mod_id=#{mod_id},
+			mod_date=#{mod_date}
+		where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id}
+			and step_code_id=(
+				select a.set_code_id
+				from p_prj_code_settings a
+				where a.prj_id=#{prj_id} and a.set_code_type='SITE DOC STEP'
+				and a.set_code=(select b.set_code from p_prj_code_settings b where b.prj_id=#{prj_id} and b.set_code_type='STR ISSUE PURPOSE' and b.set_code_id=#{set_code_id})
+			)
+    </update>
+	<update id="updateRtnStatusBySTrIncoming" parameterType="PrjStepVO">
+		update p_prj_sdc_step
+		set rtn_status=#{rtn_status},
+			tr_id=#{tr_id}
+		where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id} and step_code_id in (select set_code_id from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='SITE DOC STEP' and set_val2 like #{set_val2})
+		and (tr_id is NULL or tr_id='')
+    </update>
+	<select id="getSTrReviewStepCodeId" parameterType="PrjStepVO" resultType="PrjCodeSettingsVO">
+		select set_code_id from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='SITE DOC STEP' and set_val2 like #{set_val2}
+    </select>
+	<select id="getForeDateRuleForSTrReview" parameterType="PrjStepVO" resultType="PrjCodeSettingsVO">
+		select (select b.actual_date from p_prj_sdc_step b where b.prj_id=#{prj_id} and b.doc_id=#{doc_id} and b.rev_id=#{rev_id} and b.step_code_id=a.set_val3) as actual_date,a.set_val4
+		from p_prj_code_settings a
+		where a.prj_id=#{prj_id} and a.set_code_type='SITE DOC STEP' and a.set_code_id=#{set_code_id}
+	</select>
+	<update id="updateReviewForeDateBySTrIncoming" parameterType="PrjStepVO">
+		update p_prj_sdc_step
+		set fore_date=#{fore_date}
+		where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id} and step_code_id in (select set_code_id from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='SITE DOC STEP' and set_val2 like #{set_val2})
+    </update>
+	<update id="updateRtnStatusBySTrIncomingDelete" parameterType="PrjStepVO">
+		update p_prj_sdc_step
+		set rtn_status=null,
+			tr_id=null
+		where prj_id=#{prj_id} and tr_id=#{tr_id}
+    </update>
+	<select id="getIssuePurposeByTRDoc" resultType="PrjCodeSettingsVO" parameterType="PrjStepVO">
+		select dd.set_code_id,dd.set_val4
+		from p_prj_tr_file a,
+		(select b.tr_issuepur_code_id,b.tr_id from p_prj_tr_info b where b.prj_id=#{prj_id} and b.inout='OUT') as bb,
+		(select c.set_code,c.set_code_id  from p_prj_code_settings c where c.prj_id=#{prj_id} and c.set_code_type='TR ISSUE PURPOSE') as cc,
+		(select d.set_code_id,d.set_code,d.set_val4 from p_prj_code_settings d where d.prj_id=#{prj_id} and d.set_code_type='ENGINEERING STEP') as dd
+		where a.prj_id=#{prj_id} and a.doc_id=#{doc_id} and a.rev_id=#{rev_id} and bb.tr_id=a.tr_id and cc.set_code_id=bb.tr_issuepur_code_id and dd.set_code=cc.set_code
+    </select>
+	<select id="getIssuePurposeByVTRDoc" resultType="PrjCodeSettingsVO" parameterType="PrjStepVO">
+		select dd.set_code_id,dd.set_val4
+		from p_prj_vtr_file a,
+		(select b.tr_issuepur_code_id,b.tr_id from p_prj_vtr_info b where b.prj_id=#{prj_id} and b.inout='OUT') as bb,
+		(select c.set_code,c.set_code_id  from p_prj_code_settings c where c.prj_id=#{prj_id} and c.set_code_type='VTR ISSUE PURPOSE') as cc,
+		(select d.set_code_id,d.set_code,d.set_val4 from p_prj_code_settings d where d.prj_id=#{prj_id} and d.set_code_type='VENDOR DOC STEP') as dd
+		where a.prj_id=#{prj_id} and a.doc_id=#{doc_id} and a.rev_id=#{rev_id} and bb.tr_id=a.tr_id and cc.set_code_id=bb.tr_issuepur_code_id and dd.set_code=cc.set_code
+    </select>
+	<select id="getIssuePurposeBySTRDoc" resultType="PrjCodeSettingsVO" parameterType="PrjStepVO">
+		select dd.set_code_id,dd.set_val4
+		from p_prj_str_file a,
+		(select b.tr_issuepur_code_id,b.tr_id from p_prj_str_info b where b.prj_id=#{prj_id} and b.inout='OUT') as bb,
+		(select c.set_code,c.set_code_id  from p_prj_code_settings c where c.prj_id=#{prj_id} and c.set_code_type='STR ISSUE PURPOSE') as cc,
+		(select d.set_code_id,d.set_code,d.set_val4 from p_prj_code_settings d where d.prj_id=#{prj_id} and d.set_code_type='SITE DOC STEP') as dd
+		where a.prj_id=#{prj_id} and a.doc_id=#{doc_id} and a.rev_id=#{rev_id} and bb.tr_id=a.tr_id and cc.set_code_id=bb.tr_issuepur_code_id and dd.set_code=cc.set_code
+    </select>
+	<select id="getListForeDateSetByStep" resultType="PrjCodeSettingsVO" parameterType="PrjStepVO">
+		select * from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='ENGINEERING STEP' and set_val3 IS NOT NULL and set_val3 != '' and CHARINDEX('!!', set_val3)=0
+    </select>
+	<select id="getCodeByTrIssuePurpose" parameterType="PrjStepVO" resultType="PrjCodeSettingsVO">
+		select set_code from p_prj_code_settings b where b.prj_id=#{prj_id} and b.set_code_type='TR ISSUE PURPOSE' and set_code_id=#{set_code_id}
+    </select>
+	<select id="getCodeByVTrIssuePurpose" parameterType="PrjStepVO" resultType="PrjCodeSettingsVO">
+		select set_code from p_prj_code_settings b where b.prj_id=#{prj_id} and b.set_code_type='VTR ISSUE PURPOSE' and set_code_id=#{set_code_id}
+    </select>
+	<select id="getCodeBySTrIssuePurpose" parameterType="PrjStepVO" resultType="PrjCodeSettingsVO">
+		select set_code from p_prj_code_settings b where b.prj_id=#{prj_id} and b.set_code_type='STR ISSUE PURPOSE' and set_code_id=#{set_code_id}
+    </select>
+	<select id="getUpdateEngStepCodeId" parameterType="PrjStepVO" resultType="PrjCodeSettingsVO">
+		select set_code_id from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='ENGINEERING STEP' and set_val2=#{set_val2}
+	</select>
+	<select id="getUpdateVendorStepCodeId" parameterType="PrjStepVO" resultType="PrjCodeSettingsVO">
+		select set_code_id from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='VENDOR DOC STEP' and set_val2=#{set_val2}
+	</select>
+	<select id="getUpdateSiteStepCodeId" parameterType="PrjStepVO" resultType="PrjCodeSettingsVO">
+		select set_code_id from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='SITE DOC STEP' and set_val2=#{set_val2}
+	</select>
+	<select id="getUpdateProcStepCodeId" parameterType="PrjStepVO" resultType="PrjCodeSettingsVO">
+		select set_code_id from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='PROCUREMENT STEP' and set_val2=#{set_val2}
+	</select>
+	<select id="getUpdateBulkStepCodeId" parameterType="PrjStepVO" resultType="PrjCodeSettingsVO">
+		select set_code_id from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='BULK STEP' and set_val2=#{set_val2}
+	</select>
+	<select id="getActualDateEngStepByStepCodeId" parameterType="PrjStepVO" resultType="PrjStepVO">
+		select actual_date from p_prj_eng_step where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id} and step_code_id=#{step_code_id}
+	</select>
+	<select id="getActualDateVendorStepByStepCodeId" parameterType="PrjStepVO" resultType="PrjStepVO">
+		select actual_date from p_prj_vdr_step where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id} and step_code_id=#{step_code_id}
+	</select>
+	<select id="getActualDateSiteStepByStepCodeId" parameterType="PrjStepVO" resultType="PrjStepVO">
+		select actual_date from p_prj_sdc_step where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id} and step_code_id=#{step_code_id}
+	</select>
+	<select id="getActualDateProcStepByStepCodeId" parameterType="PrjStepVO" resultType="PrjStepVO">
+		select actual_date from p_prj_pro_step where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id} and step_code_id=#{step_code_id}
+	</select>
+	<select id="getActualDateBulkStepByStepCodeId" parameterType="PrjStepVO" resultType="PrjStepVO">
+		select actual_date from p_prj_mdc_step where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id} and step_code_id=#{step_code_id}
+	</select>
+	<update id="updateEngStepActualDateByIFCIssue" parameterType="PrjStepVO">
+		update p_prj_eng_step
+		set actual_date=#{actual_date},
+			tr_id=#{tr_id},
+			mod_id=#{mod_id},
+			mod_date=#{mod_date}
+		where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id} and step_code_id=#{step_code_id}
+	</update>
+	<update id="updateVendorStepActualDateByIFCIssue" parameterType="PrjStepVO">
+		update p_prj_vdr_step
+		set actual_date=#{actual_date},
+			tr_id=#{tr_id},
+			mod_id=#{mod_id},
+			mod_date=#{mod_date}
+		where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id} and step_code_id=#{step_code_id}
+	</update>
+	<update id="updateSiteStepActualDateByIFCIssue" parameterType="PrjStepVO">
+		update p_prj_sdc_step
+		set actual_date=#{actual_date},
+			tr_id=#{tr_id},
+			mod_id=#{mod_id},
+			mod_date=#{mod_date}
+		where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id} and step_code_id=#{step_code_id}
+	</update>
+	<update id="updateEngStepActualDateByMailSending" parameterType="PrjStepVO">
+		update p_prj_eng_step
+		set actual_date=#{actual_date},
+			tr_id=#{tr_id},
+			mod_id=#{mod_id},
+			mod_date=#{mod_date}
+		where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id} and step_code_id in (select set_code_id from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='ENGINEERING STEP' and set_val2=#{set_val2})
+	</update>
+	<update id="updateVendorStepActualDateByMailSending" parameterType="PrjStepVO">
+		update p_prj_vdr_step
+		set actual_date=#{actual_date},
+			tr_id=#{tr_id},
+			mod_id=#{mod_id},
+			mod_date=#{mod_date}
+		where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id} and step_code_id in (select set_code_id from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='VENDOR DOC STEP' and set_val2=#{set_val2})
+	</update>
+	<update id="updateSiteStepActualDateByMailSending" parameterType="PrjStepVO">
+		update p_prj_sdc_step
+		set actual_date=#{actual_date},
+			tr_id=#{tr_id},
+			mod_id=#{mod_id},
+			mod_date=#{mod_date}
+		where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id} and step_code_id in (select set_code_id from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='SITE DOC STEP' and set_val2=#{set_val2})
+	</update>
+	<update id="updateEngStepForeDateByStepActualDateUpdate" parameterType="PrjStepVO">
+		update p_prj_eng_step
+		set fore_date=#{fore_date},
+			mod_id=#{mod_id},
+			mod_date=#{mod_date}
+		where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id} and step_code_id in (select set_code_id from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='ENGINEERING STEP' and set_val3=#{set_val3})
+	</update>
+	<update id="updateVendorStepForeDateByStepActualDateUpdate" parameterType="PrjStepVO">
+		update p_prj_vdr_step
+		set fore_date=#{fore_date},
+			mod_id=#{mod_id},
+			mod_date=#{mod_date}
+		where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id} and step_code_id in (select set_code_id from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='VENDOR DOC STEP' and set_val3=#{set_val3})
+	</update>
+	<update id="updateSiteStepForeDateByStepActualDateUpdate" parameterType="PrjStepVO">
+		update p_prj_sdc_step
+		set fore_date=#{fore_date},
+			mod_id=#{mod_id},
+			mod_date=#{mod_date}
+		where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id} and step_code_id in (select set_code_id from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='SITE DOC STEP' and set_val3=#{set_val3})
+	</update>
+	<update id="updateProcStepForeDateByStepActualDateUpdate" parameterType="PrjStepVO">
+		update p_prj_pro_step
+		set fore_date=#{fore_date},
+			mod_id=#{mod_id},
+			mod_date=#{mod_date}
+		where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id} and step_code_id in (select set_code_id from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='PROCUREMENT STEP' and set_val3=#{set_val3})
+	</update>
+	<update id="updateBulkStepForeDateByStepActualDateUpdate" parameterType="PrjStepVO">
+		update p_prj_mdc_step
+		set fore_date=#{fore_date},
+			mod_id=#{mod_id},
+			mod_date=#{mod_date}
+		where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id} and step_code_id in (select set_code_id from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='BULK STEP' and set_val3=#{set_val3})
+	</update>
+	<select id="getForeDateRuleByEngStep" parameterType="PrjStepVO" resultType="PrjCodeSettingsVO">
+		select set_val3,set_val4 from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='ENGINEERING STEP' and set_code_id=#{set_code_id}
+	</select>
+	<select id="getForeDateRuleByVendorStep" parameterType="PrjStepVO" resultType="PrjCodeSettingsVO">
+		select set_val3,set_val4 from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='VENDOR DOC STEP' and set_code_id=#{set_code_id}
+	</select>
+	<select id="getForeDateRuleBySiteStep" parameterType="PrjStepVO" resultType="PrjCodeSettingsVO">
+		select set_val3,set_val4 from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='SITE DOC STEP' and set_code_id=#{set_code_id}
+	</select>
+	<select id="getForeDateRuleByProcStep" parameterType="PrjStepVO" resultType="PrjCodeSettingsVO">
+		select set_val3,set_val4 from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='PROCUREMENT STEP' and set_code_id=#{set_code_id}
+	</select>
+	<select id="getForeDateRuleByBulkStep" parameterType="PrjStepVO" resultType="PrjCodeSettingsVO">
+		select set_val3,set_val4 from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='BULK STEP' and set_code_id=#{set_code_id}
+	</select>
+	<select id="getUpdateCodeIdByTRReturnValue" parameterType="PrjStepVO" resultType="PrjCodeSettingsVO">
+		select set_code_id,set_val4 from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='ENGINEERING STEP' and set_val3 like CONCAT('TR RETURN STATUS%',#{rtn_status},'%')
+	</select>
+	<select id="getUpdateCodeIdByVTRReturnValue" parameterType="PrjStepVO" resultType="PrjCodeSettingsVO">
+		select set_code_id,set_val4 from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='VENDOR DOC STEP' and set_val3 like CONCAT('TR RETURN STATUS%',#{rtn_status},'%')
+	</select>
+	<select id="getUpdateCodeIdBySTRReturnValue" parameterType="PrjStepVO" resultType="PrjCodeSettingsVO">
+		select set_code_id,set_val4 from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='SITE DOC STEP' and set_val3 like CONCAT('TR RETURN STATUS%',#{rtn_status},'%')
+	</select>
+	<update id="updateEngStepForeDateByTRStepActualDateUpdate" parameterType="PrjStepVO">
+		update p_prj_eng_step
+		set fore_date=#{fore_date},
+			mod_id=#{mod_id},
+			mod_date=#{mod_date}
+		where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id} and step_code_id=#{set_code_id}
+	</update>
+	<update id="updateVendorStepForeDateByVTRStepActualDateUpdate" parameterType="PrjStepVO">
+		update p_prj_vdr_step
+		set fore_date=#{fore_date},
+			mod_id=#{mod_id},
+			mod_date=#{mod_date}
+		where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id} and step_code_id=#{set_code_id}
+	</update>
+	<update id="updateSiteStepForeDateBySTRStepActualDateUpdate" parameterType="PrjStepVO">
+		update p_prj_sdc_step
+		set fore_date=#{fore_date},
+			mod_id=#{mod_id},
+			mod_date=#{mod_date}
+		where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id} and step_code_id=#{set_code_id}
+	</update>
+	<insert id="insertEngStepByCheckIn" parameterType="PrjStepVO">
+		insert into p_prj_eng_step(prj_id,doc_id,rev_id,step_code_id,plan_date,actual_date,fore_date,folder_id)
+		select prj_id,doc_id,(select FORMAT(MAX(CONVERT(INT,rev_id)),'000') from p_prj_document_index where prj_id=#{prj_id} and doc_id=#{doc_id}),step_code_id,plan_date,actual_date,fore_date,folder_id
+		from p_prj_eng_step
+		where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id}
+		<selectKey keyProperty="rev_id" resultType="String">
+			select FORMAT(MAX(CONVERT(INT,rev_id)),'000') from p_prj_eng_step where prj_id=#{prj_id} and doc_id=#{doc_id}
+		</selectKey>
+	</insert>
+	<insert id="insertVendorStepByCheckIn" parameterType="PrjStepVO">
+		insert into p_prj_vdr_step(prj_id,doc_id,rev_id,step_code_id,plan_date,actual_date,fore_date,folder_id)
+		select prj_id,doc_id,(select FORMAT(MAX(CONVERT(INT,rev_id)),'000') from p_prj_document_index where prj_id=#{prj_id} and doc_id=#{doc_id}),step_code_id,plan_date,actual_date,fore_date,folder_id
+		from p_prj_vdr_step
+		where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id}
+		<selectKey keyProperty="rev_id" resultType="String">
+			select FORMAT(MAX(CONVERT(INT,rev_id)),'000') from p_prj_vdr_step where prj_id=#{prj_id} and doc_id=#{doc_id}
+		</selectKey>
+	</insert>
+	<insert id="insertSiteStepByCheckIn" parameterType="PrjStepVO">
+		insert into p_prj_sdc_step(prj_id,doc_id,rev_id,step_code_id,plan_date,actual_date,fore_date,folder_id)
+		select prj_id,doc_id,(select FORMAT(MAX(CONVERT(INT,rev_id)),'000') from p_prj_document_index where prj_id=#{prj_id} and doc_id=#{doc_id}),step_code_id,plan_date,actual_date,fore_date,folder_id
+		from p_prj_sdc_step
+		where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id}
+		<selectKey keyProperty="rev_id" resultType="String">
+			select FORMAT(MAX(CONVERT(INT,rev_id)),'000') from p_prj_sdc_step where prj_id=#{prj_id} and doc_id=#{doc_id}
+		</selectKey>
+	</insert>
+	<insert id="insertProcStepByCheckIn" parameterType="PrjStepVO">
+		insert into p_prj_pro_step(prj_id,doc_id,rev_id,step_code_id,plan_date,actual_date,fore_date,folder_id)
+		select prj_id,doc_id,(select FORMAT(MAX(CONVERT(INT,rev_id)),'000') from p_prj_document_index where prj_id=#{prj_id} and doc_id=#{doc_id}),step_code_id,plan_date,actual_date,fore_date,folder_id
+		from p_prj_pro_step
+		where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id}
+		<selectKey keyProperty="rev_id" resultType="String">
+			select FORMAT(MAX(CONVERT(INT,rev_id)),'000') from p_prj_pro_step where prj_id=#{prj_id} and doc_id=#{doc_id}
+		</selectKey>
+	</insert>
+	<insert id="insertBulkStepByCheckIn" parameterType="PrjStepVO">
+		insert into p_prj_mdc_step(prj_id,doc_id,rev_id,step_code_id,plan_date,actual_date,fore_date,folder_id)
+		select prj_id,doc_id,(select FORMAT(MAX(CONVERT(INT,rev_id)),'000') from p_prj_document_index where prj_id=#{prj_id} and doc_id=#{doc_id}),step_code_id,plan_date,actual_date,fore_date,folder_id
+		from p_prj_mdc_step
+		where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id}
+		<selectKey keyProperty="rev_id" resultType="String">
+			select FORMAT(MAX(CONVERT(INT,rev_id)),'000') from p_prj_mdc_step where prj_id=#{prj_id} and doc_id=#{doc_id}
+		</selectKey>
+	</insert>
+</mapper>

@@ -1,0 +1,825 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="drnSqlMap">
+	
+	<select id="getFolderPath" parameterType="DrnLineVO" resultType="String">
+		SELECT folder_path
+		FROM p_prj_folder_info
+	    WHERE prj_id = #{prj_id} AND folder_id = #{folder_id}
+	</select>
+	
+	<select id="getReviewConclusion" parameterType="DrnLineVO" resultType="String">
+		SELECT set_val
+		FROM p_prj_code_settings
+		WHERE prj_id = #{prj_id} AND set_code_type = 'REVIEW CONCLUSION'
+	</select>
+	
+	<select id="getDrnReviewConclusion" parameterType="DrnLineVO" resultType="String">
+		SELECT review_conclusion
+		FROM p_prj_drn_info
+		WHERE prj_id = #{prj_id} AND drn_id = #{drn_id}
+	</select>
+	
+	<select id="getDrnRegID" parameterType="DrnLineVO" resultType="String">
+		SELECT reg_id
+		FROM p_prj_drn_info
+		WHERE prj_id = #{prj_id} AND drn_id = #{drn_id}
+	</select>
+	
+	<select id="get_DRNType" parameterType="DrnLineVO" resultType="String">
+	
+<!-- 		SELECT doc_type -->
+<!-- 		FROM p_prj_process_info -->
+<!-- 		WHERE prj_id = #{prj_id} AND doc_type IS NOT NULL AND process_folder_path_id = #{folder_id}  -->
+		SELECT doc_type
+		FROM p_prj_process_info
+		WHERE prj_id = #{prj_id} AND doc_type IS NOT NULL AND #{folder_id}  IN (SELECT value from String_split(process_folder_path_id,'@'))
+	</select>
+	
+	<select id="getDocFolderPath" parameterType="DrnLineVO" resultType="String">
+		SELECT folder_path
+		FROM p_prj_folder_info 
+		WHERE prj_id = #{prj_id} and folder_id = #{folder_id}
+	</select>
+	
+	
+	<select id="get_dccUser" parameterType="DrnLineVO" resultType="DrnLineVO">
+		SELECT A.user_id , user_kor_nm
+		FROM p_prj_member A LEFT OUTER JOIN  p_users B ON a.user_id = b.user_id
+		WHERE prj_id = #{prj_id} AND dcc_yn = 'Y'
+	</select>
+	
+	<select id="getCheckSheetList" parameterType="DrnLineVO" resultType="DrnLineVO">
+		SELECT *
+		FROM p_prj_drn_check_sheet
+		WHERE prj_id = #{prj_id} AND drn_id = #{drn_id} AND check_sheet_id = #{check_sheet_id}
+	</select>
+	
+	<select id="getCheckSheetItemList" parameterType="DrnLineVO" resultType="DrnLineVO">
+		SELECT *
+		FROM p_prj_drn_check_sheet_items
+		WHERE prj_id = #{prj_id} AND drn_id = #{drn_id} AND check_sheet_id = #{check_sheet_id}
+	</select>
+	
+	<select id="getCheckSheetItem" parameterType="DrnLineVO" resultType="DrnLineVO">
+		SELECT *
+		FROM p_prj_drn_check_sheet_items
+		WHERE prj_id = #{prj_id} AND drn_id = #{drn_id} AND check_sheet_id = #{check_sheet_id} AND items_no = #{items_no}
+	</select>
+	
+	
+	<select id="getMaxDrnId" parameterType="DrnLineVO" resultType="Integer">
+		SELECT isnull(MAX(drn_id) + 1 , 1)
+		FROM p_prj_drn_info
+		WHERE prj_id = #{prj_id}
+	</select>
+	
+	<select id="getMaxLineId" parameterType="DrnLineVO" resultType="Long">
+		SELECT isnull(MAX(approval_id) + 1 , 1)
+		FROM p_prj_drn_approval_line
+		WHERE prj_id = #{prj_id}
+	</select>
+	
+	
+	<select id="getMaxSheetId" parameterType="DrnLineVO" resultType="Long">
+		SELECT isnull(max(check_sheet_id)+1 , 1)
+		FROM p_prj_drn_check_sheet
+		WHERE prj_id = #{prj_id}
+	</select>
+	
+	<select id="getMaxItemId" parameterType="DrnLineVO" resultType="Long">
+		SELECT isnull(max(items_id)+1 , 1)
+		FROM p_prj_drn_check_sheet_items
+		WHERE prj_id = #{prj_id}
+	</select>
+	
+	<select id="getSenderNm" parameterType="String" resultType="String">
+		SELECT user_kor_nm
+		FROM p_users
+		WHERE user_id = #{value}
+	</select>
+
+	
+	
+	<insert id="insertDrnLine" parameterType="DrnLineVO">
+		INSERT INTO p_prj_drn_approval_line(
+		    prj_id,
+		    reviewed_id,
+		    approved_id,
+		    distribute_id,
+		    reg_id,
+		    reg_date,
+		    mod_id,
+		    mod_date
+		 )
+		VALUES(
+			#{prj_id},
+			#{reviewed_id},
+			#{approved_id},
+			#{distribute_id},
+			#{reg_id},
+			#{reg_date},
+			#{mod_id},
+			#{mod_date}
+		)
+		
+		 <selectKey keyProperty="approval_id" resultType="Long">
+			SELECT MAX(approval_id) FROM p_prj_drn_approval_line
+		</selectKey>
+	</insert>
+	
+	<insert id="insertCheckSheetList" parameterType="DrnLineVO">
+		INSERT INTO p_prj_drn_check_sheet(
+			prj_id,
+			drn_id,
+			check_sheet_id,
+			items_no,
+			items_nm,
+			itmes_cnt,
+			reg_date,
+			mod_id,
+			mod_date
+		 )
+		VALUES(
+			#{prj_id},
+			#{drn_id},
+			#{check_sheet_id},
+			#{items_no},
+			#{items_nm},
+			#{itmes_cnt},
+			#{reg_date},
+			#{mod_id},
+			#{mod_date}
+		)
+	</insert>
+	
+	<insert id="insertCheckSheet" parameterType="DrnLineVO">
+		INSERT INTO p_prj_drn_check_sheet_items(
+			prj_id,
+			drn_id,
+			check_sheet_id,
+			items_no,
+			items_id,
+			items_seq,
+			check_items,
+			discipline_code_id,
+			design_check_status,
+			reviewed_check_status,
+			approved_check_status,
+			reg_id,
+			reg_date,
+			mod_id,
+			mod_date
+		 )
+		VALUES(
+			#{prj_id},
+			#{drn_id},
+			#{check_sheet_id},
+			#{items_no},
+			#{items_id},
+			#{items_seq},
+			#{check_items},
+			#{discipline_code_id},
+			#{design_check_status},
+			#{reviewed_check_status},
+			#{approved_check_status},
+			#{reg_id},
+			#{reg_date},
+			#{mod_id},
+			#{mod_date}
+		)
+	</insert>
+	
+	<insert id="generateDrnInfo" parameterType="DrnLineVO">
+		INSERT INTO p_prj_drn_info (
+					prj_id,
+					drn_id,
+					drn_no,
+					drn_title,
+					drn_prj_id,
+					doc_title,
+					folder_id,
+					status,
+					drn_approval_status,
+					reg_id,
+					reg_date
+					)
+			VALUES (
+					#{prj_id},
+					#{drn_id},
+					#{drn_no},
+					#{drn_title},
+					#{drn_prj_id},
+					#{doc_title},
+					#{folder_id},
+					#{status},
+					#{drn_approval_status},
+					#{reg_id},
+					#{reg_date}
+			)
+	</insert>
+	
+	
+	<update id="updateDrnInfo" parameterType="DrnLineVO">
+		UPDATE p_prj_drn_info 
+		SET 	prj_id = #{prj_id},
+				drn_id = #{drn_id},
+				drn_no = #{drn_no},
+				drn_title = #{drn_title},
+				drn_prj_id = #{drn_prj_id},
+				status = #{status},
+				doc_title = #{doc_title},
+				approval_id = #{approval_id},
+				check_sheet_id = #{check_sheet_id},
+				check_sheet_title = #{check_sheet_title},
+				review_conclusion = #{review_conclusion},
+				drn_approval_status = #{drn_approval_status},
+				folder_id = #{folder_id},
+				approval_date = #{approval_date},
+				reg_id = #{reg_id},
+				reg_date = #{reg_date},
+				mod_id = #{action_id},
+				mod_date = #{mod_date}
+		WHERE 	prj_id = #{prj_id} AND drn_id = #{drn_id}
+	</update>
+	
+		<update id="updateDrnInfo2" parameterType="DrnLineVO">
+		UPDATE p_prj_drn_info 
+		SET 	drn_approval_status = #{drn_approval_status},
+				mod_id = #{action_id},
+				mod_date = #{mod_date}
+		WHERE 	prj_id = #{prj_id} AND drn_id = #{drn_id}
+	</update>
+	
+	<insert id="insertDrnHist">
+		INSERT INTO p_prj_drn_info_hist (
+				prj_id,
+				drn_id,
+				drn_no,
+				drn_title,
+				drn_prj_id,
+				status,
+				doc_title,
+				approval_id,
+				check_sheet_id,
+				check_sheet_title,
+				review_conclusion,
+				drn_approval_status,
+				folder_id,
+				reg_id,
+				reg_date,
+				mod_id,
+				mod_date
+				)
+		VALUES (
+				#{prj_id},
+				#{drn_id},
+				#{drn_no},
+				#{drn_title},
+				#{drn_prj_id},
+				#{status},
+				#{doc_title},
+				#{approval_id},
+				#{check_sheet_id},
+				#{check_sheet_title},
+				#{review_conclusion},
+				#{drn_approval_status},
+				#{folder_id},
+				#{reg_id},
+				#{reg_date},
+				#{action_id},
+				#{mod_date}
+		)
+	</insert>
+	
+	<select id="get_as" parameterType="DrnLineVO" resultType="DrnLineVO">
+		SELECT *
+		FROM p_prj_drn_info
+		WHERE prj_id = #{prj_id} AND drn_id = #{drn_id}
+	</select>
+	
+	<select id="get_drnPage" parameterType="DrnLineVO" resultType="DrnLineVO">
+		SELECT *
+		FROM p_prj_drn_info
+		WHERE prj_id = #{prj_id} AND drn_id=#{drn_id} AND status=#{status}
+	</select>
+	
+	<select id="get_checkList" parameterType="DrnLineVO" resultType="DrnLineVO">
+		SELECT *
+		FROM p_prj_drn_info
+		WHERE prj_id = #{prj_id}
+	</select>
+	
+	<select id="getDiscipCode"  parameterType="DrnLineVO" resultType="String">
+		SELECT DISTINCT b.discip_code_id
+		FROM p_prj_folder_info a join p_prj_discipline_folder_info b on a.folder_id=b.discip_folder_id join p_prj_discipline_info c on b.discip_code_id=c.discip_code_id
+		WHERE a.prj_id = #{prj_id} AND a.folder_id = #{folder_id}
+		
+	</select>
+	
+	<select id="getApprovalData"  parameterType="DrnLineVO" resultType="DrnLineVO">
+		SELECT *  , 
+			(SELECT user_kor_nm FROM p_users WHERE user_id = A.reg_id) as designed ,
+			(SELECT sfile_nm FROM p_users WHERE user_id = A.reg_id) as dgn_sfile ,  
+			(SELECT user_kor_nm FROM p_users WHERE user_id = reviewed_id) as reviewed ,
+			(SELECT sfile_nm FROM p_users WHERE user_id = reviewed_id) as rev_sfile , 
+			(SELECT user_kor_nm FROM p_users WHERE user_id = approved_id) as approved ,
+			(SELECT sfile_nm FROM p_users WHERE user_id = approved_id) as app_sfile
+		FROM p_prj_drn_approval_line A
+		WHERE prj_id = #{prj_id} AND approval_id = #{approval_id} 
+	</select>
+	
+	<select id="getJobCode" parameterType="String" resultType="String">
+		SELECT code_nm
+		FROM p_users pu LEFT OUTER JOIN p_code_info pci ON (pu.job_tit_cd = pci.code and code_gubun = 'JOB')
+		WHERE user_id = #{Value}
+	</select>
+	
+	
+	<select id="getSysDocsData"  parameterType="DrnLineVO" resultType="DrnLineVO">
+		SELECT B.* , A.* , C.set_code as revision
+		FROM (p_prj_drn_attch_file A LEFT OUTER JOIN p_prj_document_index B ON A.doc_id = B.doc_id AND A.rev_id = B.rev_id AND A.prj_id = B.prj_id) 
+			LEFT OUTER JOIN p_prj_code_settings C ON B.prj_id = C.prj_id AND B.rev_code_id = C.set_code_id 
+		WHERE A.prj_id = #{prj_id} AND A.drn_id = #{drn_id} AND C.set_code_type = 'REVISION NUMBER'
+	</select>
+	
+	<select id="getPcDocsData"  parameterType="DrnLineVO" resultType="DrnLineVO">
+		SELECT *
+		FROM p_prj_drn_pc_attach_file
+		WHERE prj_id = #{prj_id} AND drn_id = #{drn_id}
+	</select>
+	
+	<insert id="insertDrnDocs" parameterType="DrnLineVO">
+		INSERT INTO p_prj_drn_attch_file (
+			prj_id,
+			folder_id,
+			drn_id,
+			doc_id,
+			rev_id,
+			reg_id,
+			reg_date,
+			mod_id,
+			mod_date 
+		)
+		VALUES (
+			#{prj_id},
+			#{folder_id},
+			#{drn_id},
+			#{doc_id},
+			#{rev_id},
+			#{reg_id},
+			#{reg_date},
+			#{mod_id},
+			#{mod_date}
+		)
+	</insert>
+	
+	<insert id="insertDrnPCDocs" parameterType="DrnLineVO">
+		INSERT INTO p_prj_drn_pc_attach_file (
+		    prj_id,
+		    drn_id,
+		    rfile_nm,
+		    sfile_nm,
+		    file_size,
+		    file_path,
+		    reg_id,
+		    reg_date,
+		    mod_id,
+		    mod_date
+		)
+		VALUES (
+			#{prj_id},
+			#{drn_id},
+			#{rfile_nm},
+			#{sfile_nm},
+			#{file_size},
+			#{file_path},
+			#{reg_id},
+			#{reg_date},
+			#{mod_id},
+			#{mod_date}
+		)
+	</insert>
+	
+	<update id="updateDrnPCDocs" parameterType="DrnLineVO">
+		UPDATE p_prj_drn_pc_attach_file
+		SET 	prj_id = #{prj_id},
+		    	drn_id = #{drn_id},
+		    	rfile_nm = #{rfile_nm},
+		    	sfile_nm = #{sfile_nm},
+		    	file_size = #{file_size},
+		    	file_path = #{file_path},
+		    	reg_id = #{reg_id},
+		    	reg_date = #{reg_date},
+		    	mod_id = #{mod_id},
+		    	mod_date = #{mod_date}
+		WHERE 	prj_id = #{prj_id} AND drn_id = #{drn_id}
+	</update>
+	
+	<select id="getKorNm" parameterType="String" resultType="String">
+		SELECT user_kor_nm
+		FROM p_users
+		WHERE user_id = #{value}
+	</select>
+	
+	<select id="getDrnSeq" parameterType="String" resultType="Integer">
+		SELECT COUNT(*) as seq
+		FROM p_prj_drn_info
+		WHERE drn_no LIKE #{value}
+		<!-- 		AND drn_approval_status != 'T' -->
+	</select>
+	
+	<update id="updateCheckSheetItem" parameterType="DrnLineVO">
+		UPDATE p_prj_drn_check_sheet_items
+		SET 	design_check_status = #{design_check_status},
+				reviewed_check_status = #{reviewed_check_status},
+				approved_check_status = #{approved_check_status}
+		WHERE 	prj_id = #{prj_id} AND drn_id = #{drn_id} AND items_no = #{items_no} AND items_seq = #{items_seq}
+	</update>
+	
+	<update id="checkOutDoc" parameterType="DrnLineVO">
+		UPDATE p_prj_document_index
+		SET 	lock_yn = 'Y',
+				mod_id = #{reg_id}
+		WHERE 	prj_id = #{prj_id} AND doc_id = #{doc_id} AND rev_id = #{rev_id}
+	</update>
+	
+	<select id="getApprovalSignDate" parameterType="DrnLineVO" resultType="String">
+		SELECT reg_date
+		FROM p_prj_drn_info_hist
+		WHERE prj_id = #{prj_id} AND drn_id = #{drn_id} AND drn_approval_status = #{drn_approval_status}
+	</select>
+	
+	<select id="getUserSignData" parameterType="String" resultType="UsersVO">
+		SELECT *
+		FROM p_users
+		WHERE user_id = #{value}
+	</select>
+	
+	<select id="approvalIdCheck" parameterType="DrnLineVO" resultType = "long">
+		SELECT approval_id
+		FROM p_prj_drn_info
+		WHERE prj_id = #{prj_id} AND drn_id = #{drn_id}
+	</select>
+	
+	<select id="isExistDoc" parameterType="DrnLineVO" resultType="DrnLineVO">
+		SELECT *
+		FROM p_prj_drn_attch_file
+		WHERE prj_id = #{prj_id} AND folder_id = #{folder_id} 
+		  	  AND drn_id = #{drn_id} AND doc_id = #{doc_id} AND rev_id = #{rev_id}
+	</select>
+	
+	<select id="getProcessType" parameterType="ProcessInfoVO" resultType="String">
+		SELECT doc_type
+		FROM p_prj_process_info A RIGHT OUTER JOIN p_prj_folder_info B ON A.process_folder_path_id IN (SELECT CONVERT(BIGINT,value) FROM string_split(B.folder_path,'>')) AND A.prj_id = B.prj_id
+		WHERE A.prj_id = #{prj_id} AND B.folder_id = #{folder_id}
+	</select>
+	
+	<select id="getCodeList" parameterType="PrjCodeSettingsVO" resultType="PrjCodeSettingsVO">
+		SELECT *
+		FROM p_prj_code_settings
+		WHERE prj_id = #{prj_id} AND set_code_type LIKE #{set_code_type} AND 
+			  set_val2 LIKE 'DRN%' AND set_val3 = #{set_val3}
+	</select>
+	
+	<select id="getSetVal2" parameterType="PrjCodeSettingsVO" resultType="String">
+		SELECT set_val2
+		FROM p_prj_code_settings
+		WHERE prj_id = #{prj_id} AND set_code_type LIKE #{set_code_type} AND set_code_id = #{set_code_id}
+	</select>
+	
+	<select id="getSetVal3" parameterType="PrjCodeSettingsVO" resultType="String">
+		SELECT set_val
+		FROM p_prj_code_settings
+		WHERE prj_id = #{prj_id} AND set_code_type LIKE #{set_code_type} AND set_code_id = #{set_code_id}
+	</select>
+	
+	<select id="getUpdateActualCodeByDRN" parameterType="PrjCodeSettingsVO" resultType="PrjCodeSettingsVO">
+		SELECT set_code_id , set_val3
+		FROM p_prj_code_settings
+		WHERE prj_id = #{prj_id} AND set_code_type LIKE #{set_code_type} AND set_val2=#{set_val2}
+	</select>
+	
+	<update id="engStep" parameterType="PrjCodeSettingsVO">
+		UPDATE ${tbl}
+		SET actual_date = #{actual_date},
+			<if test="fore_date != null">
+			fore_date = #{fore_date},
+			</if>			
+			mod_id = #{mod_id},
+			mod_date = #{mod_date}
+		WHERE prj_id = #{prj_id} 
+		  AND doc_id = #{doc_id}
+		  AND rev_id = #{rev_id}
+		  AND step_code_id = #{set_code_id}
+	</update>
+	
+	<select id="getApprovalStatus" parameterType="DrnLineVO" resultType="String">
+		SELECT drn_approval_status
+		FROM p_prj_drn_info
+		WHERE prj_id = #{prj_id} AND drn_id = #{drn_id}		
+	</select>
+	
+	<select id="getRevNo" parameterType="DrnLineVO" resultType="String">
+		SELECT B.set_code
+		FROM p_prj_document_index A LEFT OUTER JOIN p_prj_code_settings B ON A.rev_code_id = B.set_code_id AND A.prj_id = B.prj_id AND B.set_code_type LIKE 'REVISION NUMBER%'
+		WHERE A.prj_id = #{prj_id} AND doc_id = #{doc_id} AND rev_id = #{rev_id}
+	</select>
+	
+	<update id="cancelCheckOut" parameterType="DrnLineVO">
+		UPDATE p_prj_document_index
+		SET 	lock_yn = 'N',
+				mod_id = #{reg_id}
+		WHERE 	prj_id = #{prj_id} AND doc_id = #{doc_id} AND rev_id = #{rev_id}
+	</update>
+	
+	<select id="getExpiredTempSaveDrns" parameterType="String" resultType="DrnLineVO">
+		SELECT *
+		FROM p_prj_drn_info
+		WHERE reg_date  <![CDATA[<=]]> #{value} AND  drn_approval_status = 'T'  
+	</select>
+	
+	<delete id="delExpiredTempSaveDrns" parameterType="DrnLineVO">
+		<!-- DRN INFO 삭제  -->
+		DELETE
+		FROM p_prj_drn_info
+		WHERE prj_id = #{prj_id} AND drn_id = #{drn_id} AND drn_approval_status = 'T' ;
+		
+		<!-- DRN ATTACH 삭제  -->
+		DELETE
+		FROM p_prj_drn_attch_file
+		WHERE prj_id = #{prj_id} AND drn_id = #{drn_id}
+		
+		<!-- DRN CHECK SHEET 삭제  -->
+		DELETE
+		FROM p_prj_drn_check_sheet
+		WHERE prj_id = #{prj_id} AND drn_id = #{drn_id}
+		
+		<!-- DRN CHECK SHEET ITEMS 삭제  -->
+		DELETE
+		FROM p_prj_drn_check_sheet_items
+		WHERE prj_id = #{prj_id} AND drn_id = #{drn_id}
+		
+	</delete>
+	
+	<select id="getDocsFromDrn" parameterType="DrnLineVO" resultType="DrnLineVO">
+		SELECT prj_id,doc_id,rev_id
+		FROM p_prj_drn_attch_file
+		WHERE prj_id = #{prj_id} AND drn_id = #{drn_id}		
+	</select>
+	
+	<select id="searchCheckSheet" parameterType="DrnLineVO" resultType="DrnLineVO">
+		SELECT *
+		FROM p_prj_drn_info
+		WHERE prj_id = #{prj_id} AND check_sheet_title LIKE #{check_sheet_title}
+	</select>
+	
+	<select id="getDesigner" parameterType="DrnLineVO" resultType="String">
+		SELECT reg_id
+		FROM p_prj_drn_info
+		WHERE prj_id = #{prj_id} AND drn_id = #{drn_id}
+	</select>
+	
+	<select id="getDrnInfo" parameterType="DrnLineVO" resultType="DrnLineVO">
+		SELECT A.*, B.prj_no, B.prj_nm , (select user_kor_nm from p_users where user_id=A.reg_id) as user_kor_nm
+		FROM p_prj_drn_info A LEFT OUTER JOIN p_prj_info B ON A.prj_id = B.prj_id
+		WHERE A.prj_id = #{prj_id} AND drn_id = #{drn_id}
+	</select>
+	
+		
+	<select id="getDocsInfo" parameterType="DrnLineVO" resultType="DrnLineVO">
+		SELECT A.prj_id ,A.doc_id,A.rev_id , B.doc_no, B.sfile_nm ,B.rfile_nm , C.set_code AS rev_no, B.title as doc_title, B.folder_id, B.doc_type, B.file_size 
+		FROM p_prj_drn_attch_file A LEFT OUTER JOIN p_prj_document_index B ON (A.prj_id = B.prj_id AND A.doc_id = B.doc_id AND A.rev_id = B.rev_id)
+				LEFT OUTER JOIN p_prj_code_settings C ON (B.prj_id = C.prj_id AND B.rev_code_id = C.set_code_id AND C.set_code_type = 'REVISION NUMBER')
+		WHERE A.prj_id = #{prj_id} AND drn_id = #{drn_id}
+	</select>
+	
+	<select id="getStatusCode" parameterType="DrnLineVO" resultType="DrnLineVO">
+	 	SELECT set_code as code , set_code_id as code_id
+		FROM p_prj_code_settings
+		WHERE prj_id = #{prj_id} AND set_code_type LIKE #{type} AND set_code_id = #{status}
+	</select>
+	
+	<select id="getEmailAddr" parameterType="DrnLineVO" resultType="String">
+		SELECT email_addr
+		FROM p_users
+		WHERE user_id = #{user_id}
+	</select>
+	
+	<insert id="sendEmail" parameterType="DrnLineVO">
+		INSERT INTO p_email_send_info(
+		    email_type,
+			email_id,
+			subject,
+			contents,
+			email_sender_user_id,
+			email_sender_addr,
+			email_receiver_addr,
+			email_send_date,
+			email_refer_to,
+			email_bcc,
+			send_yn,
+			reg_id,
+			reg_date
+		 )
+		VALUES(
+			#{email_type},
+			#{email_id},
+			#{subject},
+			#{contents},
+			#{email_sender_user_id},
+			#{email_sender_addr},
+			#{email_receiver_addr},
+			#{email_send_date},
+			#{email_refer_to},
+			#{email_bcc},
+			#{send_yn},
+			#{reg_id},
+			#{reg_date}
+		)
+	</insert>
+	
+	<select id="getRejectPoint" parameterType="drnLineVO" resultType="drnLineVO">
+		SELECT *
+		FROM p_prj_drn_info_hist
+		WHERE prj_id = #{prj_id} AND drn_id = #{drn_id}
+	</select>
+	
+	<select id="getLocalFile" parameterType="drnLineVO" resultType="drnLineVO">
+		SELECT *
+		FROM p_prj_drn_pc_attach_file
+		WHERE prj_id = #{prj_id} AND drn_id = #{drn_id}
+	</select>
+	
+	<select id="isUploadedPCDocs" parameterType="drnLineVO" resultType="drnLineVO">
+		SELECT *
+		FROM p_prj_drn_pc_attach_file
+		WHERE prj_id = #{prj_id} AND drn_id = #{drn_id}
+	</select>
+	
+	<select id="drnUsedChk" parameterType="drnLineVO" resultType="drnLineVO">
+		SELECT A.*, b.drn_approval_status
+		FROM p_prj_drn_attch_file A LEFT OUTER JOIN p_prj_drn_info B ON A.drn_id = B.drn_id AND A.prj_id = B.prj_id
+		WHERE A.prj_id = #{prj_id} AND A.doc_id = #{doc_id} AND A.rev_id = #{rev_id}
+	</select>
+	
+	<select id="getStep" parameterType="PrjStepVO" resultType="PrjCodeSettingsVO">
+		SELECT * 
+		FROM p_prj_code_settings ppcs
+		WHERE ppcs.prj_id = #{prj_id} AND ppcs.set_code_type = #{set_code_type}
+	</select>
+	
+	<select id="getActualDate" parameterType="PrjCodeSettingsVO" resultType="String">
+		SELECT actual_date
+		FROM ${tbl}
+		WHERE prj_id = #{prj_id} 
+		  AND doc_id = #{doc_id}
+		  AND rev_id = #{rev_id} 
+		  AND step_code_id = #{set_code}
+	</select>
+	
+	<select id="getDocRevCode" parameterType="DrnLineVO" resultType="String">
+		SELECT rev_code_id
+		FROM p_prj_document_index
+		WHERE prj_id = #{prj_id} 
+		  AND doc_id = #{doc_id}
+		  AND rev_id = #{rev_id} 
+	</select>
+	
+	<select id="getDocTypeFromDoc" parameterType="DrnLineVO" resultType="String">
+		SELECT doc_type
+		FROM p_prj_folder_info A LEFT OUTER JOIN p_prj_process_info B ON (A.prj_id = B.prj_id AND B.process_folder_path_id IN (SELECT value FROM STRING_SPLIT(A.folder_path,'>'))) 
+		WHERE A.prj_id = #{prj_id} AND A.folder_id = #{folder_id}
+	</select>
+	
+	<select id="getStatusValue" parameterType="DrnLineVO" resultType="String">
+		SELECT set_code as status
+		FROM p_prj_code_settings ppcs 
+		WHERE prj_id = #{prj_id} AND set_code_type = #{type} AND set_code_id = #{status}
+	</select>
+
+	<select id="getThisDRNFolderId" parameterType="DrnLineVO" resultType="Long">
+		SELECT folder_id
+    	FROM p_prj_drn_attch_file 
+	    WHERE prj_id = #{prj_id} AND drn_id = #{drn_id}    	
+	</select>
+	
+	
+	<select id="getApproval_id" parameterType="DrnLineVO" resultType="long">
+		SELECT approval_id
+		FROM p_prj_drn_info
+		WHERE prj_id = #{prj_id} AND drn_id = #{drn_id}
+	</select>
+	
+	<select id="getCheck_Sheet_Id" parameterType="DrnLineVO" resultType="String">
+		SELECT check_sheet_id
+		FROM p_prj_drn_info
+		WHERE prj_id = #{prj_id} AND drn_id = #{drn_id}
+	</select>
+	
+	<select id="getFolder_id" parameterType="DrnLineVO" resultType="Long">
+		SELECT folder_id
+		FROM p_prj_drn_attch_file
+		WHERE prj_id = #{prj_id} AND drn_id = #{drn_id}
+	</select>
+	
+	<select id="getStatus" parameterType="DrnLineVO" resultType="String">
+		SELECT status
+		FROM p_prj_drn_info
+		WHERE prj_id = #{prj_id} AND drn_id = #{drn_id}
+	</select>
+	
+	<select id="getDrn_no" parameterType="DrnLineVO" resultType="String">
+		SELECT drn_no
+		FROM p_prj_drn_info
+		WHERE prj_id = #{prj_id} AND drn_id = #{drn_id}
+	</select>
+	
+	<select id="getCheck_sheet_title" parameterType="DrnLineVO" resultType="String">
+		SELECT check_sheet_title
+		FROM p_prj_drn_info
+		WHERE prj_id = #{prj_id} AND drn_id = #{drn_id}
+	</select>
+	
+	<select id="clearDocChk" parameterType="DrnLineVO" resultType="DrnLineVO">
+		SELECT *
+		FROM p_prj_drn_attch_file
+		WHERE prj_id = #{prj_id} AND drn_id = #{drn_id}
+	</select>
+	
+	<delete id="clearDoc" parameterType="DrnLineVO">
+		DELETE FROM p_prj_drn_attch_file
+		WHERE prj_id = #{prj_id} AND drn_id = #{drn_id}
+	</delete>
+	
+	<update id="clearDoc_cancelCheckOut" parameterType="DrnLineVO">
+		UPDATE p_prj_document_index
+		SET		lock_yn = 'N'
+		WHERE 	prj_id = #{prj_id} AND doc_id = #{doc_id} AND rev_id = #{rev_id}				
+			
+	</update>
+	
+	<select id="clearCheckSheetChk" parameterType="DrnLineVO" resultType="int">
+		SELECT COUNT(*)
+		FROM p_prj_drn_check_sheet
+		WHERE prj_id = #{prj_id} AND drn_id = #{drn_id}
+	</select>
+	
+	<delete id="clearCheckSheet" parameterType="DrnLineVO">
+		DELETE FROM p_prj_drn_check_sheet
+		WHERE prj_id = #{prj_id} AND drn_id = #{drn_id}
+	</delete>
+	
+	<select id="clearCheckSheetItemChk" parameterType="DrnLineVO" resultType="int">
+		SELECT COUNT(*)
+		FROM p_prj_drn_check_sheet_items
+		WHERE prj_id = #{prj_id} AND drn_id = #{drn_id}
+	</select>
+	
+	<delete id="clearCheckSheetItem" parameterType="DrnLineVO">
+		DELETE FROM p_prj_drn_check_sheet_items 
+		WHERE prj_id = #{prj_id} AND drn_id = #{drn_id}
+	</delete>
+	
+	
+	<delete id="clearLocalFile" parameterType="DrnLineVO">
+		DELETE FROM p_prj_drn_pc_attach_file 
+		WHERE prj_id = #{prj_id} AND drn_id = #{drn_id}
+	</delete>
+	
+	<update id="updateDrnLine" parameterType="DrnLineVO">
+		UPDATE p_prj_drn_approval_line
+		SET		prj_id = #{prj_id},
+			    reviewed_id = #{reviewed_id},
+			    approved_id = #{approved_id},
+			    distribute_id = #{distribute_id},
+			    reg_id = #{reg_id},
+			    reg_date = #{reg_date},
+			    mod_id = #{action_id},
+			    mod_date = #{mod_date}
+		WHERE 	prj_id = #{prj_id} AND approval_id = #{approval_id}				
+			
+	</update>
+	
+	
+	<select id="getDrnLocalFileInfo" parameterType="DrnLineVO" resultType="DrnLineVO">
+		SELECT *
+		FROM p_prj_drn_pc_attach_file
+		WHERE prj_id = #{prj_id} AND drn_id =#{drn_id}
+	</select>
+	
+	
+	<select id="isAdmin" parameterType="DrnLineVO" resultType="String">
+		SELECT isNull(admin_yn,'N') as isAdmin
+		FROM p_users
+		WHERE user_id = #{action_id}
+	</select>
+	
+	<select id="isDcc" parameterType="DrnLineVO" resultType="String">
+		SELECT isNull(dcc_yn ,'N') as isDcc
+		FROM p_prj_member
+		WHERE prj_id = #{prj_id} and user_id = #{action_id}
+	</select>
+	
+</mapper>

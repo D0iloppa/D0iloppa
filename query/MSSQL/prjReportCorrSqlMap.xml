@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="prjReportCorrSqlMap">
+	<select id="PrjReportCorrData_1" resultType="PrjReportCorresVo" parameterType="ReportVo">
+		select a.corr_no, 
+			   isnull(b.title, '-') as title, 
+			   isnull(a.doc_date, '-') as doc_date,
+			   isnull((select set_code from p_prj_code_settings ppcs where ppcs.prj_id=a.prj_id and ppcs.set_code_type='CORRESPONDENCE RESPONSIBILITY' and ppcs.set_code_id=a.responsibility_code_id),'-') as responsibility, 
+			   a.in_out as inout, 
+			   (select set_code from p_prj_code_settings ppcs where ppcs.prj_id=a.prj_id and ppcs.set_code_type='CORRESPONDENCE_FROM' and ppcs.set_code_id=a.sender_code_id) as sender,
+			   (select set_code from p_prj_code_settings ppcs where ppcs.prj_id=a.prj_id and ppcs.set_code_type='CORRESPONDENCE_FROM' and ppcs.set_code_id=a.receiver_code_id) as receiver,
+			   (select set_code from p_prj_code_settings ppcs where ppcs.prj_id=a.prj_id and ppcs.set_code_type='CORRESPONDENCE_TYPE' and ppcs.set_code_id=a.doc_type_code_id) as type,  
+				isnull(STUFF((SELECT ',' + doc_no
+                FROM p_prj_document_index ppdi
+               WHERE ppdi.prj_id=a.prj_id and ppdi.doc_id in (select value from STRING_SPLIT(REPLACE(a.ref_corr_doc_id,'@@','@'),'@'))
+                 FOR XML PATH('')
+			   ), 1, 1, ''),'-') as ref_doc,
+			   a.send_recv_date,
+			   a.replyreqdate,
+			   (select concat(u.user_kor_nm,' ',ci.code_nm) from p_users u left outer join p_code_info ci on ci.code_gubun ='JOB' and u.job_tit_cd  = ci.code where u.user_id = a.person_in_charge_id) as person_in_charge,
+			   a.remark, 
+			   a.reg_date, 
+			   (select concat(u.user_kor_nm,' ',ci.code_nm) from p_users u left outer join p_code_info ci on ci.code_gubun ='JOB' and u.job_tit_cd  = ci.code where u.user_id = a.reg_id) as reg_id
+		from p_prj_cordoc_info a join p_prj_document_index b
+		on a.prj_id=b.prj_id and a.doc_id=b.doc_id and a.rev_id=b.rev_id
+		where a.reg_date >= #{date_s} and a.reg_date <![CDATA[ <= ]]>  #{date_d}
+		and a.in_out = #{in_out}
+	</select>
+</mapper>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="pubbbsSqlMap">
+	<select id="getPubBbsContents" resultType="PubBbsContentsVO">
+		select TOP 4 *
+		from p_pub_bbs_contents AS a LEFT OUTER JOIN p_users AS b ON a.reg_id=b.user_id
+		LEFT OUTER JOIN p_code_info AS c
+		on c.code_gubun = 'JOB'
+		and b.job_tit_cd = c.code
+		order by a.reg_date desc, parent_no, order_no asc;
+    </select>
+    
+    <select id="getPubBbsContentOne" parameterType="PubBbsContentsVO" resultType="PubBbsContentsVO">
+    	select a.*, b.user_kor_nm, b.user_id, c.code_nm
+		from p_pub_bbs_contents a join p_users b
+		on a.reg_id = b.user_id
+		LEFT OUTER JOIN p_code_info AS c
+		on c.code_gubun = 'JOB'
+		and b.job_tit_cd = c.code
+		where bbs_seq=#{bbs_seq}
+    </select>
+</mapper>

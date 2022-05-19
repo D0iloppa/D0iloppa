@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="usersSqlMapOracle">
+	<select id="getHRInformation" resultType="OracleUsersVO">
+		SELECT A.EMP_NO AS USER_ID,
+		    A.KOR_NM AS USER_KOR_NM,
+		    A.ENG_NM AS USER_ENG_NM,
+		    A.WRK_PLC_NM AS USER_ADDRESS,
+		    CASE WHEN A.ASGN_CD IN ('AP00', 'AAAA') THEN A.COMPANY ELSE A.ASGN_CD END AS USER_GROUP_NM,
+		   '1' AS USER_TYPE,
+		    A.EMP_NO AS PASSWD,
+		    '현대중공업파워시스템' AS COMPANY_NM,
+		    'Y' AS FIRST_LOGIN_YN,
+		    A.HLD_OFFI_GBN AS HLD_OFFI_GBN,
+		    A.JOB_TIT_CD AS JOB_TIT_CD,
+		    A.OFFI_RES_CD AS OFFI_RES_CD,
+		    A.EMAIL AS EMAIL_ADDR,
+		    A.OFFI_TEL AS OFFI_TEL,
+		    'N' AS ADMIN_YN,
+		   '' AS SFILE_NM,
+		   '' AS RFILE_NM,
+		   '' AS FILE_PATH,
+		    '' AS FILE_SIZE,
+		    B.LAST_PRJNO AS LAST_CON_PRJ_ID,
+		    '' AS REMOTE_IP,
+		    'ADMIN' AS REG_ID,
+		    TO_CHAR(SYSDATE,'YYYYMMDDHH24MISS') AS REG_DATE,
+		    'ADMIN' AS MOD_ID,
+		    TO_CHAR(SYSDATE,'YYYYMMDDHH24MISS') AS MOD_DATE
+		FROM SUPPORT.ALL_AMSTM_VIEW A, JL01.EDB_USER B
+		WHERE A.COMPANY IN ('240','290')
+			AND A.EMP_NO = UPPER(B.USER_ID(+))
+			AND A.HLD_OFFI_GBN != '3'
+    </select>
+	<select id="getHRInformation_test" resultType="OracleUsersVO">
+		select * from P_USERS
+    </select>
+</mapper>

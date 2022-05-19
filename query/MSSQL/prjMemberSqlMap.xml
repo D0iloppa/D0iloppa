@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="prjMemberSqlMap">
+	<select id="getPrjMemberList" resultType="PrjMemberVO" parameterType="PrjMemberVO">
+		select * from p_prj_member a join p_users b on a.user_id=b.user_id where prj_id=#{prj_id} order by dcc_yn desc
+    </select>
+	<select id="isUserPrjMember" resultType="PrjMemberVO" parameterType="PrjMemberVO">
+		select * from p_prj_member where prj_id=#{prj_id} and user_id=#{user_id}
+    </select>
+	<insert id="insertPrjMember" parameterType="PrjMemberVO">
+		insert into p_prj_member(prj_id,user_id,dcc_yn,reg_id,reg_date)
+		values(#{prj_id},#{user_id},'N',#{reg_id},#{reg_date})
+    </insert>
+	<delete id="deletePrjMember" parameterType="PrjMemberVO">
+		delete from p_prj_member where prj_id=#{prj_id} and user_id=#{user_id}
+    </delete>
+    <delete id="deleteCopyPrjMember" parameterType="PrjMemberVO">
+    	delete from p_prj_member 
+    	where prj_id = #{prj_id}
+    </delete>
+	<insert id="insertCopyPrjMember" parameterType="PrjMemberVO">
+		insert p_prj_member(prj_id,user_id,dcc_yn,reg_id,reg_date)
+		select #{prj_id},user_id,dcc_yn,#{reg_id},#{reg_date}
+		from p_prj_member
+		where prj_id=#{copy_prj_id}
+    </insert>
+</mapper>

@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- - DispatcherServlet application context for PetClinic's web tier. -->
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:aop="http://www.springframework.org/schema/aop" 
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.2.xsd
+				           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.2.xsd
+				           http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.2.xsd
+							http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.2.xsd">
+
+
+	<aop:aspectj-autoproxy />
+
+
+    <!-- Context 전체 설정 -->
+   	<context:component-scan base-package="kr.co.hhi">
+		<context:include-filter type="annotation" expression="org.springframework.stereotype.Controller" />
+<!-- 		<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Repository" /> -->
+<!-- 		<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Service" /> -->
+	</context:component-scan>
+
+
+
+    
+    <bean id="localeResolver" class="org.springframework.web.servlet.i18n.SessionLocaleResolver">
+        <property name="defaultLocale" value="KO" />
+    </bean>
+    
+    <bean id="fixedLocaleResolver" class="org.springframework.web.servlet.i18n.FixedLocaleResolver">
+        <property name="defaultLocale" value="KO" />
+    </bean>
+    
+
+	<bean id="localeChangeInterceptor" class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor">
+		<property name="paramName" value="lang" />
+	</bean>
+	<bean id="handlerMapping" class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping">
+		<property name="alwaysUseFullPath" value="true" />
+		<property name="interceptors">
+			<list>
+				<ref bean="localeChangeInterceptor" />
+			</list>
+		</property>
+	</bean>
+
+	<bean class="org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter" />
+
+
+
+    <!-- MultipartResolver 설정 -->
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+    	<property name="defaultEncoding" value="UTF-8"/>
+        <property name="maxUploadSize"   value="10000000000"></property>
+        <property name="maxInMemorySize" value="100000000"></property>
+    </bean>
+    
+	<bean class="org.springframework.web.servlet.view.BeanNameViewResolver">
+        <property name="order" value="0"></property>
+    </bean>
+    
+	<bean id="viewResolver" class="org.springframework.web.servlet.view.UrlBasedViewResolver">
+		<property name="viewClass" value="org.springframework.web.servlet.view.JstlView" />
+		<property name="prefix" value="/WEB-INF/jsp/" />
+		<property name="suffix" value=".jsp" />
+		<property name="order" value="1" />
+	</bean>
+
+
+
+    <bean id="objectMapper" class="com.fasterxml.jackson.databind.ObjectMapper" />
+    
+	<bean id="jsonView" class="org.springframework.web.servlet.view.json.MappingJackson2JsonView">
+		<property name="objectMapper" ref="objectMapper"></property>
+	</bean>
+
+	<bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter" p:alwaysUseFullPath="true">
+		<property name="messageConverters">
+			<list>
+				<bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+					<property name="objectMapper" ref="objectMapper"></property>
+				</bean>
+			</list>
+		</property>
+	</bean>
+	
+  <bean id="SessionInterceptor" class="kr.co.hhi.interceptor.SessionInterceptor"></bean>
+  <bean id="LoginInterceptor" class="kr.co.hhi.interceptor.LoginInterceptor"></bean>
+  <bean id="ReadAuthInterceptor" class="kr.co.hhi.interceptor.ReadAuthInterceptor"></bean>
+  <bean id="WriteAuthInterceptor" class="kr.co.hhi.interceptor.WriteAuthInterceptor"></bean>
+  <bean id="DeleteAuthInterceptor" class="kr.co.hhi.interceptor.DeleteAuthInterceptor"></bean>
+  <mvc:interceptors>
+  
+<!--   		<mvc:interceptor> -->
+<!--         <mvc:mapping path="/**"/> -->
+<!--            <bean class="org.springframework.web.servlet.mvc.WebContentInterceptor"> -->
+<!-- 	            <property name="cacheSeconds" value="0"/>	 -->
+<!-- 				<property name="useExpiresHeader" value="true" /> -->
+<!-- 				<property name="useCacheControlHeader" value="true" /> -->
+<!-- 				<property name="useCacheControlNoStore" value="true" /> -->
+<!--            </bean> -->
+<!--         </mvc:interceptor> -->
+        
+        <mvc:interceptor>
+            <mvc:mapping path="/**"/>
+			<mvc:exclude-mapping path="/login.do"/>
+            <mvc:exclude-mapping path="/loginPost.do"/>
+            <mvc:exclude-mapping path="/firstLoginPost.do"/>
+            <mvc:exclude-mapping path="/getUserPw.do"/>
+            <mvc:exclude-mapping path="/checkUserId.do"/>
+            <mvc:exclude-mapping path="/passwdReset.do"/>
+			<mvc:exclude-mapping path="/logout.do"/>
+			<mvc:exclude-mapping path="/getPubBbsContents.do"/>
+			<mvc:exclude-mapping path="/getDetailFileList.do"/>
+			<mvc:exclude-mapping path="/cancleHit.do"/>
+			<mvc:exclude-mapping path="/estimateDownloadN.do"/>
+			<mvc:exclude-mapping path="/getFirstLoginYn.do"/>
+			<mvc:exclude-mapping path="/getChcekIpAddr.do"/>
+			<mvc:exclude-mapping path="/loginCheckAdmin.do"/>
+			<mvc:exclude-mapping path="/saveUserConnect.do"/>
+			<mvc:exclude-mapping path="/upConnFailCnt.do"/>
+			<mvc:exclude-mapping path="/resetDateFail.do"/>
+			<mvc:exclude-mapping path="/checkPassPolicy.do"/>
+			<mvc:exclude-mapping path="/insertLoginSystemLog.do"/>
+            <mvc:exclude-mapping path="/fileDownloadEmail.do"/>
+            <mvc:exclude-mapping path="/downloadFileEmail.do"/>
+            <mvc:exclude-mapping path="/downloadTRCoverFile.do"/>
+            <mvc:exclude-mapping path="/downloadCommentFile.do"/>
+            <mvc:exclude-mapping path="/drnEmail.do"/>
+            <mvc:exclude-mapping path="/drnPrint.do"/>
+            <mvc:exclude-mapping path="/getDrnPrint.do"/>
+            <mvc:exclude-mapping path="/drnUpLine.do"/>
+            <mvc:exclude-mapping path="/drnFileDownload.do"/>
+            <mvc:exclude-mapping path="/getLocalFile.do"/>
+            <mvc:exclude-mapping path="/checkFolderAuth.do"/>
+            <mvc:exclude-mapping path="/getSummernoteImage.do"/>
+            <ref bean="SessionInterceptor"/>
+        </mvc:interceptor>
+        <mvc:interceptor>
+            <mvc:mapping path="/loginPost.do"/>   
+            <ref bean="LoginInterceptor"/>
+        </mvc:interceptor>
+         <mvc:interceptor>
+         	<mvc:mapping path="/tab.do"/>
+            <mvc:mapping path="/checkFolderAuth.do"/>
+            <mvc:exclude-mapping path="/trOutGoingExcelDownload.do"/>
+            <mvc:exclude-mapping path="/vtrOutGoingExcelDownload.do"/>
+            <mvc:exclude-mapping path="/strOutGoingExcelDownload.do"/>
+            <ref bean="ReadAuthInterceptor"/>
+        </mvc:interceptor>
+         <mvc:interceptor>
+            <mvc:mapping path="/checkIn.do"/>   
+            <mvc:mapping path="/multiUploadChkFile.do"/>
+            <mvc:mapping path="/multiUpload.do"/>
+            <mvc:mapping path="/dciTemplateSave.do"/>
+            <mvc:mapping path="/createNewFolder.do"/>
+            <mvc:mapping path="/renameFolder.do"/>
+            <mvc:mapping path="/engDocSave.do"/>
+            <mvc:mapping path="/updateRevision.do"/>
+            <mvc:mapping path="/vendorDocSave.do"/>
+            <mvc:mapping path="/updateRevisionVendor.do"/>
+            <mvc:mapping path="/procDocSave.do"/>
+            <mvc:mapping path="/updateRevisionProc.do"/>
+            <mvc:mapping path="/siteDocSave.do"/>
+            <mvc:mapping path="/updateRevisionSite.do"/>
+            <mvc:mapping path="/generalDocSave.do"/>
+            <mvc:mapping path="/updateRevisionGeneral.do"/>
+            <mvc:mapping path="/insertPrjEmail.do"/>
+            <mvc:mapping path="/TrOutIssue.do"/>
+            <mvc:mapping path="/insertTrOutgoingSave.do"/>
+            <mvc:mapping path="/incomingSave.do"/>
+            <mvc:mapping path="/incomingSaveAttach.do"/>
+            <ref bean="WriteAuthInterceptor"/>
+        </mvc:interceptor>
+         <mvc:interceptor>
+            <mvc:mapping path="/deleteFolder.do"/>
+            <mvc:mapping path="/documentDelete.do"/>
+            <mvc:mapping path="/deleteTR.do"/>
+            <mvc:mapping path="/deleteTRIn.do"/>
+            <mvc:mapping path="/updateTRIssueCancel.do"/>
+            <ref bean="DeleteAuthInterceptor"/>
+        </mvc:interceptor>
+  </mvc:interceptors>
+  
+  <bean class="org.springframework.web.servlet.view.BeanNameViewResolver">
+      <property name="order" value="0"/>
+  </bean>
+
+</beans>

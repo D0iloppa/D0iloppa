@@ -1,0 +1,589 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="notificationSqlMap">
+	<select id="delayEngDoc" resultType="NotificationVO" parameterType="NotificationVO">
+		select sub1.*
+		from
+		  (	select a.prj_id,c.prj_nm
+				       , a.doc_no, a.doc_id, a.rev_id, a.title
+				       ,a.rev_code_id
+				       ,(select c1.set_code as set_desc from p_prj_code_settings c1 where a.prj_id = c1.prj_id and c1.set_code_type ='REVISION NUMBER' and a.rev_code_id = c1.set_code_id) rev_no
+				      ,(select c1.set_code from p_prj_code_settings c1 where a.prj_id = c1.prj_id and c1.set_code_type ='ENGINEERING STEP' and c1.set_code_id = b.step_code_id) as step
+				      ,b.plan_date
+				      ,b.actual_date
+				      ,b.fore_date
+				      ,ei.designer_id
+				      ,concat(u.user_kor_nm,' ' ,pco.code_nm) designer
+				      ,pco.code_nm
+				      ,DATEDIFF(DD, b.fore_date, Convert(varchar(10),dbo.returnLocalDate(Getdate()),112)) as delay_days
+				      ,ei.discip_code_id
+				      ,(select ppdi.discip_display from p_prj_discipline_info ppdi where ppdi.prj_id=ei.prj_id and ppdi.discip_code_id=ei.discip_code_id) discipline
+				      ,d.set_order
+				      ,a.folder_id
+				from p_prj_document_index a
+				join p_prj_eng_info ei on a.prj_id  = ei.prj_id and a.doc_id = ei.doc_id and a.rev_id = ei.rev_id
+				join p_prj_eng_step b on a.prj_id  = b.prj_id and a.doc_id = b.doc_id and a.rev_id = b.rev_id
+				join p_prj_info c on a.prj_id = c.prj_id and c.prj_hidden_yn !='Y'
+				join p_users u on u.user_id = ei.designer_id
+				left outer join p_code_info pco on pco.code_gubun = 'JOB' and u.job_tit_cd = pco.code	
+				,(select *
+				 from p_prj_code_settings c1
+				 where c1.set_code_type ='ENGINEERING STEP'
+				) d
+				,(select prj_id, doc_id, max(rev_id) as rev_id from p_prj_document_index
+							where 1=1
+							and del_yn!='Y'					
+							group by prj_id, doc_id)a1						
+				where 1=1
+				and a.prj_id = a1.prj_id
+				and a.doc_id  = a1.doc_id
+				and a.rev_id  = a1.rev_id
+				and a.prj_id  = d.prj_id
+			    and b.step_code_id = d.set_code_id
+				and b.fore_date is not null and b.fore_date != '' and b.fore_date <![CDATA[ < ]]> Convert(varchar(10),dbo.returnLocalDate(Getdate()),112)
+				and (b.actual_date is null or b.actual_date='')		
+				)sub1,
+		(select a.prj_id, a.doc_id, a.rev_id
+				      , min(d.set_order) set_order
+				from p_prj_document_index a
+				join p_prj_eng_info ei on a.prj_id  = ei.prj_id and a.doc_id = ei.doc_id and a.rev_id = ei.rev_id
+				join p_prj_eng_step b on a.prj_id  = b.prj_id and a.doc_id = b.doc_id and a.rev_id = b.rev_id
+				join p_prj_info c on a.prj_id = c.prj_id and c.prj_hidden_yn !='Y'
+				join p_users u on u.user_id = ei.designer_id
+				left outer join p_code_info pco on pco.code_gubun = 'JOB' and u.job_tit_cd = pco.code	
+				,(select *
+				 from p_prj_code_settings c1
+				 where c1.set_code_type ='ENGINEERING STEP'
+				) d
+				,(select prj_id, doc_id, max(rev_id) as rev_id from p_prj_document_index
+							where 1=1
+							and del_yn!='Y'					
+							group by prj_id, doc_id)a1						
+				where 1=1
+				and a.prj_id = a1.prj_id
+				and a.doc_id  = a1.doc_id
+				and a.rev_id  = a1.rev_id
+				and a.prj_id  = d.prj_id
+			    and b.step_code_id = d.set_code_id
+				and b.fore_date is not null and b.fore_date != '' and b.fore_date <![CDATA[ < ]]> Convert(varchar(10),dbo.returnLocalDate(Getdate()),112)
+				and (b.actual_date is null or b.actual_date='')	
+			     group by a.prj_id, a.doc_id, a.rev_id
+		) sub2
+		where sub1.prj_id = sub2.prj_id
+		and sub1.doc_id = sub2.doc_id
+		and sub1.rev_id = sub2.rev_id
+		and sub1.set_order = sub2.set_order
+		order by sub1.prj_id, sub1.doc_id, sub1.rev_id
+	</select>
+	<select id="delayVendorDoc" resultType="NotificationVO" parameterType="NotificationVO">
+		select sub1.*
+		from
+		  (	select a.prj_id,c.prj_nm
+				       , a.doc_no, a.doc_id, a.rev_id, a.title
+				       ,a.rev_code_id
+				       ,(select c1.set_code as set_desc from p_prj_code_settings c1 where a.prj_id = c1.prj_id and c1.set_code_type ='REVISION NUMBER' and a.rev_code_id = c1.set_code_id) rev_no
+				      ,(select c1.set_code from p_prj_code_settings c1 where a.prj_id = c1.prj_id and c1.set_code_type ='VENDOR DOC STEP' and c1.set_code_id = b.step_code_id) as step
+				      ,b.plan_date
+				      ,b.actual_date
+				      ,b.fore_date
+				      ,ei.designer_id
+				      ,concat(u.user_kor_nm,' ' ,pco.code_nm) designer
+				      ,pco.code_nm
+				      ,DATEDIFF(DD, b.fore_date, Convert(varchar(10),dbo.returnLocalDate(Getdate()),112)) as delay_days
+				      ,ei.discip_code_id
+				      ,(select ppdi.discip_display from p_prj_discipline_info ppdi where ppdi.prj_id=ei.prj_id and ppdi.discip_code_id=ei.discip_code_id) discipline
+				      ,d.set_order
+				      ,a.folder_id
+				from p_prj_document_index a
+				join p_prj_vdr_info ei on a.prj_id  = ei.prj_id and a.doc_id = ei.doc_id and a.rev_id = ei.rev_id
+				join p_prj_vdr_step b on a.prj_id  = b.prj_id and a.doc_id = b.doc_id and a.rev_id = b.rev_id
+				join p_prj_info c on a.prj_id = c.prj_id and c.prj_hidden_yn !='Y'
+				join p_users u on u.user_id = ei.designer_id
+				left outer join p_code_info pco on pco.code_gubun = 'JOB' and u.job_tit_cd = pco.code	
+				,(select *
+				 from p_prj_code_settings c1
+				 where c1.set_code_type ='VENDOR DOC STEP'
+				) d
+				,(select prj_id, doc_id, max(rev_id) as rev_id from p_prj_document_index
+							where 1=1
+							and del_yn!='Y'					
+							group by prj_id, doc_id)a1						
+				where 1=1
+				and a.prj_id = a1.prj_id
+				and a.doc_id  = a1.doc_id
+				and a.rev_id  = a1.rev_id
+				and a.prj_id  = d.prj_id
+			    and b.step_code_id = d.set_code_id
+				and b.fore_date is not null and b.fore_date != '' and b.fore_date <![CDATA[ < ]]> Convert(varchar(10),dbo.returnLocalDate(Getdate()),112)
+				and (b.actual_date is null or b.actual_date='')		
+				)sub1,
+		(	select a.prj_id, a.doc_id, a.rev_id
+				      , min(d.set_order) set_order
+				from p_prj_document_index a
+				join p_prj_vdr_info ei on a.prj_id  = ei.prj_id and a.doc_id = ei.doc_id and a.rev_id = ei.rev_id
+				join p_prj_vdr_step b on a.prj_id  = b.prj_id and a.doc_id = b.doc_id and a.rev_id = b.rev_id
+				join p_prj_info c on a.prj_id = c.prj_id and c.prj_hidden_yn !='Y'
+				join p_users u on u.user_id = ei.designer_id
+				left outer join p_code_info pco on pco.code_gubun = 'JOB' and u.job_tit_cd = pco.code	
+				,(select *
+				 from p_prj_code_settings c1
+				 where c1.set_code_type ='VENDOR DOC STEP'
+				) d
+				,(select prj_id, doc_id, max(rev_id) as rev_id from p_prj_document_index
+							where 1=1
+							and del_yn!='Y'					
+							group by prj_id, doc_id)a1						
+				where 1=1
+				and a.prj_id = a1.prj_id
+				and a.doc_id  = a1.doc_id
+				and a.rev_id  = a1.rev_id
+				and a.prj_id  = d.prj_id
+			    and b.step_code_id = d.set_code_id
+				and b.fore_date is not null and b.fore_date != '' and b.fore_date <![CDATA[ < ]]> Convert(varchar(10),dbo.returnLocalDate(Getdate()),112)
+				and (b.actual_date is null or b.actual_date='')	
+			     group by a.prj_id, a.doc_id, a.rev_id
+		) sub2
+		where sub1.prj_id = sub2.prj_id
+		and sub1.doc_id = sub2.doc_id
+		and sub1.rev_id = sub2.rev_id
+		and sub1.set_order = sub2.set_order
+		order by sub1.prj_id, sub1.doc_id, sub1.rev_id
+	</select>
+	<select id="delayProcDoc" resultType="NotificationVO" parameterType="NotificationVO">
+		select sub1.*
+		from
+		  (	select a.prj_id,c.prj_nm
+				       , a.doc_no, a.doc_id, a.rev_id, a.title
+				       ,a.rev_code_id
+				       ,(select c1.set_code as set_desc from p_prj_code_settings c1 where a.prj_id = c1.prj_id and c1.set_code_type ='REVISION NUMBER' and a.rev_code_id = c1.set_code_id) rev_no
+				      ,(select c1.set_code from p_prj_code_settings c1 where a.prj_id = c1.prj_id and c1.set_code_type ='PROCUREMENT STEP' and c1.set_code_id = b.step_code_id) as step
+				      ,b.plan_date
+				      ,b.actual_date
+				      ,b.fore_date
+				      ,ei.designer_id
+				      ,concat(u.user_kor_nm,' ' ,pco.code_nm) designer
+				      ,pco.code_nm
+				      ,DATEDIFF(DD, b.fore_date, Convert(varchar(10),dbo.returnLocalDate(Getdate()),112)) as delay_days
+				      ,ei.discip_code_id
+				      ,(select ppdi.discip_display from p_prj_discipline_info ppdi where ppdi.prj_id=ei.prj_id and ppdi.discip_code_id=ei.discip_code_id) discipline
+				      ,d.set_order
+				      ,a.folder_id
+				from p_prj_document_index a
+				join p_prj_pro_info ei on a.prj_id  = ei.prj_id and a.doc_id = ei.doc_id and a.rev_id = ei.rev_id
+				join p_prj_pro_step b on a.prj_id  = b.prj_id and a.doc_id = b.doc_id and a.rev_id = b.rev_id
+				join p_prj_info c on a.prj_id = c.prj_id and c.prj_hidden_yn !='Y'
+				join p_users u on u.user_id = ei.designer_id
+				left outer join p_code_info pco on pco.code_gubun = 'JOB' and u.job_tit_cd = pco.code	
+				,(select *
+				 from p_prj_code_settings c1
+				 where c1.set_code_type ='PROCUREMENT STEP'
+				) d
+				,(select prj_id, doc_id, max(rev_id) as rev_id from p_prj_document_index
+							where 1=1
+							and del_yn!='Y'					
+							group by prj_id, doc_id)a1						
+				where 1=1
+				and a.prj_id = a1.prj_id
+				and a.doc_id  = a1.doc_id
+				and a.rev_id  = a1.rev_id
+				and a.prj_id  = d.prj_id
+			    and b.step_code_id = d.set_code_id
+				and b.fore_date is not null and b.fore_date != '' and b.fore_date <![CDATA[ < ]]> Convert(varchar(10),dbo.returnLocalDate(Getdate()),112)
+				and (b.actual_date is null or b.actual_date='')		
+				)sub1,
+		(	select a.prj_id, a.doc_id, a.rev_id
+				      , min(d.set_order) set_order
+				from p_prj_document_index a
+				join p_prj_pro_info ei on a.prj_id  = ei.prj_id and a.doc_id = ei.doc_id and a.rev_id = ei.rev_id
+				join p_prj_pro_step b on a.prj_id  = b.prj_id and a.doc_id = b.doc_id and a.rev_id = b.rev_id
+				join p_prj_info c on a.prj_id = c.prj_id and c.prj_hidden_yn !='Y'
+				join p_users u on u.user_id = ei.designer_id
+				left outer join p_code_info pco on pco.code_gubun = 'JOB' and u.job_tit_cd = pco.code	
+				,(select *
+				 from p_prj_code_settings c1
+				 where c1.set_code_type ='PROCUREMENT STEP'
+				) d
+				,(select prj_id, doc_id, max(rev_id) as rev_id from p_prj_document_index
+							where 1=1
+							and del_yn!='Y'					
+							group by prj_id, doc_id)a1						
+				where 1=1
+				and a.prj_id = a1.prj_id
+				and a.doc_id  = a1.doc_id
+				and a.rev_id  = a1.rev_id
+				and a.prj_id  = d.prj_id
+			    and b.step_code_id = d.set_code_id
+				and b.fore_date is not null and b.fore_date != '' and b.fore_date <![CDATA[ < ]]> Convert(varchar(10),dbo.returnLocalDate(Getdate()),112)
+				and (b.actual_date is null or b.actual_date='')	
+			     group by a.prj_id, a.doc_id, a.rev_id
+		) sub2
+		where sub1.prj_id = sub2.prj_id
+		and sub1.doc_id = sub2.doc_id
+		and sub1.rev_id = sub2.rev_id
+		and sub1.set_order = sub2.set_order
+		order by sub1.prj_id, sub1.doc_id, sub1.rev_id
+	</select>
+	<select id="delaySiteDoc" resultType="NotificationVO" parameterType="NotificationVO">
+		select sub1.*
+		from
+		  (	select a.prj_id,c.prj_nm
+				       , a.doc_no, a.doc_id, a.rev_id, a.title
+				       ,a.rev_code_id
+				       ,(select c1.set_code as set_desc from p_prj_code_settings c1 where a.prj_id = c1.prj_id and c1.set_code_type ='REVISION NUMBER' and a.rev_code_id = c1.set_code_id) rev_no
+				      ,(select c1.set_code from p_prj_code_settings c1 where a.prj_id = c1.prj_id and c1.set_code_type ='SITE DOC STEP' and c1.set_code_id = b.step_code_id) as step
+				      ,b.plan_date
+				      ,b.actual_date
+				      ,b.fore_date
+				      ,ei.designer_id
+				      ,concat(u.user_kor_nm,' ' ,pco.code_nm) designer
+				      ,pco.code_nm
+				      ,DATEDIFF(DD, b.fore_date, Convert(varchar(10),dbo.returnLocalDate(Getdate()),112)) as delay_days
+				      ,ei.discip_code_id
+				      ,(select ppdi.discip_display from p_prj_discipline_info ppdi where ppdi.prj_id=ei.prj_id and ppdi.discip_code_id=ei.discip_code_id) discipline
+				      ,d.set_order
+				      ,a.folder_id
+				from p_prj_document_index a
+				join p_prj_sdc_info ei on a.prj_id  = ei.prj_id and a.doc_id = ei.doc_id and a.rev_id = ei.rev_id
+				join p_prj_sdc_step b on a.prj_id  = b.prj_id and a.doc_id = b.doc_id and a.rev_id = b.rev_id
+				join p_prj_info c on a.prj_id = c.prj_id and c.prj_hidden_yn !='Y'
+				join p_users u on u.user_id = ei.designer_id
+				left outer join p_code_info pco on pco.code_gubun = 'JOB' and u.job_tit_cd = pco.code	
+				,(select *
+				 from p_prj_code_settings c1
+				 where c1.set_code_type ='SITE DOC STEP'
+				) d
+				,(select prj_id, doc_id, max(rev_id) as rev_id from p_prj_document_index
+							where 1=1
+							and del_yn!='Y'					
+							group by prj_id, doc_id)a1						
+				where 1=1
+				and a.prj_id = a1.prj_id
+				and a.doc_id  = a1.doc_id
+				and a.rev_id  = a1.rev_id
+				and a.prj_id  = d.prj_id
+			    and b.step_code_id = d.set_code_id
+				and b.fore_date is not null and b.fore_date != '' and b.fore_date <![CDATA[ < ]]> Convert(varchar(10),dbo.returnLocalDate(Getdate()),112)
+				and (b.actual_date is null or b.actual_date='')		
+				)sub1,
+		(	select a.prj_id, a.doc_id, a.rev_id
+				      , min(d.set_order) set_order
+				from p_prj_document_index a
+				join p_prj_sdc_info ei on a.prj_id  = ei.prj_id and a.doc_id = ei.doc_id and a.rev_id = ei.rev_id
+				join p_prj_sdc_step b on a.prj_id  = b.prj_id and a.doc_id = b.doc_id and a.rev_id = b.rev_id
+				join p_prj_info c on a.prj_id = c.prj_id and c.prj_hidden_yn !='Y'
+				join p_users u on u.user_id = ei.designer_id
+				left outer join p_code_info pco on pco.code_gubun = 'JOB' and u.job_tit_cd = pco.code	
+				,(select *
+				 from p_prj_code_settings c1
+				 where c1.set_code_type ='SITE DOC STEP'
+				) d
+				,(select prj_id, doc_id, max(rev_id) as rev_id from p_prj_document_index
+							where 1=1
+							and del_yn!='Y'					
+							group by prj_id, doc_id)a1						
+				where 1=1
+				and a.prj_id = a1.prj_id
+				and a.doc_id  = a1.doc_id
+				and a.rev_id  = a1.rev_id
+				and a.prj_id  = d.prj_id
+			    and b.step_code_id = d.set_code_id
+				and b.fore_date is not null and b.fore_date != '' and b.fore_date <![CDATA[ < ]]> Convert(varchar(10),dbo.returnLocalDate(Getdate()),112)
+				and (b.actual_date is null or b.actual_date='')	
+			     group by a.prj_id, a.doc_id, a.rev_id
+		) sub2
+		where sub1.prj_id = sub2.prj_id
+		and sub1.doc_id = sub2.doc_id
+		and sub1.rev_id = sub2.rev_id
+		and sub1.set_order = sub2.set_order
+		order by sub1.prj_id, sub1.doc_id, sub1.rev_id
+	</select>
+	
+	<select id="getIncomingCorr" resultType="NotificationVO" parameterType="NotificationVO">
+		select di.prj_id, pi.prj_nm, di.doc_id, di.rev_id, di.doc_no, di.title, di.folder_id
+		      , ci.sender_code_id 
+		      , (select c1.set_desc as set_desc from p_prj_code_settings c1 where c1.prj_id = di.prj_id and c1.set_code_type ='CORRESPONDENCE_FROM' and c1.set_code_id = ci.sender_code_id) sender
+		      , ci.receiver_code_id  
+		      , (select c1.set_desc as set_desc from p_prj_code_settings c1 where c1.prj_id = di.prj_id and c1.set_code_type ='CORRESPONDENCE_FROM' and c1.set_code_id = ci.receiver_code_id) receiver      
+		      , ci.doc_type_code_id 
+		      , di.doc_type
+		      , convert(date, ci.doc_date) as doc_date
+      		  , ci.send_recv_date 
+		      , ci.replyreqdate
+		      , CASE  
+			    WHEN  ci.replyreqdate IS NULL  THEN  ''
+			    WHEN  ci.replyreqdate = '' THEN ''
+			    ELSE SUBSTRING(ci.replyreqdate,1,4) + '-' + SUBSTRING(ci.replyreqdate,5,2) + '-' + SUBSTRING(ci.replyreqdate,7,2)
+		        END replyreqdate  
+		      , di.reg_date  
+		from p_prj_document_index di
+		join p_prj_cordoc_info ci on ci.prj_id = di.prj_id and ci.doc_id = di.doc_id and ci.rev_id = di.rev_id and ci.in_out = 'I'
+		join p_prj_info pi on pi.prj_id = di.prj_id and pi.prj_hidden_yn!='Y'
+		where 1=1
+		and SUBSTRING(di.reg_date,1,8)  = Convert(varchar(10),DATEADD(DAY, -1, dbo.returnLocalDate(Getdate())),112)
+		order by di.prj_id, di.doc_id, di.title, di.reg_date
+	</select>
+	<select id="getIncomingTR" resultType="NotificationVO" parameterType="NotificationVO">
+		select ti.prj_id, pi.prj_nm, ti.tr_id, ti.tr_no, ti.tr_subject as title
+		       ,cs.set_val
+		       ,(select c1.set_desc as set_desc from p_prj_code_settings c1 where c1.prj_id = ti.prj_id and c1.set_code_type ='CORRESPONDENCE_FROM' and c1.set_code = cs.set_val) sender       
+		       ,cs.set_val2 
+		       ,(select c1.set_desc as set_desc from p_prj_code_settings c1 where c1.prj_id = ti.prj_id and c1.set_code_type ='CORRESPONDENCE_FROM' and c1.set_code = cs.set_val2) receiver
+		       ,ti.tr_from 
+		       ,ti.tr_to 
+		       ,ti.reg_id
+		       ,u.user_kor_nm as creator  
+		       ,convert(date, ti.send_date) as received_date  
+		       ,tf.rev_id
+		       ,tf.discip_code_id       
+		       ,tf.dis_cnt
+		       ,CASE
+		        WHEN dis_cnt = 1 THEN (select ppdi.discip_display from p_prj_discipline_info ppdi where ppdi.prj_id=tf.prj_id and ppdi.discip_code_id=tf.discip_code_id) 
+		        WHEN dis_cnt > 1 THEN CONCAT((select ppdi.discip_display from p_prj_discipline_info ppdi where ppdi.prj_id=tf.prj_id and ppdi.discip_code_id=tf.discip_code_id),N' 외') 
+		        ELSE '' 
+		        END as discipline        
+		from p_prj_tr_info ti
+		join p_prj_info pi on pi.prj_id = ti.prj_id and pi.prj_hidden_yn!='Y'
+		join p_prj_code_settings cs on ti.prj_id = cs.prj_id and cs.set_code_type = 'CORRESPONDENCE_IN' and cs.set_code = 'TR INCOMING'
+		join p_users u on u.user_id  = ti.reg_id 
+		,(select tf.prj_id, tf.tr_id, max(tf.rev_id) as rev_id, max(ei.discip_code_id) as discip_code_id, count(discip_code_id) as dis_cnt
+		 from p_prj_tr_file tf
+		 join p_prj_document_index di on tf.prj_id = di.prj_id and tf.doc_id = di.doc_id and tf.rev_id = di.rev_id and di.del_yn != 'Y'
+		 join p_prj_eng_info ei on tf.prj_id = ei.prj_id and tf.doc_id = ei.doc_id and tf.rev_id = ei.rev_id
+		 group by tf.prj_id,tf.tr_id  
+		)tf
+		where 1=1 
+		and SUBSTRING(ti.reg_date,1,8)  = Convert(varchar(10),DATEADD(DAY, -1, dbo.returnLocalDate(Getdate())),112)
+		and ti.inout = 'IN'
+		and ti.prj_id = tf.prj_id and ti.tr_id = tf.tr_id 
+		order by ti.prj_id, ti.tr_no, ti.tr_subject, ti.req_date
+	</select>
+	<select id="getIncomingVTR" resultType="NotificationVO" parameterType="NotificationVO">
+		select ti.prj_id, pi.prj_nm, ti.tr_no, ti.tr_subject as title
+		       ,cs.set_val
+		       ,(select c1.set_desc as set_desc from p_prj_code_settings c1 where c1.prj_id = ti.prj_id and c1.set_code_type ='CORRESPONDENCE_FROM' and c1.set_code = cs.set_val) sender       
+		       ,cs.set_val2 
+		       ,(select c1.set_desc as set_desc from p_prj_code_settings c1 where c1.prj_id = ti.prj_id and c1.set_code_type ='CORRESPONDENCE_FROM' and c1.set_code = cs.set_val2) receiver
+		       ,ti.tr_from 
+		       ,ti.tr_to 
+		       ,ti.reg_id
+		       ,u.user_kor_nm as creator
+		       ,convert(date, ti.send_date) as received_date
+		       ,tf.rev_id
+		       ,tf.discip_code_id       
+		       ,tf.dis_cnt
+		       ,CASE
+		        WHEN dis_cnt = 1 THEN (select ppdi.discip_display from p_prj_discipline_info ppdi where ppdi.prj_id=tf.prj_id and ppdi.discip_code_id=tf.discip_code_id) 
+		        WHEN dis_cnt > 1 THEN CONCAT((select ppdi.discip_display from p_prj_discipline_info ppdi where ppdi.prj_id=tf.prj_id and ppdi.discip_code_id=tf.discip_code_id),N' 외') 
+		        ELSE '' 
+		        END as discipline      
+		from p_prj_vtr_info ti
+		join p_prj_info pi on pi.prj_id = ti.prj_id and pi.prj_hidden_yn!='Y'
+		join p_prj_code_settings cs on ti.prj_id = cs.prj_id and cs.set_code_type = 'CORRESPONDENCE_IN' and cs.set_code = 'VTR INCOMING'
+		join p_users u on u.user_id  = ti.reg_id 
+		,(select tf.prj_id, tf.tr_id, max(tf.rev_id) as rev_id, max(ei.discip_code_id) as discip_code_id, count(discip_code_id) as dis_cnt
+		 from p_prj_vtr_file tf
+		 join p_prj_document_index di on tf.prj_id = di.prj_id and tf.doc_id = di.doc_id and tf.rev_id = di.rev_id and di.del_yn != 'Y'
+		 join p_prj_vdr_info ei on tf.prj_id = ei.prj_id and tf.doc_id = ei.doc_id and tf.rev_id = ei.rev_id
+		 group by tf.prj_id,tf.tr_id  
+		)tf
+		where 1=1
+		and SUBSTRING(ti.reg_date,1,8)  = Convert(varchar(10),DATEADD(DAY, -1, dbo.returnLocalDate(Getdate())),112)
+		and ti.inout = 'IN'
+		and ti.prj_id = tf.prj_id and ti.tr_id = tf.tr_id 
+		order by ti.prj_id, ti.tr_no, ti.tr_subject, ti.req_date
+	</select>
+	<select id="getOutgoingCorr" resultType="NotificationVO" parameterType="NotificationVO">
+		select di.prj_id, pi.prj_nm, di.doc_id, di.rev_id, di.doc_no, di.title, di.folder_id
+		      , ci.sender_code_id 
+		      , (select c1.set_desc as set_desc from p_prj_code_settings c1 where c1.prj_id = di.prj_id and c1.set_code_type ='CORRESPONDENCE_FROM' and c1.set_code_id = ci.sender_code_id) sender
+		      , ci.receiver_code_id  
+		      , (select c1.set_desc as set_desc from p_prj_code_settings c1 where c1.prj_id = di.prj_id and c1.set_code_type ='CORRESPONDENCE_FROM' and c1.set_code_id = ci.receiver_code_id) receiver      
+		      , ci.doc_type_code_id 
+		      , di.doc_type as type
+		      , convert(date, ci.doc_date) as doc_date
+		      , ci.send_recv_date 
+		      , ci.replyreqdate
+		      , CASE  
+			    WHEN  ci.replyreqdate IS NULL  THEN  ''
+			    WHEN  ci.replyreqdate = '' THEN ''
+			    ELSE SUBSTRING(ci.replyreqdate,1,4) + '-' + SUBSTRING(ci.replyreqdate,5,2) + '-' + SUBSTRING(ci.replyreqdate,7,2)
+		        END replyreqdate
+		      , di.doc_type
+		      , di.reg_date  
+		from p_prj_document_index di
+		join p_prj_cordoc_info ci on ci.prj_id = di.prj_id and ci.doc_id = di.doc_id and ci.rev_id = di.rev_id and ci.in_out = 'O'
+		join p_prj_info pi on pi.prj_id = di.prj_id and pi.prj_hidden_yn!='Y'
+		where 1=1
+		and SUBSTRING(di.reg_date,1,8) = Convert(varchar(10),DATEADD(DAY, -1, dbo.returnLocalDate(Getdate())),112)
+		order by di.prj_id, di.doc_id, di.title, di.reg_date
+	</select>
+	<select id="getOutgoingTR" resultType="NotificationVO" parameterType="NotificationVO">
+		select ti.prj_id, pi.prj_nm, ti.tr_id, ti.tr_no, ti.tr_subject as title
+		       ,cs.set_val
+		       ,(select c1.set_desc as set_desc from p_prj_code_settings c1 where c1.prj_id = ti.prj_id and c1.set_code_type ='CORRESPONDENCE_FROM' and c1.set_code = cs.set_val) sender       
+		       ,cs.set_val2 
+		       ,(select c1.set_desc as set_desc from p_prj_code_settings c1 where c1.prj_id = ti.prj_id and c1.set_code_type ='CORRESPONDENCE_FROM' and c1.set_code = cs.set_val2) receiver
+		       ,ti.tr_from 
+		       ,ti.tr_to 
+		       ,ti.reg_id    
+		       ,u.user_kor_nm as creator
+		       ,convert(date, ti.send_date) as receive_date  
+			   ,(select ppdi.discip_display from p_prj_discipline_info ppdi where ppdi.prj_id=ti.prj_id and ppdi.discip_code_id=ti.discipline_code_id) discipline
+			   ,(select c1.set_code as set_desc from p_prj_code_settings c1 where c1.prj_id = ti.prj_id and c1.set_code_type ='TR ISSUE PURPOSE' and c1.set_code_id = ti.tr_issuepur_code_id) issue_purpose
+		from p_prj_tr_info ti
+		join p_prj_info pi on pi.prj_id = ti.prj_id and pi.prj_hidden_yn!='Y'
+		join p_prj_code_settings cs on ti.prj_id = cs.prj_id and cs.set_code_type = 'CORRESPONDENCE_OUT' and cs.set_code = 'TR OUTGOING'
+		join p_users u on u.user_id  = ti.reg_id 
+		where 1=1 
+		and SUBSTRING(ti.reg_date,1,8) = Convert(varchar(10),DATEADD(DAY, -1, dbo.returnLocalDate(Getdate())),112)
+		and ti.inout = 'OUT' 
+		order by ti.prj_id, ti.tr_no, ti.tr_subject, ti.req_date
+	</select>
+	<select id="getOutgoingVTR" resultType="NotificationVO" parameterType="NotificationVO">
+		select ti.prj_id, pi.prj_nm, ti.tr_no, ti.tr_subject as title
+		       ,cs.set_val
+		       ,(select c1.set_desc as set_desc from p_prj_code_settings c1 where c1.prj_id = ti.prj_id and c1.set_code_type ='CORRESPONDENCE_FROM' and c1.set_code = cs.set_val) sender       
+		       ,cs.set_val2 
+		       ,(select c1.set_desc as set_desc from p_prj_code_settings c1 where c1.prj_id = ti.prj_id and c1.set_code_type ='CORRESPONDENCE_FROM' and c1.set_code = cs.set_val2) receiver
+		       ,ti.tr_from 
+		       ,ti.tr_to 
+		       ,ti.reg_id    
+		       ,u.user_kor_nm as creator
+		       ,convert(date, ti.send_date) as receive_date
+			   ,(select ppdi.discip_display from p_prj_discipline_info ppdi where ppdi.prj_id=ti.prj_id and ppdi.discip_code_id=ti.discipline_code_id) discipline         
+			   ,(select c1.set_code as set_desc from p_prj_code_settings c1 where c1.prj_id = ti.prj_id and c1.set_code_type ='TR ISSUE PURPOSE' and c1.set_code_id = ti.tr_issuepur_code_id) issue_purpose	   
+		from p_prj_vtr_info ti
+		join p_prj_info pi on pi.prj_id = ti.prj_id and pi.prj_hidden_yn!='Y'
+		join p_prj_code_settings cs on ti.prj_id = cs.prj_id and cs.set_code_type = 'CORRESPONDENCE_OUT' and cs.set_code = 'VTR OUTGOING'
+		join p_users u on u.user_id  = ti.reg_id 
+		where 1=1
+		and SUBSTRING(ti.reg_date,1,8) = Convert(varchar(10),DATEADD(DAY, -1, dbo.returnLocalDate(Getdate())),112)
+		and ti.inout = 'OUT' 
+		order by ti.prj_id, ti.tr_no, ti.tr_subject, ti.req_date 
+	</select>
+	
+	<select id="getPrjDCC" parameterType="PrjDocumentIndexVO" resultType="PrjDocumentIndexVO">
+		select a.user_id from p_prj_member a where a.prj_id=#{prj_id} and a.dcc_yn='Y'
+    </select>
+	<select id="getEngDesigner" parameterType="PrjDocumentIndexVO" resultType="PrjDocumentIndexVO">
+		select a.designer_id from p_prj_eng_info a where a.prj_id=#{prj_id} and a.doc_id=#{doc_id} and rev_id=#{rev_id}
+    </select>
+	<select id="getVendorDesigner" parameterType="PrjDocumentIndexVO" resultType="PrjDocumentIndexVO">
+		select a.designer_id from p_prj_vdr_info a where a.prj_id=#{prj_id} and a.doc_id=#{doc_id} and rev_id=#{rev_id}
+    </select>
+	<select id="getProcDesigner" parameterType="PrjDocumentIndexVO" resultType="PrjDocumentIndexVO">
+		select a.designer_id from p_prj_pro_info a where a.prj_id=#{prj_id} and a.doc_id=#{doc_id} and rev_id=#{rev_id}
+    </select>
+	<select id="getSiteDesigner" parameterType="PrjDocumentIndexVO" resultType="PrjDocumentIndexVO">
+		select a.designer_id from p_prj_sdc_info a where a.prj_id=#{prj_id} and a.doc_id=#{doc_id} and rev_id=#{rev_id}
+    </select>
+	<select id="getDocCreator" parameterType="PrjDocumentIndexVO" resultType="PrjDocumentIndexVO">
+		select a.reg_id from p_prj_document_index a where a.prj_id=#{prj_id} and a.doc_id=#{doc_id} and rev_id=#{rev_id}
+    </select>
+	<select id="getTROutCreator" parameterType="PrjDocumentIndexVO" resultType="PrjDocumentIndexVO">
+		select a.reg_id from p_prj_tr_file a where a.prj_id=#{prj_id} and a.doc_id=#{doc_id} and rev_id=#{rev_id}
+    </select>
+	<select id="getVTROutCreator" parameterType="PrjDocumentIndexVO" resultType="PrjDocumentIndexVO">
+		select a.reg_id from p_prj_vtr_file a where a.prj_id=#{prj_id} and a.doc_id=#{doc_id} and rev_id=#{rev_id}
+    </select>
+	<select id="getSTROutCreator" parameterType="PrjDocumentIndexVO" resultType="PrjDocumentIndexVO">
+		select a.reg_id from p_prj_str_file a where a.prj_id=#{prj_id} and a.doc_id=#{doc_id} and rev_id=#{rev_id}
+    </select>
+	<select id="getUserEmailAddr" parameterType="PrjDocumentIndexVO" resultType="String">
+		select email_addr from p_users where user_id=#{user_id}
+    </select>
+    <insert id="insertDailyNotificationEmailSendInfo" parameterType="PrjEmailVO">
+    	insert into p_email_send_info(email_type,email_id,subject,contents,email_sender_user_id,email_sender_addr,email_receiver_addr,email_send_date,email_refer_to,email_bcc,send_yn,reg_id,reg_date,mod_id,mod_date)
+    	values(#{email_type},#{email_id},#{subject},#{contents},#{email_sender_user_id},#{email_sender_addr},#{email_receiver_addr},#{email_send_date},#{email_refer_to},#{email_bcc},'N',#{reg_id},#{reg_date},#{mod_id},#{mod_date})
+    </insert>
+	<select id="getEmailSettingReceiver" resultType="String">
+		select email_receiver_addr from p_email_setting
+	</select>
+
+
+    <select id="isSentCorrEmail" resultType="int" parameterType="PrjDocumentIndexVO">
+		select count(*) from p_prj_email_send_info where prj_id=#{prj_id} and user_data00=#{user_data00}
+    </select>
+    <select id="getCorrReplyRequest" resultType="PrjDocumentIndexVO" parameterType="PrjDocumentIndexVO">
+    	select prj_id,doc_id,rev_id,folder_id,person_in_charge_id from p_prj_cordoc_info ppci where in_out='I' and replyreqdate is not null and replyreqdate!='' and replyreqdate=#{replyreqdate}
+    </select>
+    <select id="getCorrInfo" resultType="PrjDocumentIndexVO" parameterType="PrjDocumentIndexVO">
+    	select * from p_prj_document_index where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id}
+    </select>
+    <insert id="insertCorrRequestNotificationEmailSendInfo" parameterType="PrjEmailVO">
+    	insert into p_email_send_info(email_type,email_id,subject,contents,email_sender_user_id,email_sender_addr,email_receiver_addr,email_send_date,email_refer_to,email_bcc,send_yn,reg_id,reg_date,mod_id,mod_date)
+    	values(#{email_type},#{email_id},#{subject},#{contents},#{email_sender_user_id},#{email_sender_addr},#{email_receiver_addr},#{email_send_date},#{email_refer_to},#{email_bcc},'N',#{reg_id},#{reg_date},#{mod_id},#{mod_date})
+    </insert>
+
+
+	
+	<select id="todoEng" resultType="NotificationVO" parameterType="NotificationVO">
+		select a.prj_id,c.prj_nm
+		       , a.doc_no, a.doc_id, a.rev_id, a.title
+		       ,a.rev_code_id
+		       ,(select c1.set_code as set_desc from p_prj_code_settings c1 where a.prj_id = c1.prj_id and c1.set_code_type ='REVISION NUMBER' and a.rev_code_id = c1.set_code_id) rev_no       
+		      ,b.step_code_id 
+		      ,b.plan_date
+		      ,b.actual_date
+		      ,b.fore_date 
+		      ,ei.designer_id       
+		      ,concat(u.user_kor_nm,' ' ,pco.code_nm) designer
+		      ,pco.code_nm
+		      ,DATEDIFF(DD, b.fore_date, Convert(varchar(10),dbo.returnLocalDate(Getdate()),112)) as delay_days
+		      ,ei.discip_code_id
+		      ,(select c1.set_desc as set_desc from p_prj_code_settings c1 where c1.prj_id = ei.prj_id and c1.set_code_type ='CORRESPONDENCE RESPONSIBILITY' and c1.set_code_id = ei.discip_code_id) discipline
+		from p_prj_document_index a
+		join p_prj_eng_info ei on a.prj_id  = ei.prj_id and a.doc_id = ei.doc_id and a.rev_id = ei.rev_id 
+		join p_prj_eng_step b on a.prj_id  = b.prj_id and a.doc_id = b.doc_id and a.rev_id = b.rev_id 
+		join p_prj_info c on a.prj_id = c.prj_id
+		join p_users u on u.user_id = ei.designer_id 
+		left outer join p_code_info pco on pco.code_gubun = 'JOB' and u.job_tit_cd = pco.code
+		,(select *   
+		 from p_prj_code_settings c1
+		 where c1.set_code_type ='ENGINEERING STEP' 
+		 and c1.ifc_yn = 'Y'
+		) d
+		where 1=1 
+		and a.prj_id  = d.prj_id 
+		and b.step_code_id = d.set_code_id 
+		and a.rev_code_id is not null
+		and b.fore_date is not null and b.fore_date != '' and b.fore_date <![CDATA[ >= ]]> Convert(varchar(10),dbo.returnLocalDate(Getdate() - 7),112)
+		and (b.actual_date is null or b.actual_date='')
+		order by a.prj_id, a.doc_id, a.rev_id, a.rev_code_id 
+	</select>
+	<select id="todoVendor" resultType="NotificationVO" parameterType="NotificationVO">
+		select a.prj_id,c.prj_nm
+		       , a.doc_no, a.doc_id, a.rev_id, a.title
+		       ,a.rev_code_id
+		       ,(select c1.set_code as set_desc from p_prj_code_settings c1 where a.prj_id = c1.prj_id and c1.set_code_type ='REVISION NUMBER' and a.rev_code_id = c1.set_code_id) rev_no       
+		      ,b.step_code_id 
+		      ,b.plan_date
+		      ,b.actual_date
+		      ,b.fore_date 
+		      ,ei.designer_id       
+		      ,concat(u.user_kor_nm,' ' ,pco.code_nm) designer
+		      ,pco.code_nm
+		      ,DATEDIFF(DD, b.fore_date, Convert(varchar(10),dbo.returnLocalDate(Getdate()),112)) as delay_days
+		      ,ei.discip_code_id
+		      ,(select c1.set_desc as set_desc from p_prj_code_settings c1 where c1.prj_id = ei.prj_id and c1.set_code_type ='CORRESPONDENCE RESPONSIBILITY' and c1.set_code_id = ei.discip_code_id) discipline
+		from p_prj_document_index a
+		join p_prj_vdr_info ei on a.prj_id  = ei.prj_id and a.doc_id = ei.doc_id and a.rev_id = ei.rev_id 
+		join p_prj_vdr_step b on a.prj_id  = b.prj_id and a.doc_id = b.doc_id and a.rev_id = b.rev_id 
+		join p_prj_info c on a.prj_id = c.prj_id
+		join p_users u on u.user_id = ei.designer_id 
+		left outer join p_code_info pco on pco.code_gubun = 'JOB' and u.job_tit_cd = pco.code
+		,(select *   
+		 from p_prj_code_settings c1
+		 where c1.set_code_type ='VENDOR DOC STEP' 
+		 and c1.ifc_yn = 'Y'
+		) d
+		where 1=1 
+		and a.prj_id  = d.prj_id 
+		and b.step_code_id = d.set_code_id 
+		and a.rev_code_id is not null
+		and b.fore_date is not null and b.fore_date != '' and b.fore_date <![CDATA[ >= ]]> Convert(varchar(10),dbo.returnLocalDate(Getdate() - 7),112)
+		and (b.actual_date is null or b.actual_date='')
+		order by a.prj_id, a.doc_id, a.rev_id, a.rev_code_id 
+	</select>
+</mapper>

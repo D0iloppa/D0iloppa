@@ -1,0 +1,77 @@
+@charset "utf-8";
+
+@font-face {
+   font-family: 'Noto Sans KR';
+   font-style: normal;
+   font-weight: 100;
+   src: local(NotoSansKR-Thin),
+       url(NotoSansKR-Thin.eot?#iefix) format('embedded-opentype'),
+       url(NotoSansKR-Thin.woff2) format('woff2'),
+       url(NotoSansKR-Thin.woff) format('woff'),
+       url(NotoSansKR-Thin.otf) format('opentype');
+ }
+@font-face {
+   font-family: 'Noto Sans KR';
+   font-style: normal;
+   font-weight: 300;
+   src: local(NotoSansCJKkr-Light),
+       url(NotoSansKR-Light.eot?#iefix) format('embedded-opentype'),
+       url(NotoSansKR-Light.woff2) format('woff2'),
+       url(NotoSansKR-Light.woff) format('woff'),
+       url(NotoSansKR-Light.otf) format('opentype');
+ }
+@font-face {
+   font-family: 'Noto Sans KR';
+   font-style: normal;
+   font-weight: 400;
+   src: local(NotoSansKR-Regular),
+       url(NotoSansKR-Regular.eot?#iefix) format('embedded-opentype'),
+       url(NotoSansKR-Regular.woff2) format('woff2'),
+       url(NotoSansKR-Regular.woff) format('woff'),
+       url(NotoSansKR-Regular.otf) format('opentype');
+ }
+@font-face {
+   font-family: 'Noto Sans KR';
+   font-style: normal;
+   font-weight: 500;
+   src: local(NotoSansKR-Medium),
+       url(NotoSansKR-Medium.eot?#iefix) format('embedded-opentype'),
+       url(NotoSansKR-Medium.woff2) format('woff2'),
+       url(NotoSansKR-Medium.woff) format('woff'),
+       url(NotoSansKR-Medium.otf) format('opentype');
+ }
+@font-face {
+   font-family: 'Noto Sans KR';
+   font-style: normal;
+   font-weight: 700;
+   src: local(NotoSansKR-Medium),
+       url(NotoSansKR-bold.eot?#iefix) format('embedded-opentype'),
+       url(NotoSansKR-bold.woff2) format('woff2'),
+       url(NotoSansKR-bold.woff) format('woff'),
+       url(NotoSansKR-bold.otf) format('opentype');
+ }
+@font-face {
+   font-family: 'Noto Sans KR';
+   font-style: normal;
+   font-weight: 900;
+   src: local(NotoSansKR-Black),
+       url(NotoSansKR-Black.eot?#iefix) format('embedded-opentype'),
+       url(NotoSansKR-Black.woff2) format('woff2'),
+       url(NotoSansKR-Black.woff) format('woff'),
+       url(NotoSansKR-Black.otf) format('opentype');
+ }
+
+
+@font-face {
+   font-family: 'TimesNewerRoman';
+   font-style: normal;
+   font-weight: 400;
+   src: local(NotoSansKR-Thin),
+       url(../fonts/TimesNewerRoman.eot?#iefix) format('embedded-opentype'),
+       url(../fonts/TimesNewerRoman.woff2) format('woff2'),
+       url(../fonts/TimesNewerRoman.woff) format('woff'),
+       url(../fonts/TimesNewerRoman.otf) format('opentype');
+ }
+
+
+

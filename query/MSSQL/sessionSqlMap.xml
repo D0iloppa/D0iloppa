@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="sessionSqlMap">
+	<select id="loginPost" parameterType="UsersVO" resultType="UsersVO">
+      select * from p_users where user_id=#{user_id} and passwd=#{passwd} and user_st='Y'
+    </select>
+    <update id="firstLoginPost" parameterType="UsersVO">
+		update p_users 
+		set passwd=#{passwd},
+			first_login_yn='N'
+		where user_id=#{user_id} and user_st='Y'
+	</update>
+	<select id="checkUserId" parameterType="UsersVO" resultType="UsersVO">
+      select * from p_users where user_id=#{user_id} and user_st='Y'
+    </select>
+    <update id="updateLastConPrjId" parameterType="UsersVO">
+		update p_users 
+		set last_con_prj_id=#{last_con_prj_id}
+		where user_id=#{user_id}
+	</update>
+    <update id="updateUsersVO" parameterType="UsersVO">
+		update p_users 
+		set user_eng_nm=#{user_eng_nm},
+			email_addr=#{email_addr},
+			offi_tel=#{offi_tel}
+			<if test='file_value != ""'>
+				,sfile_nm=#{sfile_nm},
+				rfile_nm=#{rfile_nm},
+				file_path=#{file_path},
+				file_size=#{file_size}
+			</if>
+		where user_id=#{user_id}
+	</update>
+	<select id="getUsersVO" parameterType="UsersVO" resultType="UsersVO">
+      select * from p_users where user_id=#{user_id} and user_st='Y'
+    </select>
+    <select id="getAdminChkYN" parameterType="UsersVO" resultType="UsersVO">
+    	select admin_yn from p_users
+    	where user_id=#{user_id}
+    </select>
+</mapper>
