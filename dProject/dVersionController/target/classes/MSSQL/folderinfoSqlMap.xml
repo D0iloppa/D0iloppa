@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="folderinfoSqlMap">
+	<select id="getFolderList_old" resultType="FolderInfoVO">
+     	select *
+     	from p_prj_folder_info 
+     	where prj_id=#{prj_id}
+    </select>
+    
+	<select id="getFolderListForPg01" parameterType="FolderInfoVO" resultType="FolderInfoVO">
+        select prj_id, 1 as folder_id, 1 as parent_folder_id, '1' as folder_path
+              ,prj_nm as folder_nm, ''as r_folder_path_nm, 'DCC' as folder_type
+              ,'' as tra_folder_nm, reg_id, reg_date, mod_id, mod_date
+        from p_prj_info 
+        where prj_id=#{prj_id}
+        union all       
+     	select prj_id, folder_id, parent_folder_id, folder_path
+     	      ,folder_nm, r_folder_path_nm, folder_type, tra_folder_nm, reg_id, reg_date, mod_id, mod_date
+     	from p_prj_folder_info 
+     	where prj_id=#{prj_id} and folder_type='DCC'
+     	and folder_id != 1
+    </select>    
+	<select id="getFolderList" resultType="FolderInfoVO">
+        select prj_id, 1 as folder_id, 1 as parent_folder_id, '1' as folder_path
+              ,prj_nm as folder_nm, ''as r_folder_path_nm, 'DCC' as folder_type
+              ,'' as tra_folder_nm, reg_id, reg_date, mod_id, mod_date
+        from p_prj_info 
+        where prj_id=#{prj_id}
+        union all       
+     	select prj_id, folder_id, parent_folder_id, folder_path
+     	      ,folder_nm, r_folder_path_nm, folder_type, tra_folder_nm, reg_id, reg_date, mod_id, mod_date
+     	from p_prj_folder_info 
+     	where prj_id=#{prj_id}
+     	and folder_id != 1
+    </select>    
+    	
+	<select id="getFolderName" parameterType="FolderInfoVO" resultType="String">
+		SELECT folder_nm
+		FROM p_prj_folder_info
+		WHERE prj_id = #{prj_id} AND folder_id = #{folder_id}
+	</select>
+	
+	<select id="getLastFolderId" resultType="FolderInfoVO" parameterType="FolderInfoVO">
+		select isnull(max(folder_id),1) as folder_id
+     	from p_prj_folder_info
+		where prj_id=#{prj_id}
+    </select>
+	<select id="getParentFolderInfo" resultType="FolderInfoVO" parameterType="FolderInfoVO">
+     	select folder_path,folder_type
+     	from p_prj_folder_info
+     	where folder_id=#{parent_folder_id} and prj_id=#{prj_id}
+    </select>
+	<insert id="insertFolderInfoVO" parameterType="FolderInfoVO">
+     	insert into p_prj_folder_info(prj_id,folder_id,parent_folder_id,folder_path,folder_nm,r_folder_path_nm,folder_type,reg_id,reg_date)
+     	values(#{prj_id},#{folder_id},#{parent_folder_id},#{folder_path},#{folder_nm},#{r_folder_path_nm},#{folder_type},#{reg_id},#{reg_date})
+    </insert>
+	<update id="updateFolderNm" parameterType="FolderInfoVO">
+     	update p_prj_folder_info
+     	set folder_nm=#{new_folder_nm}
+     	where prj_id=#{prj_id} and folder_id=#{folder_id} and folder_nm=#{folder_nm}
+    </update>
+	<delete id="deleteFolder" parameterType="FolderInfoVO">
+     	delete from p_prj_folder_info where prj_id=#{prj_id} and (folder_id=#{folder_id} or folder_path like concat('%>',#{folder_id},'>%'))
+    </delete>
+	<select id="getIsExistDownFolder" resultType="int" parameterType="FolderInfoVO">
+     	select count(*) from p_prj_folder_info where prj_id=#{prj_id}
+     	and folder_path like concat('%>',#{parent_folder_id},'>%')
+    </select>
+	<update id="updateFolderPath" parameterType="FolderInfoVO">
+     	update p_prj_folder_info
+     	set folder_path=#{folder_path}, parent_folder_id=#{parent_folder_id}
+     	where prj_id=#{prj_id} and folder_id=#{folder_id}
+    </update>
+	<update id="updateDownFolderPath" parameterType="FolderInfoVO">
+     	update p_prj_folder_info
+     	set folder_path = REPLACE(folder_path,#{origin_folder_path},#{folder_path})
+     	where prj_id=#{prj_id} and (folder_path like concat('%>',#{origin_folder_path},'>%') or folder_path like concat(#{origin_folder_path},'>%'))
+    </update>
+	<select id="getFolderDiscipline" resultType="FolderInfoVO" parameterType="FolderInfoVO">
+     	select b.discip_code_id,a.folder_id,a.folder_path,c.discip_code,c.discip_display,c.discip_desc from p_prj_folder_info a 
+     	join p_prj_discipline_folder_info b on a.folder_id=b.discip_folder_id  and a.prj_id = b.prj_id 
+     	join p_prj_discipline_info c on b.discip_code_id=c.discip_code_id and c.prj_id=a.prj_id
+     	where a.prj_id=#{prj_id}<!--  and a.folder_id=#{folder_id} or a.folder_path like concat(#{folder_id},'>%') or folder_path like concat('%>',#{folder_id},'>%') -->
+    	order by folder_id asc
+    </select>
+	<select id="getTrootFolderInfo" resultType="FolderInfoVO" parameterType="FolderInfoVO">
+		select folder_id,parent_folder_id,folder_path,folder_nm
+		from p_prj_folder_info
+		where prj_id=#{prj_id} and tra_folder_nm=#{tra_folder_nm}
+    </select>
+	<select id="getFolderInfoFromTRAFolderNm" resultType="FolderInfoVO" parameterType="FolderInfoVO">
+     	select folder_id,parent_folder_id,folder_path,folder_nm
+		from p_prj_folder_info
+		where prj_id=#{prj_id} and tra_folder_nm=#{tra_folder_nm}
+    </select>
+	<insert id="insertTRAFolderInfoVO" parameterType="FolderInfoVO">
+     	insert into p_prj_folder_info(prj_id,folder_id,parent_folder_id,folder_path,folder_nm,r_folder_path_nm,folder_type,tra_folder_nm,reg_id,reg_date)
+     	values(#{prj_id},(select MAX(folder_id)+1 from p_prj_folder_info where prj_id=#{prj_id}),#{parent_folder_id},CONCAT(#{folder_path},(select MAX(folder_id)+1 from p_prj_folder_info where prj_id=#{prj_id})),#{folder_nm},#{r_folder_path_nm},'TRA',#{tra_folder_nm},#{reg_id},#{reg_date})
+    	<selectKey keyProperty="folder_id" resultType="long">
+			select MAX(folder_id) from p_prj_folder_info where prj_id=#{prj_id}
+		</selectKey>
+    </insert>
+	<delete id="deleteTROutgoingFolder" parameterType="PrjFolderInfoVO">
+     	delete from p_prj_folder_info where prj_id=#{prj_id} and folder_type='TRA' and tra_folder_nm is not null and tra_folder_nm!='SYSTEMLINK' and tra_folder_nm!='TROOT' and tra_folder_nm!='VROOT' and tra_folder_nm!='SROOT'
+    </delete>
+	<insert id="insertTRAFolderAuth" parameterType="FolderInfoVO">
+		INSERT INTO p_prj_folder_auth(prj_id,folder_id,auth_lvl1,auth_val,parent_folder_inheri_yn,reg_id,reg_date)
+		VALUES(#{prj_id},#{folder_id},'F',#{folder_id},'Y',#{reg_id},#{reg_date})
+    </insert>
+    
+	<select id="getFolderInfo" resultType="FolderInfoVO" parameterType="FolderInfoVO">
+     	select folder_id,parent_folder_id,folder_path,folder_nm,folder_type
+		from p_prj_folder_info
+		where prj_id=#{prj_id} and folder_id=#{folder_id}
+    </select>
+    
+    <select id="getOrgPath" parameterType="String" resultType="String">
+    	SELECT org_path
+		FROM p_organization A LEFT OUTER JOIN p_organization_user B ON A.org_id = B.org_id
+		WHERE B.user_id = #{value}
+    </select>
+    
+    <select id="getGrpPath" parameterType="FolderInfoVO" resultType="String">
+    	SELECT group_id
+		FROM p_prj_group_member
+		WHERE prj_id = #{prj_id} AND user_id = #{user_id}
+    </select>
+    
+    
+    <select id="getFolderListWithAuth" resultType="FolderInfoVO" parameterType="FolderInfoVO">
+    	SELECT A.*, 
+		   U.read_auth_yn as user_r, U.write_auth_yn as user_w, U.delete_auth_yn as user_d, U.parent_folder_inheri_yn as user_p,
+		   <if test='org_id != null'> 
+		   O.read_auth_yn as org_r, O.write_auth_yn as org_w, O.delete_auth_yn as org_d, O.parent_folder_inheri_yn as org_p,
+		   </if> 
+		   G.read_auth_yn as grp_r, G.write_auth_yn as grp_w, G.delete_auth_yn as grp_d, O.parent_folder_inheri_yn as grp_p
+		FROM p_prj_folder_info A
+			LEFT JOIN
+		( SELECT * FROM p_prj_folder_auth  WHERE AUTH_VAL = #{user_id}) U ON A.folder_id = U.folder_id AND A.prj_id = U.prj_id
+			<if test='org_id != null'>
+			LEFT JOIN
+		( SELECT * FROM p_prj_folder_auth  WHERE AUTH_VAL IN (SELECT VALUE FROM string_split(#{org_id},'>') )) O ON A.folder_id = O.folder_id AND A.prj_id=O.prj_id
+			</if>
+			LEFT JOIN
+		( SELECT * FROM p_prj_folder_auth  WHERE AUTH_VAL = #{grp_id} ) G ON A.folder_id = G.folder_id AND A.prj_id=G.prj_id
+		WHERE A.prj_id = #{prj_id}
+    </select>
+    
+    <select id="getFolderWithAuth" resultType="FolderInfoVO" parameterType="FolderInfoVO">
+    	SELECT A.*, 
+		   U.read_auth_yn as user_r, U.write_auth_yn as user_w, U.delete_auth_yn as user_d, U.parent_folder_inheri_yn as user_p,
+		   <if test='org_id != null'> 
+		   O.read_auth_yn as org_r, O.write_auth_yn as org_w, O.delete_auth_yn as org_d, O.parent_folder_inheri_yn as org_p,
+		   </if> 
+		   G.read_auth_yn as grp_r, G.write_auth_yn as grp_w, G.delete_auth_yn as grp_d, O.parent_folder_inheri_yn as grp_p
+		FROM p_prj_folder_info A
+			LEFT JOIN
+		( SELECT * FROM p_prj_folder_auth  WHERE AUTH_VAL = #{user_id}) U ON A.folder_id = U.folder_id AND A.prj_id = U.prj_id
+			<if test='org_id != null'>
+			LEFT JOIN
+		( SELECT * FROM p_prj_folder_auth  WHERE AUTH_VAL IN (SELECT VALUE FROM string_split(#{org_id},'>') )) O ON A.folder_id = O.folder_id AND A.prj_id=O.prj_id
+			</if>
+			LEFT JOIN
+		( SELECT * FROM p_prj_folder_auth  WHERE AUTH_VAL = #{grp_id} ) G ON A.folder_id = G.folder_id AND A.prj_id=G.prj_id
+		WHERE A.prj_id = #{prj_id} AND A.folder_id = #{folder_id}
+    </select>
+    
+    <select id="isAdmin" resultType="String" parameterType="String">
+    	SELECT admin_yn
+		FROM p_users
+		WHERE user_id = #{value}    	
+    </select>
+    
+     <select id="isDcc" resultType="String" parameterType="PrjInfoVO">
+    	SELECT dcc_yn
+		FROM p_prj_member
+		WHERE prj_id = #{prj_id} AND user_id = #{user_id}    	
+    </select>
+    
+    <update id="setRootFolderNm" parameterType="FolderInfoVO">
+    	UPDATE p_prj_folder_info
+		SET folder_nm = #{folder_nm}
+		WHERE prj_id = #{prj_id} AND folder_id = #{folder_id}
+    </update>
+    
+    
+    <select id="getSubFolder" parameterType="FolderInfoVO" resultType="FolderInfoVO">
+    	SELECT *
+		FROM p_prj_folder_info
+		WHERE folder_path LIKE (SELECT CONCAT(folder_path,'%') FROM p_prj_folder_info  WHERE prj_id = #{prj_id} AND folder_id = #{folder_id} )
+	          AND prj_id = #{prj_id}
+    </select>
+    
+    <select id="getUserType" parameterType="FolderInfoVO" resultType="String">
+    	SELECT user_type
+		FROM p_users pu
+		WHERE user_id = #{user_id}
+    </select>
+    
+    <select id="isHHIUserCanReadFolder" parameterType="FolderInfoVO" resultType="String">
+	    SELECT folder_type
+		FROM p_prj_folder_info ppfi 
+		WHERE ppfi.prj_id = #{prj_id} AND folder_id = #{folder_id} AND folder_type IN ('REP','COL','TRA')
+    </select>
+    
+    <select id="getAdminFolderList" parameterType="FolderInfoVO" resultType="FolderInfoVO">
+    	SELECT dbo.fn_getFolderNm(prj_id,folder_id) as folder_path_str , *
+		FROM p_prj_folder_info 
+		WHERE prj_id = #{prj_id}
+    </select>
+    
+    <select id="getDccFolderList" parameterType="FolderInfoVO" resultType="FolderInfoVO">
+    	SELECT dbo.fn_getFolderNm(prj_id,folder_id) as folder_path_str , *
+		FROM p_prj_folder_info 
+		WHERE prj_id = #{prj_id} AND folder_type NOT IN ('CON')
+    </select>
+    
+    <select id="getHHIUserFolderList" parameterType="FolderInfoVO" resultType="FolderInfoVO">
+    	SELECT dbo.fn_getFolderNm(prj_id,folder_id) as folder_path_str , *
+    	FROM p_prj_folder_info 
+		WHERE prj_id = #{prj_id} AND folder_type IN ('DCC','COL','TRA','PBO','REP')
+    </select>
+    
+    
+     <select id="getOutterUserFolderList" parameterType="FolderInfoVO" resultType="FolderInfoVO">
+    	SELECT dbo.fn_getFolderNm(prj_id,folder_id) as folder_path_str , *    	
+		FROM p_prj_folder_info
+		WHERE prj_id = #{prj_id}
+		AND folder_id IN (SELECT folder_id
+		 	FROM p_prj_folder_auth 
+		 	WHERE (	prj_id = #{prj_id}
+		 			AND auth_lvl1 = 'O' 
+				 	AND auth_val IN ( SELECT value FROM STRING_SPLIT(#{org_id},'>') )
+				 	AND read_auth_yn = 'Y') 
+				OR ( prj_id = #{prj_id} 
+					AND auth_lvl1 = 'G' 
+					AND auth_val = #{grp_id}
+					AND read_auth_yn = 'Y' )
+				OR ( prj_id = #{prj_id} 
+					AND auth_lvl1 = 'P' 
+					AND auth_val = #{user_id}
+					AND read_auth_yn = 'Y' )
+			)
+    </select>
+    
+     <select id="getOutterUserFolderListInPath" parameterType="FolderInfoVO" resultType="FolderInfoVO">
+    	SELECT dbo.fn_getFolderNm(prj_id,folder_id) as folder_path_str , *
+		FROM p_prj_folder_info
+		WHERE prj_id = #{prj_id} AND folder_id = #{folder_id}
+    </select>
+    
+    <select id="getOutterUserSubFolderListInPath" parameterType="FolderInfoVO" resultType="FolderInfoVO">
+	    SELECT dbo.fn_getFolderNm(prj_id,folder_id) as folder_path_str , *
+		from p_prj_folder_info
+		where prj_id = #{prj_id} and (folder_id!=#{folder_id} and folder_path like #{folder_path})
+    </select>
+    
+    <select id="getOutterUserSubFolderListInPath_inheritYN" parameterType="FolderInfoVO" resultType="String">
+	    SELECT parent_folder_inheri_yn
+		FROM p_prj_folder_auth
+		WHERE prj_id = #{prj_id} and folder_id = #{folder_id} and auth_lvl1 = 'F'
+    </select>
+    
+    <select id="getFolderPath" parameterType="FolderInfoVO" resultType="String">
+    	SELECT folder_path
+		FROM p_prj_folder_info
+		WHERE prj_id = #{prj_id} AND folder_id = #{folder_id}
+    </select>
+    
+      <select id="getFolderPathStr" parameterType="FolderInfoVO" resultType="String">
+    	SELECT dbo.fn_getFolderNm(ppfi.prj_id,ppfi.folder_id)
+		FROM p_prj_folder_info ppfi
+		WHERE prj_id = #{prj_id} AND folder_id = #{folder_id}
+    </select>
+    
+    <select id="getDocType" parameterType="FolderInfoVO" resultType="String">
+	    SELECT doc_type
+		FROM p_prj_process_info pppi 
+		WHERE prj_id = #{prj_id} AND #{folder_id} IN (SELECT value  FROM STRING_SPLIT(pppi.process_folder_path_id,'@'))
+    </select>
+    
+    
+    
+    <select id="getFolderType" parameterType="FolderInfoVO" resultType="String">
+    	SELECT folder_type
+		FROM p_prj_folder_info
+		WHERE prj_id = #{prj_id} AND folder_id = #{folder_id}
+    </select>
+    
+    <select id="getAllDiscipFolderListInProject" parameterType = "String" resultType="FolderInfoVO">
+    	SELECT ppfi.folder_path, ppdi.*
+    	FROM p_prj_folder_info ppfi 
+    		 LEFT OUTER JOIN p_prj_discipline_folder_info ppdfi 
+    		 	ON ( ppfi.prj_id = ppdfi.prj_id AND ppfi.folder_id = ppdfi.discip_folder_id)
+    		 LEFT OUTER JOIN p_prj_discipline_info ppdi
+    		 	ON ppdfi.prj_id = ppdi.prj_id AND ppdfi.discip_code_id = ppdi.discip_code_id 
+    	WHERE ppfi.prj_id = #{prj_id}  AND ppdi.discip_code_id IS NOT NULL
+    </select>
+    
+    
+    <select id="getFolderProcess" parameterType="FolderInfoVO" resultType="String">
+    	SELECT TOP 1 doc_type
+		FROM p_prj_process_info pppi
+		WHERE prj_id = #{prj_id} AND process_folder_path_id IN (SELECT value FROM string_split(#{folder_path},'>') )
+    </select>
+    
+    
+    
+    
+</mapper>

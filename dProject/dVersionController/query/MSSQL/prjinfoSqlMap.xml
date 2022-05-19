@@ -1,0 +1,305 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="prjinfoSqlMap">
+	<select id="getLastConPrj" parameterType="UsersVO" resultType="PrjInfoVO">
+		select *
+		from p_prj_info AS a LEFT OUTER JOIN P_USERS AS b ON a.prj_id=b.last_con_prj_id
+		where b.user_id=#{user_id}
+    </select>
+	<select id="getPrjInfoListTop" parameterType="UsersVO" resultType="PrjInfoVO">
+		select * from 
+		(
+			select a.*
+			from p_prj_info AS a
+	  <choose>
+	 	 <when test='admin_yn == "Y" '>
+	    	where a.prj_hidden_yn='N'    
+	   	 </when>
+	 	 <otherwise>
+			LEFT OUTER JOIN p_prj_member AS b ON a.prj_id=b.prj_id 
+			where b.user_id=#{user_id} and a.prj_hidden_yn='N' 
+			<!-- union all
+			select a.*
+			from p_prj_info AS a
+			where a.prj_id = '0000000001'
+			 -->	  	  	
+	  	 </otherwise>    
+	  </choose>				
+		)main
+		order by main.prj_id asc			
+    </select>    
+	<select id="getPrjInfoList_old" parameterType="UsersVO" resultType="PrjInfoVO">
+		select * from p_prj_info AS a 
+	  <choose>
+	 	 <when test='admin_yn == "Y" '>
+	    	where a.prj_hidden_yn='N'    
+	   	 </when>
+	 	 <otherwise>
+	 	 	LEFT OUTER JOIN p_prj_member AS b ON a.prj_id=b.prj_id where b.user_id=#{user_id} and a.prj_hidden_yn='N'	  	  	
+	  	 </otherwise>    
+	  </choose>				
+    </select>
+	<select id="getPrjInfoList" parameterType="UsersVO" resultType="PrjInfoVO"> 
+		select * from p_prj_info 
+		where  prj_hidden_yn='N' 
+		order by prj_id asc			
+    </select>    
+	<select id="getPrjInfo" parameterType="PrjInfoVO" resultType="PrjInfoVO">
+		select * from p_prj_info where prj_id=#{prj_id}
+    </select>
+	<select id="getPrjList" resultType="PrjInfoVO">
+		select * from p_prj_info order by prj_id desc
+    </select>
+	<select id="searchDesignerProject" resultType="PrjInfoVO">
+		(select a.prj_id,b.prj_no,b.prj_nm,b.prj_full_nm from p_prj_eng_info a join p_prj_info b on a.prj_id=b.prj_id where designer_id=#{user_id} and b.prj_hidden_yn='N')
+		UNION
+		(select a.prj_id,b.prj_no,b.prj_nm,b.prj_full_nm from p_prj_vdr_info a join p_prj_info b on a.prj_id=b.prj_id where designer_id=#{user_id} and b.prj_hidden_yn='N')
+		UNION
+		(select a.prj_id,b.prj_no,b.prj_nm,b.prj_full_nm from p_prj_pro_info a join p_prj_info b on a.prj_id=b.prj_id where designer_id=#{user_id} and b.prj_hidden_yn='N')
+		UNION
+		(select a.prj_id,b.prj_no,b.prj_nm,b.prj_full_nm from p_prj_sdc_info a join p_prj_info b on a.prj_id=b.prj_id where designer_id=#{user_id} and b.prj_hidden_yn='N')
+		UNION
+		(select a.prj_id,b.prj_no,b.prj_nm,b.prj_full_nm from p_prj_cordoc_info a join p_prj_info b on a.prj_id=b.prj_id where person_in_charge_id=#{user_id} and b.prj_hidden_yn='N')
+    </select>
+	<insert id="insertPrjInfo" parameterType="PrjInfoVO">
+		insert into p_prj_info(prj_id,prj_no,prj_nm,prj_full_nm,prj_hidden_yn,prj_type,client_code,ship_no,reg_id,reg_date)
+		values((select FORMAT(MAX(CONVERT(INT,prj_id))+1,'0000000000') from p_prj_info),#{prj_no},#{prj_nm},#{prj_full_nm},#{prj_hidden_yn},#{prj_type},#{client_code},#{ship_no},#{reg_id},#{reg_date})
+		<selectKey keyProperty="prj_id" resultType="String">
+			select FORMAT(MAX(CONVERT(INT,prj_id)),'0000000000') from p_prj_info
+		</selectKey>
+    </insert>
+    
+    <insert id="initProjectProcess" parameterType="PrjInfoVO">
+		INSERT INTO p_prj_process_info (prj_id,process_id,class_lvl,process_type,process_desc,drn_use_yn,process_folder_path_id,doc_type, reg_id, reg_date)
+		SELECT #{prj_id},process_id,class_lvl,process_type,process_desc,drn_use_yn,process_folder_path_id, doc_type, #{reg_id},#{reg_date}
+		FROM p_prj_process_info
+		WHERE prj_id=#{copy_prj_id}		
+	</insert>
+    
+    
+	<insert id="insertDCCPrjMember" parameterType="PrjMemberVO">
+		insert into p_prj_member(prj_id,user_id,dcc_yn,reg_id,reg_date)
+		values(#{prj_id},#{user_id},#{dcc_yn},#{reg_id},#{reg_date})
+    </insert>
+	<insert id="insertCopyPrjFolder" parameterType="PrjFolderInfoVO">
+		insert p_prj_folder_info(prj_id,folder_id,parent_folder_id,folder_path,folder_nm,r_folder_path_nm,folder_type,tra_folder_nm,reg_id,reg_date)
+		select #{create_prj_id},folder_id,parent_folder_id,folder_path,folder_nm,r_folder_path_nm,folder_type,tra_folder_nm,#{reg_id},#{reg_date}
+		from p_prj_folder_info
+		where prj_id=#{copy_prj_id}
+    </insert>
+	<update id="updatePrjInfo" parameterType="PrjInfoVO">
+		update p_prj_info
+		set prj_no = #{prj_no},
+			prj_nm = #{prj_nm},
+			prj_full_nm = #{prj_full_nm},
+			prj_hidden_yn = #{prj_hidden_yn},
+			prj_type = #{prj_type},
+			client_code = #{client_code},
+			ship_no = #{ship_no},
+			mod_id = #{mod_id},
+			mod_date = #{mod_date}
+		where prj_id = #{prj_id}
+    </update>
+	<select id="getPrjDCC" parameterType="PrjMemberVO" resultType="PrjMemberVO">
+		select a.user_id,
+			(select b.user_kor_nm from p_users b where b.user_id=a.user_id) as user_kor_nm,
+			(select b.email_addr from p_users b where b.user_id=a.user_id) as email_addr
+		from p_prj_member a where a.prj_id=#{prj_id} and a.dcc_yn='Y'
+    </select>
+	<select id="getDCCs" parameterType="PrjMemberVO" resultType="PrjMemberVO">
+		select a.user_id,
+			(select b.user_kor_nm from p_users b where b.user_id=a.user_id) as user_kor_nm,
+			(select b.email_addr from p_users b where b.user_id=a.user_id) as email_addr
+		from p_prj_member a where a.dcc_yn='Y'
+    </select>
+	<select id="getPrjDCCYN" parameterType="PrjMemberVO" resultType="PrjMemberVO">
+		select dcc_yn from p_prj_member where prj_id=#{prj_id} and user_id=#{diff_dcc_user}
+    </select>
+	<update id="updatePrjDCCYN" parameterType="PrjMemberVO">
+		update p_prj_member
+		set dcc_yn = #{dcc_yn},
+			mod_id = #{mod_id},
+			mod_date = #{mod_date}
+		where prj_id = #{prj_id}
+		and user_id = #{diff_dcc_user}
+    </update>
+    <update id="pg_updatePrjInfo" parameterType="PrjInfoVO">
+		UPDATE p_prj_info
+		SET  prj_no = #{prj_no}, prj_nm = #{prj_nm}, prj_full_nm = #{prj_full_nm} 
+		WHERE prj_id = #{prj_id}
+	</update>
+	<select id="getDiscipList" parameterType="PrjDisciplineVO" resultType="PrjDisciplineVO">
+		SELECT *
+		FROM p_prj_discipline_info
+		WHERE prj_id = #{prj_id}
+	</select>
+	<select id="getPrjName" parameterType="String" resultType="String">
+		SELECT prj_nm <!-- 약칭으로 가져오도록 수정 -->
+		FROM p_prj_info
+		WHERE prj_id = #{value}
+	</select>
+	
+    <insert id="initProjectSystemPrefix" parameterType="PrjInfoVO">
+		INSERT INTO p_prj_system_prefix (prj_id,system_prefix_type,system_prefix_id, prefix, prefix_desc, reg_id, reg_date)
+		SELECT #{prj_id}, system_prefix_type,system_prefix_id, prefix, prefix_desc, #{reg_id},#{reg_date}
+		FROM p_prj_system_prefix
+		WHERE prj_id=#{copy_prj_id}		
+	</insert>	
+	
+	<select id="getPrjGridList" parameterType="String" resultType="PrjInfoVO">
+		SELECT DISTINCT B.*
+		FROM p_prj_member A LEFT OUTER JOIN p_prj_info B ON A.prj_id = B.prj_id AND B.prj_hidden_yn!='Y'
+		WHERE A.user_id = #{value}
+			  OR B.prj_id = '0000000001'
+	</select>
+	
+	<select id="getPrjGridList_out" parameterType="String" resultType="PrjInfoVO">
+		SELECT DISTINCT B.*
+		FROM p_prj_member A LEFT OUTER JOIN p_prj_info B ON A.prj_id = B.prj_id AND B.prj_hidden_yn!='Y'
+		WHERE A.user_id = #{value}
+	</select>
+	
+	<select id="getPrjGridAdminList" resultType="PrjInfoVO">
+		SELECT *
+		FROM p_prj_info 
+		WHERE prj_hidden_yn='N' 
+		ORDER BY prj_id ASC	
+	</select>
+	
+	<select id="getUserType" parameterType="String" resultType="String">
+    	SELECT user_type
+		FROM p_users pu
+		WHERE user_id = #{value}
+    </select>
+	
+	<select id="prjSearch" parameterType="PrjInfoVO" resultType="PrjInfoVO">
+		SELECT A.*
+		FROM p_prj_info A
+			<if test = ' isAdmin.equals("N") '>
+			 LEFT OUTER JOIN p_prj_member B
+			 ON A.prj_id = B.prj_id
+			</if>
+		WHERE A.prj_hidden_yn='N' 
+			  AND (A.prj_no LIKE #{keyword} OR prj_nm LIKE #{keyword} OR prj_full_nm LIKE #{keyword})
+			 <if test = 'isAdmin.equals("N") '>
+			  AND B.user_id LIKE #{user_id}
+			</if>
+		ORDER BY A.prj_id ASC	
+	</select>
+
+	<select id="isProjectMember" parameterType="PrjInfoVO" resultType="PrjInfoVO">
+		SELECT *
+		FROM p_prj_member
+		WHERE prj_id = #{prj_id} and user_id = #{user_id}
+	</select>
+	
+	<select id="getPrjType" resultType="CodeInfoVO">
+		SELECT *
+		FROM p_code_info
+		WHERE code_gubun = 'PTY'
+		ORDER BY set_order
+	</select>
+	
+	<select id="getMaxsetOrder" resultType="CodeInfoVO">
+		SELECT MAX(set_order) set_order
+		FROM p_code_info
+		WHERE code_gubun = 'PTY'
+	</select>
+	
+	<select id="getMaxCode" resultType="CodeInfoVO">
+		SELECT MAX(code) code
+		FROM p_code_info
+		WHERE code_gubun = 'PTY'
+	</select>
+	
+	<update id="updateCodeInfo" parameterType="CodeInfoVO">
+		UPDATE p_code_info
+		SET code_nm = #{code_nm}
+		WHERE code_gubun = #{code_gubun}
+		AND code = #{origin_code}
+	</update>
+	
+	<insert id="insertCodeInfo" parameterType="CodeInfoVO">
+		INSERT INTO p_code_info(code_gubun, code, code_nm, set_order)
+		VALUES('PTY', #{code}, #{code_nm}, #{set_order})
+	</insert>
+	
+	<delete id="deleteCodeInfo" parameterType="CodeInfoVO">
+		DELETE FROM p_code_info
+		WHERE code_gubun = #{code_gubun}
+		AND code = #{code}
+	</delete>
+	
+	<update id="prjCodeInfoUpdate" parameterType="CodeInfoVO">
+		UPDATE p_code_info
+		SET set_order = #{set_order}
+		<if test="code_nm">
+			,code_nm = #{code_nm}
+		</if>
+		WHERE code_gubun = #{code_gubun}
+		AND code = #{code}
+	</update>
+
+	<select id="getUseCodeYN" parameterType="PrjInfoVO" resultType="int">
+		select count(*) from p_prj_info where prj_type=#{prj_type}
+	</select>
+	
+	<select id="getUseYcodeNm" parameterType="CodeInfoVO" resultType="CodeInfoVO">
+		select code_nm
+		from p_code_info
+		where code_gubun = #{code_gubun}
+		and code = #{code}
+	</select>
+	
+	<select id="isUsingDRN" parameterType="FolderInfoVO" resultType="String">
+		SELECT pppi.drn_use_yn 
+		FROM p_prj_process_info pppi RIGHT OUTER JOIN p_prj_folder_info ppfi 
+			ON pppi.prj_id = ppfi.prj_id AND pppi.process_folder_path_id IN (SELECT value FROM string_split(ppfi.folder_path ,'>'))
+		WHERE pppi.prj_id = #{prj_id} and ppfi.folder_id = #{folder_id}
+	</select>
+	
+	
+	<select id="isAdmin" parameterType="String" resultType="String">
+		SELECT ISNULL(admin_yn,'N') as admin_yn
+		FROM p_users  
+		WHERE user_id = #{value}
+	</select>
+	
+	<select id="getPrjGridListByAuth" parameterType="PrjInfoVO" resultType="PrjInfoVO">			
+		SELECT DISTINCT B.*
+		FROM p_prj_folder_auth A left outer join p_prj_info B ON (a.prj_id = B.prj_id)
+			 LEFT OUTER JOIN p_prj_folder_info F on (A.prj_id = F.prj_id and A.folder_id = F.folder_id)
+			 LEFT OUTER JOIN p_prj_group_member c on A.prj_id = c.prj_id and A.auth_val = c.group_id and c.user_id=#{user_id}
+		WHERE auth_lvl1 != 'F' AND A.read_auth_yn = 'Y' AND F.folder_type NOT IN ('COL','TRA') and
+			(
+				(auth_lvl1 = 'O' AND auth_val IN (SELECT value FROM STRING_SPLIT(#{org_id},'>')) ) OR
+				(auth_lvl1 = 'G' AND auth_val =  C.group_id AND a.prj_id = C.prj_id) OR
+				(auth_lvl1 = 'P' AND auth_val = #{user_id})
+			) and B.prj_hidden_yn='N'
+	</select>
+	
+<!-- 	<select id="getPrjGridListByGroupAuth" parameterType="PrjInfoVO" resultType="PrjInfoVO"> -->
+<!-- 		SELECT DISTINCT B.* -->
+<!-- 		FROM p_prj_folder_auth A left outer join p_prj_info B ON (a.prj_id = B.prj_id) -->
+<!-- 			 LEFT OUTER JOIN p_prj_folder_info F on (A.prj_id = F.prj_id and A.folder_id = F.folder_id) -->
+<!-- 			 ,(SELECT prj_id,group_id FROM p_prj_group_member where user_id=#{user_id}) C -->
+<!-- 		WHERE auth_lvl1 != 'F' AND A.read_auth_yn = 'Y' AND F.folder_type NOT IN ('COL','TRA') and -->
+<!-- 			auth_lvl1 = 'G' AND auth_val =  C.group_id AND a.prj_id = C.prj_id and B.prj_hidden_yn='N'  -->
+<!-- 	</select> -->
+	
+	
+	<select id="getOrgIds" parameterType="String" resultType="String">
+		SELECT org_path
+		FROM p_organization_user pou left outer join p_organization po ON pou.org_id = po.org_id 
+		WHERE pou.user_id = #{value}
+	</select>
+	
+	
+	<select id="isPrjMember" parameterType="FolderInfoVO" resultType="int">
+		SELECT count(*)
+		from p_prj_member 
+		where prj_id = #{prj_id} and user_id = #{user_id}
+	</select>
+
+</mapper>

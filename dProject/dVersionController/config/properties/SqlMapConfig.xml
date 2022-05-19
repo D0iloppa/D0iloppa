@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <typeAliases>
+		<typeAlias alias="hmap" type="java.util.HashMap" />
+		<typeAlias alias="map" type="java.util.Map" />
+		<typeAlias alias="list" type="java.util.List" />
+		
+		<typeAlias alias="PrjInfoVO" type="kr.co.hhi.model.PrjInfoVO" />
+		<typeAlias alias="NotificationVO" type="kr.co.hhi.model.NotificationVO" />
+		<typeAlias alias="PrjEmailVO" type="kr.co.hhi.model.PrjEmailVO" />
+		<typeAlias alias="PrjEmailTypeVO" type="kr.co.hhi.model.PrjEmailTypeVO" />
+		<typeAlias alias="PrjEmailTypeContentsVO" type="kr.co.hhi.model.PrjEmailTypeContentsVO" />
+		<typeAlias alias="PrjSystemPrefixVO" type="kr.co.hhi.model.PrjSystemPrefixVO" />
+		<typeAlias alias="PrjDocumentIndexVO" type="kr.co.hhi.model.PrjDocumentIndexVO" />
+		<typeAlias alias="PrjEngInfoVO" type="kr.co.hhi.model.PrjEngInfoVO" />
+		<typeAlias alias="PrjWbsCodeVO" type="kr.co.hhi.model.PrjWbsCodeVO" />
+		<typeAlias alias="PubBbsContentsVO" type="kr.co.hhi.model.PubBbsContentsVO" />
+		<typeAlias alias="OrganizationVO" type="kr.co.hhi.model.OrganizationVO" />
+		<typeAlias alias="OrganizationUserVO" type="kr.co.hhi.model.OrganizationUserVO" />
+		<typeAlias alias="UsersVO" type="kr.co.hhi.model.UsersVO" />
+		<typeAlias alias="PrjStepVO" type="kr.co.hhi.model.PrjStepVO" />
+		<typeAlias alias="PrjTrVO" type="kr.co.hhi.model.PrjTrVO" />
+		<typeAlias alias="PrjDrnInfoVO" type="kr.co.hhi.model.PrjDrnInfoVO" />
+		<typeAlias alias="PrjDrnInfoHistVO" type="kr.co.hhi.model.PrjDrnInfoHistVO" />
+		<typeAlias alias="UserConnectVO" type="kr.co.hhi.model.UserConnectVO" />
+		<typeAlias alias="FolderInfoVO" type="kr.co.hhi.model.FolderInfoVO" />
+		<typeAlias alias="DocumentIndexVO" type="kr.co.hhi.model.DocumentIndexVO" />
+		<typeAlias alias="PrjMemberVO" type="kr.co.hhi.model.PrjMemberVO" />
+		<typeAlias alias="PrjGroupMemberVO" type="kr.co.hhi.model.PrjGroupMemberVO" />
+		<typeAlias alias="PrjFolderInfoVO" type="kr.co.hhi.model.PrjFolderInfoVO" />
+		<typeAlias alias="GlobalSearchVO" type="kr.co.hhi.model.GlobalSearchVO" />
+		<typeAlias alias="ProjectBbsVO" type="kr.co.hhi.model.ProjectBbsVO" />
+		<typeAlias alias="ProcessInfoVO" type="kr.co.hhi.model.ProcessInfoVO" />
+		<typeAlias alias="PrjCodeSettingsVO" type="kr.co.hhi.model.PrjCodeSettingsVO" />
+		<typeAlias alias="DictionarySearchVO" type="kr.co.hhi.model.DictionarySearchVO" />
+		<typeAlias alias="NoticeBoardVO" type="kr.co.hhi.model.NoticeBoardVO" />
+		<typeAlias alias="PrjDisciplineVO" type="kr.co.hhi.model.PrjDisciplineVO" />
+		<typeAlias alias="ProjectNoticeVO" type="kr.co.hhi.model.ProjectNoticeVO" />
+		<typeAlias alias="PasswordPolicyVO" type="kr.co.hhi.model.PasswordPolicyVO" />		
+		<typeAlias alias="WbsCodeControlVO" type="kr.co.hhi.model.WbsCodeControlVO" />		
+		<typeAlias alias="CollaborationVO" type="kr.co.hhi.model.CollaborationVO" />
+		<typeAlias alias="DrnLineVO" type="kr.co.hhi.model.DrnLineVO" />
+		<typeAlias alias="DrnPageVO" type="kr.co.hhi.model.DrnPageVO" />
+		<typeAlias alias="PrjDocTrNoChgHistVO" type="kr.co.hhi.model.PrjDocTrNoChgHistVO" />
+		<typeAlias alias="FolderAuthVO" type="kr.co.hhi.model.FolderAuthVO" />
+		<typeAlias alias="CodeInfoVO" type="kr.co.hhi.model.CodeInfoVO" />
+		<typeAlias alias="SecurityIpVO" type="kr.co.hhi.model.SecurityIpVO" />
+		<typeAlias alias="SecurityLogVO" type="kr.co.hhi.model.SecurityLogVO" />
+		<typeAlias alias="PrjReportEnginneeringVo" type="kr.co.hhi.model.PrjReportEnginneeringVo" />
+		<typeAlias alias="PrjReportProcurementVo" type="kr.co.hhi.model.PrjReportProcurementVo" />
+		<typeAlias alias="PrjReportVendorVo" type="kr.co.hhi.model.PrjReportVendorVo" />
+		<typeAlias alias="PrjReportSiteVo" type="kr.co.hhi.model.PrjReportSiteVo" />
+		<typeAlias alias="PrjReportCorresVo" type="kr.co.hhi.model.PrjReportCorresVo" />
+		<typeAlias alias="ReportVo" type="kr.co.hhi.model.ReportVo" />
+		
+	</typeAliases>
+ 
+    <typeHandlers>
+        <typeHandler handler="org.apache.ibatis.type.SqlDateTypeHandler" javaType="java.sql.Date" jdbcType="DATE"/>
+    </typeHandlers>
+ 
+</configuration>
+

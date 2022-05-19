@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <typeAliases>
+		<typeAlias alias="hmap" type="java.util.HashMap" />
+		<typeAlias alias="map" type="java.util.Map" />
+		<typeAlias alias="list" type="java.util.List" />
+		
+		<typeAlias alias="OracleUsersVO" type="kr.co.hhi.model.UsersVO" />
+		<typeAlias alias="OraclePrjDocumentIndexVO" type="kr.co.hhi.model.PrjDocumentIndexVO" />
+		<typeAlias alias="OraclePrjInfoVO" type="kr.co.hhi.model.PrjInfoVO" />
+		
+	</typeAliases>
+ 
+    <typeHandlers>
+        <typeHandler handler="org.apache.ibatis.type.SqlDateTypeHandler" javaType="java.sql.Date" jdbcType="DATE"/>
+    </typeHandlers>
+ 
+</configuration>
+

@@ -1,0 +1,448 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="projectGenSqlMap">
+	 
+
+	
+
+   <select id="getSystemClass" resultType="ProcessInfoVO" parameterType="ProcessInfoVO">
+		SELECT *
+		FROM p_prj_process_info
+		WHERE prj_id = #{prj_id} AND 
+			  class_lvl = 'SYSTEM'
+    </select>
+    
+    <select id="getManualClass" resultType="ProcessInfoVO" parameterType="ProcessInfoVO">
+		SELECT *
+		FROM p_prj_process_info
+		WHERE prj_id = #{prj_id} and 
+			  class_lvl != 'SYSTEM'
+    </select>
+    
+    <select id="getFolderPath" resultType="String" parameterType="ProcessInfoVO">
+    	SELECT dbo.fn_getFolderNm(#{prj_id},#{folder_id}) AS 'folder_path'
+    </select>
+    
+     <select id="getFolderPath_pg02" resultType="String" parameterType="ProcessInfoVO">
+    	SELECT folder_path 
+		FROM p_prj_folder_info
+		WHERE prj_id = #{prj_id} AND folder_id = #{folder_id} 
+    </select>
+    
+    
+    <select id="isIndocAtSubFolder_pg02" resultType="Long" parameterType="ProcessInfoVO">
+   	 	SELECT count(*)
+		FROM p_prj_document_index ppdi left outer join p_prj_folder_info ppfi on (ppdi.prj_id = ppfi.prj_id and ppdi.folder_id = ppfi.folder_id) 
+		WHERE ppdi.prj_id = #{prj_id} and ppfi.folder_path like #{folder_path} and ppdi.del_yn != 'Y'
+    </select>
+    	
+    	
+    <select id="getExFolderId_pg02" resultType="String" parameterType="ProcessInfoVO">
+    	SELECT process_folder_path_id 
+		FROM p_prj_process_info
+		WHERE prj_id = #{prj_id} and process_id = #{process_id}
+    </select>
+    
+        	
+    <select id="getExProcessType_pg02" resultType="String" parameterType="ProcessInfoVO">
+    	SELECT process_type 
+		FROM p_prj_process_info
+		WHERE prj_id = #{prj_id} and process_id = #{process_id}
+    </select>
+    
+    
+    <insert id="initProjectProcess" parameterType="ProcessInfoVO">
+		INSERT INTO p_prj_process_info (prj_id,process_id,class_lvl,process_type,process_desc,drn_use_yn,process_folder_path_id)
+		SELECT #{prj_id},process_id,class_lvl,process_type,process_desc,drn_use_yn,process_folder_path_id
+		FROM p_prj_process_info
+		WHERE prj_id='0000000001'		
+	</insert>
+	
+	<insert id="addProcessClass" parameterType="ProcessInfoVO">
+		INSERT INTO p_prj_process_info (prj_id,process_id,class_lvl,process_type,process_desc,drn_use_yn,process_folder_path_id,doc_type)
+		VALUES(#{prj_id},
+				(SELECT FORMAT((SELECT CONVERT(INT,(SELECT max(process_id) from p_prj_process_info))+1) ,'D10')),
+				'MANUAL',
+				#{process_type},
+				#{process_desc},
+				#{drn_use_yn},
+				#{process_folder_path_id},
+				#{doc_type})
+	</insert>
+    
+    
+    <update id="updateClass" parameterType="ProcessInfoVO">
+	    UPDATE p_prj_process_info
+	    SET drn_use_yn=#{drn_use_yn} ,
+	    	doc_type=#{doc_type},
+	    	process_desc=#{process_desc},
+	    	process_folder_path_id=#{process_folder_path_id}
+	    	<if test='!class_lvl.equals("SYSTEM")'>
+	    	, process_type=#{process_type}
+	    	</if>
+	    WHERE process_id = #{process_id} AND prj_id = #{prj_id}
+    </update>
+    
+    <select id="pg02_delValidationChk" parameterType="ProcessInfoVO" resultType="ProcessInfoVO">
+    	SELECT count(*) as folder_id
+		FROM p_prj_document_index
+		WHERE EXISTS
+		( SELECT * 
+		  FROM p_prj_document_index
+		  WHERE 
+		    prj_id = #{prj_id} and 
+		    folder_id = #{folder_id})
+    </select>
+    
+    <select id="pg02_getFolderId" parameterType="ProcessInfoVO" resultType="String">
+    	SELECT process_folder_path_id
+		FROM p_prj_process_info pppi 
+		WHERE prj_id = #{prj_id} and process_id = #{process_id}
+    </select>
+    
+    
+    <delete id="pg02_deleteClass" parameterType="ProcessInfoVO">
+    		DELETE FROM p_prj_process_info 
+			WHERE class_lvl != 'SYSTEM' 
+			and process_id in ( ${process_seq_list} )
+			AND prj_id = #{prj_id}
+    </delete>
+    
+    
+    
+    <select id="pg03_getGrid" parameterType="PrjCodeSettingsVO" resultType="PrjCodeSettingsVO">
+	    SELECT * from p_prj_code_settings
+		WHERE prj_id = #{prj_id} and set_code_type like 'CORRESPONDENCE_%' and set_code_type not like '%PONSIBILITY%'
+		order by set_code_type,set_order
+    </select>
+    
+    <delete id="pg03_ClearTbl" parameterType="PrjCodeSettingsVO">
+		DELETE FROM p_prj_code_settings
+		WHERE prj_id = #{prj_id} and set_code_type like 'CORRESPONDENCE_%' and set_code_type not like '%PONSIBILITY%'
+	</delete>
+	
+	<insert id="pg03_copyCode" parameterType="PrjCodeSettingsVO">
+	INSERT INTO p_prj_code_settings (prj_id,set_code_type,set_code_id,set_code_feature,set_code,set_desc,set_val,set_order,set_val2,set_val3,set_val4,ifc_yn,reg_id,reg_date,mod_id,mod_date)
+		Select #{prj_id} as prj_id ,set_code_type,set_code_id,set_code_feature,set_code,set_desc,set_val,set_order,set_val2,set_val3,set_val4,ifc_yn,reg_id,reg_date,mod_id,mod_date
+		FROM p_prj_code_settings
+		where prj_id = #{copy_prj_id} and
+		set_code_type like 'CORRESPONDENCE%' and
+		set_code_type not like '%PONSIBILITY%'
+	</insert>
+	
+	<delete id="pg03_delCode" parameterType="PrjCodeSettingsVO">
+    	DELETE FROM p_prj_code_settings 
+		WHERE prj_id = #{prj_id} AND 
+			 set_code_type = #{set_code_type} AND
+			 set_code_id = #{set_code_id}
+    </delete>
+    
+    
+    
+    <select id="pg04_getCode" parameterType="PrjCodeSettingsVO" resultType="PrjCodeSettingsVO">
+	    SELECT *
+		FROM p_prj_code_settings
+		WHERE
+		 	prj_id = #{prj_id} and 
+			set_code_type = #{set_code_type}
+		ORDER BY set_order
+    </select>
+    
+    <select id="pg04_getStep" parameterType="PrjCodeSettingsVO" resultType="PrjCodeSettingsVO">
+	    SELECT *
+		FROM p_prj_code_settings
+		WHERE
+		 	prj_id = #{prj_id} and 
+			set_code_type LIKE '%STEP'
+		ORDER BY set_order
+    </select>
+    
+	<select id="pg04_chkCodeId" parameterType="PrjCodeSettingsVO" resultType="int">
+	    SELECT count(*) as count
+		FROM p_prj_code_settings
+		WHERE
+		 	prj_id = #{prj_id} and 
+			set_code_type = #{set_code_type} and
+			set_code_id = #{set_code_id}
+    </select>
+    
+     <update id="pg04_updateCode" parameterType="PrjCodeSettingsVO">
+     
+     	UPDATE p_prj_code_settings
+	 	SET set_order = #{set_order}
+	 		<if test='set_code_feature'>
+	 	    , set_code_feature =#{set_code_feature}
+	 	    </if>
+	 	    <if test='set_code'>
+	 	    , set_code = #{set_code}
+	 	    </if>
+	 	    <if test='set_desc'>
+	 	    , set_desc = #{set_desc}
+	 	    </if>
+	 	    <if test='set_val'>
+	 	    , set_val = #{set_val}
+	 	    </if>
+	 	    <if test='set_val2'>
+	 	    , set_val2 = #{set_val2}
+	 	    </if>
+	 	    <if test='set_val3'>
+	 	    , set_val3 = #{set_val3}
+	 	    </if>
+	 	    <if test='set_val4'>
+	 	    , set_val4 = #{set_val4}
+	 	    </if>
+	 	    <if test='ifc_yn'>
+	 	    , ifc_yn = #{ifc_yn}
+	 	    </if>
+	 	WHERE prj_id = #{prj_id} AND 
+	 		  set_code_type = #{set_code_type} AND
+	 		  set_code_id = #{set_code_id}
+    </update>
+    
+    <delete id="pg04_delCode" parameterType="PrjCodeSettingsVO">
+    	DELETE FROM p_prj_code_settings 
+		WHERE prj_id = #{prj_id} AND 
+			 set_code_type = #{set_code_type} AND
+			 set_code_id = #{set_code_id}
+    </delete>
+    
+    <insert id="pg04_insertCode" parameterType="PrjCodeSettingsVO">
+		INSERT INTO p_prj_code_settings(
+				prj_id,set_code_type,set_code_id,set_order
+				<if test='set_code'>
+				,set_code
+				</if>
+				<if test='set_code_feature'>
+				,set_code_feature
+				</if>
+				<if test='set_desc'>
+				,set_desc
+				</if>
+				<if test='set_val'>
+				,set_val
+				</if>
+				<if test='set_val2'>
+				,set_val2
+				</if>
+				<if test='set_val3'>
+				,set_val3
+				</if>
+				<if test='set_val4'>
+				,set_val4
+				</if>
+				<if test='ifc_yn'>
+				,ifc_yn
+				</if>
+				)
+		VALUES(
+			#{prj_id},#{set_code_type},#{set_code_id},#{set_order}
+				<if test='set_code'>
+				,#{set_code}
+				</if>
+				<if test='set_code_feature'>
+				,#{set_code_feature}
+				</if>
+				<if test='set_desc'>
+				,#{set_desc}
+				</if>
+				<if test='set_val'>
+				,#{set_val}
+				</if>
+				<if test='set_val2'>
+				,#{set_val2}
+				</if>
+				<if test='set_val3'>
+				,#{set_val3}
+				</if>
+				<if test='set_val4'>
+				,#{set_val4}
+				</if>
+				<if test='ifc_yn'>
+				,#{ifc_yn}
+				</if>
+		)
+	</insert>
+	
+	<delete id="pg04_ClearTbl" parameterType="PrjCodeSettingsVO">
+		DELETE FROM p_prj_code_settings
+		WHERE prj_id = #{prj_id} and set_code_type = #{set_code_type}
+	</delete>
+	
+	<insert id="pg04_copyCode" parameterType="PrjCodeSettingsVO">
+	INSERT INTO p_prj_code_settings (prj_id,set_code_type,set_code_id,set_code_feature,set_code,set_desc,set_val,set_order,set_val2,set_val3,set_val4,ifc_yn,reg_id,reg_date,mod_id,mod_date)
+		Select #{prj_id} as prj_id ,set_code_type,set_code_id,set_code_feature,set_code,set_desc,set_val,set_order,set_val2,set_val3,set_val4,ifc_yn,reg_id,reg_date,mod_id,mod_date
+		FROM p_prj_code_settings
+		where prj_id = #{copy_prj_id} and
+		set_code_type = #{set_code_type}
+	</insert>
+	
+	<delete id="pg07_ClearDiscip" parameterType="PrjDisciplineVO">
+		DELETE FROM p_prj_discipline_info
+		WHERE prj_id = #{prj_id} and discip_code_id = #{discip_code_id}
+	</delete>
+	
+	<delete id="pg07_ClearDiscipFolder" parameterType="PrjDisciplineVO">
+		DELETE FROM p_prj_discipline_folder_info
+		WHERE prj_id = #{prj_id} and discip_code_id = #{discip_code_id}
+	</delete>
+	
+	<insert id="pg07_copyDiscipCode" parameterType="PrjDisciplineVO">
+		INSERT INTO p_prj_discipline_info (prj_id,discip_code_id,discip_code,discip_display,discip_desc)
+		Select #{prj_id} as prj_id ,discip_code_id,discip_code,discip_display,discip_desc
+		FROM p_prj_discipline_info
+		where prj_id = #{copy_prj_id}
+	</insert>
+	
+	<insert id="pg07_copyDiscipFolder" parameterType="PrjDisciplineVO">
+		INSERT INTO p_prj_discipline_folder_info (prj_id,discip_code_id,discip_folder_id)
+		Select #{prj_id} as prj_id ,discip_code_id,discip_folder_id
+		FROM p_prj_discipline_folder_info
+		where prj_id = #{copy_prj_id}
+	</insert>
+	
+	
+	  <select id="pg07_getDiscp" parameterType="PrjDisciplineVO" resultType="PrjDisciplineVO">
+	    SELECT A.* , B.discip_folder_id, B.discip_order, discip_folder_seq , dbo.fn_getFolderNm(A.prj_id,B.discip_folder_id) as folder_name
+		FROM  p_prj_discipline_info A LEFT OUTER JOIN  p_prj_discipline_folder_info B
+		ON A.discip_code_id = B.discip_code_id AND A.prj_id = B.prj_id
+		WHERE A.prj_id = #{prj_id}
+		ORDER BY A.discip_code_id, B.discip_order, B.discip_folder_seq
+    </select>
+    
+    <select id="pg07_getMaxId" parameterType="PrjDisciplineVO" resultType="Long">
+    	SELECT ISNULL(MAX(discip_code_id),0) + 1  as getMax
+		FROM p_prj_discipline_info
+		WHERE prj_id = #{prj_id}
+		GROUP BY prj_id
+    </select>
+    
+    <select id="pg07_chkCodeId" parameterType="PrjCodeSettingsVO" resultType="int">
+	    SELECT count(*) as count
+		FROM p_prj_discipline_info
+		WHERE
+		 	prj_id = #{prj_id} and 
+			discip_code_id = #{discip_code_id}
+    </select>
+    
+   <insert id="pg07_insertCode" parameterType="PrjDisciplineVO">
+		INSERT INTO p_prj_discipline_info (
+			prj_id, discip_code_id, discip_code, discip_display,discip_desc,discip_order
+		)
+		VALUES( #{prj_id}, #{discip_code_id}, #{discip_code}, #{discip_display}, #{discip_desc}, #{discip_order} )
+	</insert>
+	
+ 	<update id="pg07_updateCode" parameterType="PrjDisciplineVO">
+ 		UPDATE p_prj_discipline_info 
+		SET 
+		 discip_code = #{discip_code}
+		 ,discip_display = #{discip_display}
+		 ,discip_desc = #{discip_desc}
+		 ,discip_order = #{discip_order}
+		WHERE prj_id = #{prj_id} AND
+			  discip_code_id = #{discip_code_id}
+	</update>
+	
+	<select id="pg07_getFolderPath" parameterType="PrjDisciplineVO" resultType="PrjDisciplineVO">
+		SELECT dbo.fn_getFolderNm(#{prj_id},#{discip_folder_id}) as folder_name
+	</select>
+	
+	<select id="pg07_getOldPath" parameterType="PrjDisciplineVO" resultType="String">
+		SELECT discip_folder_id
+		FROM p_prj_discipline_folder_info
+		WHERE prj_id = #{prj_id} AND discip_code_id = #{discip_code_id}
+	</select>
+	
+	<insert id="pg07_insertFolderId" parameterType="PrjDisciplineVO">
+		INSERT INTO p_prj_discipline_folder_info (prj_id,discip_code_id,discip_folder_id)
+		VALUES( #{prj_id},
+				#{discip_code_id},
+				#{discip_folder_id} )
+	</insert>
+	
+	<delete id="pg07_delFolderId" parameterType="PrjDisciplineVO">
+		DELETE FROM p_prj_discipline_folder_info 
+		WHERE prj_id = #{prj_id} AND 
+			 discip_code_id = #{discip_code_id} AND
+			 discip_folder_id = #{discip_folder_id}
+	</delete>
+	
+	<select id="pg07_delValidateChk" parameterType="PrjDisciplineVO" resultType="Integer">
+		<!-- 	해당 폴더 혹은 하위 폴더에 문서 있는지 체크 -->
+		SELECT count(*) as count
+		FROM p_prj_document_index A LEFT OUTER JOIN p_prj_folder_info B ON A.folder_id = B.folder_id AND A.prj_id = B.prj_id
+		WHERE (B.folder_path LIKE #{discip_code_id} OR B.folder_id = #{folder_id}) AND A.prj_id = #{prj_id}
+	</select>		
+	
+	<select id="pg07_insertValidateChk" parameterType="PrjDisciplineVO" resultType="PrjDisciplineVO">
+		SELECT A.* , B.folder_path as folder_name
+		FROM p_prj_discipline_folder_info A LEFT OUTER JOIN p_prj_folder_info B ON (A.discip_folder_id = B.folder_id AND A.prj_id = B.prj_id)
+		WHERE A.discip_code_id != #{discip_code_id} AND A.prj_id = #{prj_id}
+	</select>
+	
+	<delete id="pg07_delDiscip" parameterType="PrjDisciplineVO">
+    	DELETE FROM p_prj_discipline_info 
+		WHERE prj_id = #{prj_id} AND 
+			 discip_code_id = #{discip_code_id}
+    </delete>
+	
+	<select id="searchUser" parameterType="String" resultType="UsersVO">
+		SELECT *
+		FROM p_users
+		WHERE (user_id LIKE #{Value} OR user_kor_nm LIKE #{Value} OR user_eng_nm LIKE #{Value} OR company_nm LIKE #{Value})
+		and user_st='Y' order by user_kor_nm asc
+	</select>
+	
+	<select id="getRvc" parameterType="String" resultType="String">
+		SELECT set_val
+		FROM p_prj_code_settings
+		where prj_id = #{value} AND set_code_type = 'REVIEW CONCLUSION'
+	</select>
+	
+	
+	<insert id="insertRvc" parameterType="PrjCodeSettingsVO">
+		INSERT INTO p_prj_code_settings(
+			prj_id,
+			set_code_type,
+			set_code_id,
+			set_code_feature,
+			set_code,
+			set_val,
+			reg_id,
+			reg_date
+		)
+		VALUES(
+			#{prj_id},
+			'REVIEW CONCLUSION',
+			'00001',
+			'V',
+			'RC',
+			#{set_val},
+			#{reg_id},
+			#{reg_date}
+		)
+	</insert>
+	
+	<update id="updateRvc" parameterType="PrjCodeSettingsVO">
+		UPDATE p_prj_code_settings
+		SET
+		  set_val = #{set_val},
+		  mod_id = #{mod_id},
+		  mod_date = #{mod_date}
+		WHERE prj_id = #{prj_id} AND set_code_type ='REVIEW CONCLUSION'
+	</update>
+	
+	<select id="pg03_getSerialNo" parameterType="String" resultType="String">
+		SELECT DISTINCT set_val4
+		FROM p_prj_code_settings
+		WHERE prj_id = #{value} AND (set_code_type = 'CORRESPONDENCE_FROM' or set_code_type = 'CORRESPONDENCE_TYPE')
+	</select>
+	
+	<update id="pg03_updateSerialNo" parameterType="PrjCodeSettingsVO">
+		UPDATE p_prj_code_settings
+		SET set_val4 = #{set_val4}
+		WHERE prj_id = #{prj_id} AND (set_code_type = 'CORRESPONDENCE_FROM' or set_code_type = 'CORRESPONDENCE_TYPE')
+	</update>
+	
+    
+</mapper>

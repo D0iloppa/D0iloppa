@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="prjwbscodeSqlMap">
+	<select id="getWbsCodeList" resultType="PrjWbsCodeVO" parameterType="PrjWbsCodeVO">
+		SELECT A.* , B.discip_display
+		FROM p_prj_wbs_code A LEFT OUTER JOIN p_prj_discipline_info B ON (A.prj_id = B.prj_id AND A.discipline = B.discip_code_id)
+		WHERE A.prj_id=#{prj_id}
+    </select>
+</mapper>

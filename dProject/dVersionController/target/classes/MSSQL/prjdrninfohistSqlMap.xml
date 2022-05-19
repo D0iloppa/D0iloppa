@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="prjdrninfohistSqlMap">
+	<select id="getPrjDrnHistory" resultType="PrjDrnInfoHistVO" parameterType="PrjDrnInfoHistVO">
+		select b.reg_date,
+		       b.status,
+		       b.drn_approval_status 
+		       from p_prj_drn_attch_file a 
+		       join p_prj_drn_info_hist b 
+		       on b.prj_id = a.prj_id and a.drn_id=b.drn_id  
+		where a.prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id} order by b.reg_date asc 
+	</select>
+	<select id="getPrjDrnHistoryData" resultType="PrjDrnInfoHistVO" parameterType="PrjDrnInfoHistVO">
+		select 
+			b.drn_no,
+			(select doc_no from p_prj_document_index where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id}) as doc_no,
+			(select set_code from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='REVISION NUMBER' and set_code_id=c.rev_code_id) as revision,
+			(select user_kor_nm from p_users where user_id=b.reg_id) as drafter,
+			b.status,b.drn_approval_status,
+			b.reg_date
+		 from p_prj_drn_attch_file a 
+		 join p_prj_drn_info_hist b on b.prj_id = a.prj_id and a.drn_id=b.drn_id 
+		 join p_prj_document_index c on c.prj_id = a.prj_id and a.doc_id=c.doc_id and a.rev_id=c.rev_id
+		 where a.prj_id=#{prj_id} and a.doc_id=#{doc_id} and a.rev_id=#{rev_id} order by b.reg_date desc
+	</select>
+	<insert id="updateDrnHistoryByIssueCancel" parameterType="PrjDrnInfoHistVO">
+		insert p_prj_drn_info_hist(prj_id,drn_id,drn_no,drn_title,drn_prj_id,status,doc_title,approval_id,check_sheet_id,check_sheet_title,review_conclusion,drn_approval_status,folder_id,reg_id,reg_date,mod_id,mod_date)
+		select prj_id,drn_id,drn_no,drn_title,drn_prj_id,status,doc_title,approval_id,check_sheet_id,
+			check_sheet_title,review_conclusion,'R',folder_id,#{reg_id},#{reg_date},#{reg_id},#{reg_date}
+		from p_prj_drn_info_hist
+		where prj_id=#{prj_id} and drn_id=#{drn_id} and drn_approval_status='C'
+    </insert>
+</mapper>

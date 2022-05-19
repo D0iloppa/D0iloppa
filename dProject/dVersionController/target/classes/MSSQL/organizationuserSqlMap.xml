@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="organizationuserSqlMap">
+	<select id="getAllUserList" resultType="UsersVO">
+		select c.reg_date as reg_date,c.user_id as user_id,c.user_kor_nm as user_kor_nm,dbo.fn_getGrpNm(a.org_id) as user_group_nm,a.org_id,c.user_eng_nm as user_eng_nm,c.company_nm as company_nm, d.connect_fail_cnt, e.passwd_fail_acc_stop_cnt,e.passwd_fail_acc_stop_use_yn
+		from p_organization_user a join p_organization b on a.org_id=b.org_id right join p_users c on a.user_id=c.user_id LEFT OUTER join p_user_connect d on a.user_id=d.user_id, p_password_policy e
+		where c.user_st='Y'
+		order by c.user_id asc
+    </select>
+	<select id="getAllUserListCorA" resultType="UsersVO">
+		select c.reg_date as reg_date,c.user_id as user_id,c.user_kor_nm as user_kor_nm,dbo.fn_getGrpNm(a.org_id) as user_group_nm,a.org_id,c.user_eng_nm as user_eng_nm,c.company_nm as company_nm, d.connect_fail_cnt, e.passwd_fail_acc_stop_cnt,e.passwd_fail_acc_stop_use_yn
+		from p_organization_user a join p_organization b on a.org_id=b.org_id right join p_users c on a.user_id=c.user_id LEFT OUTER join p_user_connect d on a.user_id=d.user_id, p_password_policy e
+		where c.user_st='Y' and (b.org_type='C' or b.org_type='A')
+		order by c.user_id asc
+    </select>
+	<select id="getAllUserListHyundaePlusDeleteUser" resultType="UsersVO">
+		select c.reg_date as reg_date,c.user_id as user_id,c.user_kor_nm as user_kor_nm,dbo.fn_getGrpNm(a.org_id) as user_group_nm,a.org_id,c.user_eng_nm as user_eng_nm,c.company_nm as company_nm, d.connect_fail_cnt, e.passwd_fail_acc_stop_cnt,e.passwd_fail_acc_stop_use_yn
+		from p_organization_user a join p_organization b on a.org_id=b.org_id right join p_users c on a.user_id=c.user_id LEFT OUTER join p_user_connect d on a.user_id=d.user_id, p_password_policy e
+		where b.org_type='H'
+		order by c.user_id asc
+    </select>
+	<select id="getAllUserListHyundae" resultType="UsersVO">
+		select c.reg_date as reg_date,c.user_id as user_id,c.user_kor_nm as user_kor_nm,dbo.fn_getGrpNm(a.org_id) as user_group_nm,a.org_id,c.user_eng_nm as user_eng_nm,c.company_nm as company_nm, d.connect_fail_cnt, e.passwd_fail_acc_stop_cnt,e.passwd_fail_acc_stop_use_yn
+		from p_organization_user a join p_organization b on a.org_id=b.org_id right join p_users c on a.user_id=c.user_id LEFT OUTER join p_user_connect d on a.user_id=d.user_id, p_password_policy e
+		where c.user_st='Y' and b.org_type='H'
+		order by c.user_id asc
+    </select>
+    <select id="getAllOutUserList" resultType="UsersVO">
+		select c.reg_date as reg_date,c.user_id as user_id,c.user_kor_nm as user_kor_nm,dbo.fn_getGrpNm(a.org_id) as user_group_nm,a.org_id,c.user_eng_nm as user_eng_nm,c.company_nm as company_nm, org_type, org_path, d.connect_fail_cnt, e.passwd_fail_acc_stop_cnt,e.passwd_fail_acc_stop_use_yn
+		from p_organization_user a join p_organization b on a.org_id=b.org_id right join p_users c on a.user_id=c.user_id LEFT OUTER join p_user_connect d on a.user_id=d.user_id, p_password_policy e
+		where c.user_st='Y'
+		and c.user_type != 1
+		order by c.user_id asc
+    </select>
+	<select id="getOrganizationUserListAll" resultType="UsersVO" parameterType="OrganizationVO">
+		select c.reg_date as reg_date,c.user_id as user_id,c.user_kor_nm as user_kor_nm,dbo.fn_getGrpNm(a.org_id) as user_group_nm,a.org_id,c.user_eng_nm as user_eng_nm,c.company_nm as company_nm, org_type, org_path, d.connect_fail_cnt, e.passwd_fail_acc_stop_cnt,e.passwd_fail_acc_stop_use_yn
+		from p_organization_user a join p_organization b on a.org_id=b.org_id join p_users c on a.user_id=c.user_id LEFT OUTER join p_user_connect d on a.user_id=d.user_id, p_password_policy e
+		where c.user_st='Y' 
+		order by c.user_id asc
+    </select>
+	<select id="getOrganizationUserListPlusDeleteUser" resultType="UsersVO" parameterType="OrganizationVO">
+		select c.reg_date as reg_date,c.user_id as user_id,c.user_kor_nm as user_kor_nm,dbo.fn_getGrpNm(a.org_id) as user_group_nm,a.org_id,c.user_eng_nm as user_eng_nm,c.company_nm as company_nm, d.connect_fail_cnt, e.passwd_fail_acc_stop_cnt,e.passwd_fail_acc_stop_use_yn
+		from p_organization_user a join p_organization b on a.org_id=b.org_id join p_users c on a.user_id=c.user_id LEFT OUTER join p_user_connect d on a.user_id=d.user_id, p_password_policy e
+		where (b.org_id=#{org_id} or b.org_path like concat(#{org_id},'>%') or b.org_path like concat('%>',#{org_id},'>%'))
+		order by c.user_id asc
+    </select>
+	<select id="getOrganizationUserList" resultType="UsersVO" parameterType="OrganizationVO">
+		select c.reg_date as reg_date,c.user_id as user_id,c.user_kor_nm as user_kor_nm,dbo.fn_getGrpNm(a.org_id) as user_group_nm,a.org_id,c.user_eng_nm as user_eng_nm,c.company_nm as company_nm, d.connect_fail_cnt, e.passwd_fail_acc_stop_cnt,e.passwd_fail_acc_stop_use_yn
+		from p_organization_user a join p_organization b on a.org_id=b.org_id join p_users c on a.user_id=c.user_id LEFT OUTER join p_user_connect d on a.user_id=d.user_id, p_password_policy e
+		where c.user_st='Y' 
+		and (b.org_id=#{org_id} or b.org_path like concat(#{org_id},'>%') or b.org_path like concat('%>',#{org_id},'>%'))
+		order by c.user_id asc
+    </select>
+    <select id="getOrganizationOutUserList" resultType="UsersVO" parameterType="OrganizationVO">
+		select c.reg_date as reg_date,c.user_id as user_id,c.user_kor_nm as user_kor_nm,dbo.fn_getGrpNm(a.org_id) as user_group_nm,a.org_id,c.user_eng_nm as user_eng_nm,c.company_nm as company_nm 
+		from p_organization_user a join p_organization b on a.org_id=b.org_id join p_users c on a.user_id=c.user_id
+		where c.user_st='Y'
+		and c.user_type != 1
+		and (b.org_id=#{org_id} or b.org_path like concat(#{org_id},'>%') or b.org_path like concat('%>',#{org_id},'>%'))
+		order by c.user_id asc
+    </select>
+	<select id="getOrganizationUserListInPrj" resultType="UsersVO" parameterType="OrganizationVO">
+		SELECT prj_id,c.user_id as user_id,c.user_kor_nm as user_kor_nm,dbo.fn_getGrpNm(a.org_id) as user_group_nm,a.org_id,c.user_eng_nm as user_eng_nm,c.company_nm as company_nm , user_st , file_path , rfile_nm
+		FROM (p_organization_user a join p_organization b on a.org_id=b.org_id join p_users c on a.user_id=c.user_id ) RIGHT OUTER JOIN p_prj_member D ON C.user_id= D.user_id
+		WHERE c.user_st='Y' and (b.org_id=#{org_id}  or b.org_path like concat(#{org_id},'>%') or b.org_path like concat('%>',#{org_id},'>%') ) AND prj_id = #{prj_id}
+		ORDER BY c.user_id ASC
+    </select>
+	<select id="getOrganizationUserCnt" resultType="int" parameterType="OrganizationVO">
+		select count(*)
+		from p_organization_user a join p_organization b on a.org_id=b.org_id join p_users c on a.user_id=c.user_id
+		where c.user_st='Y' and b.org_id=#{org_id} or b.org_path like concat(#{org_id},'>%') or b.org_path like concat('%>',#{org_id},'>%')
+    </select>
+	<select id="searchUsersHyundaeList" parameterType="UsersVO" resultType="UsersVO">
+		select c.reg_date as reg_date,c.user_id as user_id,c.user_kor_nm as user_kor_nm,dbo.fn_getGrpNm(a.org_id) as user_group_nm,a.org_id,c.user_eng_nm as user_eng_nm,c.company_nm as company_nm, d.connect_fail_cnt, e.passwd_fail_acc_stop_cnt,e.passwd_fail_acc_stop_use_yn
+		from p_organization_user a join p_organization b on a.org_id=b.org_id right join p_users c on a.user_id=c.user_id LEFT OUTER join p_user_connect d on a.user_id=d.user_id, p_password_policy e
+		where c.user_st='Y' and b.org_type='H'
+		<if test="searchUser == 'user_id'">
+      		and c.user_id like concat('%', #{searchKeyword}, '%')
+		</if>
+		<if test="searchUser == 'user_kor_nm'">
+			and c.user_kor_nm like concat('%', #{searchKeyword}, '%')
+		</if>
+		order by c.user_id asc
+    </select>
+	<select id="getUserOrgCount" resultType="int" parameterType="OrganizationUserVO">
+		select count(user_id) 
+		from p_organization_user
+		where user_id=#{user_id}
+    </select>
+    <select id="searchUsersHyundaeVO" parameterType="UsersVO" resultType="UsersVO">
+		<!-- select a.*, d.connect_fail_cnt, e.passwd_fail_acc_stop_cnt
+		from p_users a LEFT OUTER join p_user_connect d on a.user_id=d.user_id, p_password_policy e
+		where a.user_st='Y' -->
+		select c.reg_date as reg_date,c.user_id as user_id,c.user_kor_nm as user_kor_nm,dbo.fn_getGrpNm(a.org_id) as user_group_nm,a.org_id,c.user_eng_nm as user_eng_nm,c.company_nm as company_nm, d.connect_fail_cnt, e.passwd_fail_acc_stop_cnt,e.passwd_fail_acc_stop_use_yn
+		from p_organization_user a join p_organization b on a.org_id=b.org_id right join p_users c on a.user_id=c.user_id LEFT OUTER join p_user_connect d on a.user_id=d.user_id, p_password_policy e
+		where c.user_st='Y'
+		<if test="searchUser == 'user_id'">
+      		and c.user_id like concat('%', #{searchKeyword}, '%')
+		</if>
+		<if test="searchUser == 'user_kor_nm'">
+			and c.user_kor_nm like concat('%', #{searchKeyword}, '%')
+		</if>
+		order by c.user_id asc
+    </select>
+    <select id="searchUsersHyundaeVOPlusDeleteUser" parameterType="UsersVO" resultType="UsersVO">
+		select c.reg_date as reg_date,c.user_id as user_id,c.user_kor_nm as user_kor_nm,dbo.fn_getGrpNm(a.org_id) as user_group_nm,a.org_id,c.user_eng_nm as user_eng_nm,c.company_nm as company_nm, d.connect_fail_cnt, e.passwd_fail_acc_stop_cnt,e.passwd_fail_acc_stop_use_yn
+		from p_organization_user a join p_organization b on a.org_id=b.org_id right join p_users c on a.user_id=c.user_id LEFT OUTER join p_user_connect d on a.user_id=d.user_id, p_password_policy e
+		where 1=1
+		<if test="searchUser == 'user_id'">
+      		and c.user_id like concat('%', #{searchKeyword}, '%')
+		</if>
+		<if test="searchUser == 'user_kor_nm'">
+			and c.user_kor_nm like concat('%', #{searchKeyword}, '%')
+		</if>
+		order by c.user_id asc
+    </select>
+	<delete id="deleteOrganizationUser" parameterType="OrganizationUserVO">
+		delete from p_organization_user where user_id = #{user_id} and org_id=#{org_id}
+    </delete>
+	<select id="countOrganizationUser" resultType="int" parameterType="OrganizationUserVO">
+		select count(org_id) 
+		from p_organization_user
+		where org_id=#{org_id} and user_id=#{user_id}
+    </select>
+	<insert id="insertOrganizationUser" parameterType="OrganizationUserVO">
+     	insert into p_organization_user(org_id,user_id,reg_id,reg_date)
+     	values(#{org_id},#{user_id},#{reg_id},#{reg_date})
+    </insert>
+	<update id="updateOrganizationUser" parameterType="OrganizationUserVO">
+     	update p_organization_user
+     	set org_id=#{org_id},
+     		mod_id=#{mod_id},
+     		mod_date=#{mod_date}
+     	where org_id=#{origin_org_id} and user_id=#{user_id}
+    </update>
+	<delete id="deleteOrgUser" parameterType="OrganizationUserVO">
+		delete from p_organization_user where user_id = #{user_id}
+    </delete>
+</mapper>

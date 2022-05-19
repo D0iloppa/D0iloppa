@@ -1,0 +1,1536 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="dataMigrationSqlMap">
+	
+	<select id="getCodeSetList" parameterType="PrjCodeSettingsVO" resultType="PrjCodeSettingsVO">
+		select *
+		from p_prj_code_settings
+		where prj_id = #{prj_id}
+	</select>
+	<delete id="deleteCodeSettings" parameterType="PrjCodeSettingsVO">
+		delete from p_prj_code_settings 
+		where prj_id = #{prj_id}
+	</delete>
+	<insert id="insertCodeSettings" parameterType="PrjCodeSettingsVO">
+		insert into p_prj_code_settings(
+						prj_id, 
+						set_code_type, 
+						set_code_id, 
+						set_code_feature, 
+						set_code, 
+						set_desc, 
+						set_val,
+						set_order,
+						set_val2,
+						set_val3,
+						set_val4,
+						ifc_yn,
+						number_type,
+						reg_id,
+						reg_date,
+						mod_id,
+						mod_date)
+		values(
+			#{prj_id},
+			#{set_code_type},
+			#{set_code_id},
+			#{set_code_feature},
+			#{set_code},
+			#{set_desc},
+			#{set_val},
+			#{set_order},
+			#{set_val2},
+			#{set_val3},
+			#{set_val4},
+			#{ifc_yn},
+			#{number_type},
+			#{reg_id},
+			#{reg_date},
+			#{mod_id},
+			#{mod_date})
+	</insert>
+	
+	<select id="getCordocInfoList" parameterType="PrjDocumentIndexVO" resultType="PrjDocumentIndexVO">
+		select *
+		from p_prj_cordoc_info
+		where prj_id = #{prj_id}
+	</select>
+	<delete id="deleteCordocInfo" parameterType="PrjDocumentIndexVO">
+		delete from p_prj_cordoc_info 
+		where prj_id = #{prj_id}
+	</delete>
+	<insert id="insertCordocInfo" parameterType="PrjDocumentIndexVO">
+		insert into p_prj_cordoc_info(
+						prj_id, 
+						doc_id,
+						rev_id,
+						folder_id,
+						in_out,
+						doc_date,
+						sender_code_id,
+						receiver_code_id,
+						doc_type_code_id,
+						serial,
+						corr_no,
+						sys_corr_no,
+						ref_corr_doc_id,
+						responsibility_code_id,
+						send_recv_date,
+						originator,
+						disact,
+						replyreqdate,
+						indistdate,
+						inactdate,
+						person_in_charge_id,
+						remark,
+						item_info_code_id,
+						item_note,
+						userdata00,
+						userdata01,
+						userdata02,
+						userdata03,
+						userdata04,
+						replydocno,
+						ref_grp,
+						reg_id,
+						reg_date,
+						mod_id,
+						mod_date)
+		values(
+			#{prj_id},
+			#{doc_id},
+			#{rev_id},
+			#{folder_id},
+			#{in_out},
+			#{doc_date},
+			#{sender_code_id},
+			#{receiver_code_id},
+			#{doc_type_code_id},
+			#{serial},
+			#{corr_no},
+			#{sys_corr_no},
+			#{ref_corr_doc_id},
+			#{responsibility_code_id},
+			#{send_recv_date},
+			#{originator},
+			#{disact},
+			#{replyreqdate},
+			#{indistdate},
+			#{inactdate},
+			#{person_in_charge_id},
+			#{remark},
+			#{item_info_code_id},
+			#{item_note},
+			#{userdata00},
+			#{userdata01},
+			#{userdata02},
+			#{userdata03},
+			#{userdata04},
+			#{replydocno},
+			#{ref_grp},
+			#{reg_id},
+			#{reg_date},
+			#{mod_id},
+			#{mod_date})
+	</insert>
+	
+	<select id="getDisciplineFolderInfoList" parameterType="PrjDisciplineVO" resultType="PrjDisciplineVO">
+		select *
+		from p_prj_discipline_folder_info
+		where prj_id = #{prj_id}
+	</select>
+	<delete id="deleteDisciplineFolderInfo" parameterType="PrjDisciplineVO">
+		delete from p_prj_discipline_folder_info 
+		where prj_id = #{prj_id}
+	</delete>
+	<insert id="insertDisciplineFolderInfo" parameterType="PrjDisciplineVO">
+		insert into p_prj_discipline_folder_info(
+						prj_id,
+						discip_code_id,
+						discip_folder_id,
+						discip_order,
+						reg_id,
+						reg_date,
+						mod_id,
+						mod_date)
+		values(
+			#{prj_id},
+			#{discip_code_id},
+			#{discip_folder_id},
+			#{discip_order},
+			#{reg_id},
+			#{reg_date},
+			#{mod_id},
+			#{mod_date})
+	</insert>
+	
+	<select id="getDisciplineInfoList" parameterType="PrjDisciplineVO" resultType="PrjDisciplineVO">
+		select *
+		from p_prj_discipline_info
+		where prj_id = #{prj_id}
+	</select>
+	<delete id="deleteDisciplineInfo" parameterType="PrjDisciplineVO">
+		delete from p_prj_discipline_info 
+		where prj_id = #{prj_id}
+	</delete>
+	<insert id="insertDisciplineInfo" parameterType="PrjDisciplineVO">
+		insert into p_prj_discipline_info(
+						prj_id,
+						discip_code_id,
+						discip_code,
+						discip_display,
+						discip_desc,
+						discip_order,
+						reg_id,
+						reg_date,
+						mod_id,
+						mod_date)
+		values(
+			#{prj_id},
+			#{discip_code_id},
+			#{discip_code},
+			#{discip_display},
+			#{discip_desc},
+			#{discip_order},
+			#{reg_id},
+			#{reg_date},
+			#{mod_id},
+			#{mod_date})
+	</insert>
+	
+	<select id="getDocumentIndexList" parameterType="PrjDocumentIndexVO" resultType="PrjDocumentIndexVO">
+		select *
+		from p_prj_document_index
+		where prj_id = #{prj_id}
+	</select>
+	<delete id="deleteDocumentIndex" parameterType="PrjDocumentIndexVO">
+		delete from p_prj_document_index
+		where prj_id = #{prj_id}
+	</delete>
+	<insert id="insertDocumentIndex" parameterType="PrjDocumentIndexVO">
+		insert into p_prj_document_index(
+						prj_id,
+						doc_id,
+						rev_id,
+						folder_id,
+						doc_no,
+						doc_type,
+						rev_code_id,
+						sfile_nm,
+						rfile_nm,
+						file_type,
+						file_size,
+						title,
+						del_yn,
+						unread_yn,
+						lock_yn,
+						attach_file_date,
+						last_rev_yn,
+						trans_ref_doc_id,
+						reg_id,
+						reg_date,
+						mod_id,
+						mod_date)
+		values(
+			#{prj_id},
+			#{doc_id},
+			#{rev_id},
+			#{folder_id},
+			#{doc_no},
+			#{doc_type},
+			#{rev_code_id},
+			#{sfile_nm},
+			#{rfile_nm},
+			#{file_type},
+			#{file_size},
+			#{title},
+			#{del_yn},
+			#{unread_yn},
+			#{lock_yn},
+			#{attach_file_date},
+			#{last_rev_yn},
+			#{trans_ref_doc_id},
+			#{reg_id},
+			#{reg_date},
+			#{mod_id},
+			#{mod_date})
+	</insert>
+	
+	<select id="getEmailAttachInfoList" parameterType="PrjEmailVO" resultType="PrjEmailVO">
+		select *
+		from p_prj_email_attach_info
+		where prj_id = #{prj_id}
+	</select>
+	<delete id="deleteEmailAttachInfo" parameterType="PrjEmailVO">
+		delete from p_prj_email_attach_info 
+		where prj_id = #{prj_id}
+	</delete>
+	<insert id="insertEmailAttachInfo" parameterType="PrjEmailVO">
+		insert into p_prj_email_attach_info(
+						prj_id,
+						email_type_id,
+						email_id,
+						doc_id,
+						rev_id,
+						doc_no,
+						down_ip,
+						down_id,
+						down_date,
+						rev_no,
+						reg_id,
+						reg_date,
+						mod_id,
+						mod_date)
+		values(
+			#{prj_id},
+			#{email_type_id},
+			#{email_id},
+			#{doc_id},
+			#{rev_id},
+			#{doc_no},
+			#{down_ip},
+			#{down_id},
+			#{down_date},
+			#{rev_no},
+			#{reg_id},
+			#{reg_date},
+			#{mod_id},
+			#{mod_date})
+	</insert>
+	
+	<select id="getEmailReceiptInfoList" parameterType="PrjEmailVO" resultType="PrjEmailVO">
+		select *
+		from p_prj_email_receipt_info
+		where prj_id = #{prj_id}
+	</select>
+	<delete id="deleteEmailReceiptInfo" parameterType="PrjEmailVO">
+		delete from p_prj_email_receipt_info 
+		where prj_id = #{prj_id}
+	</delete>
+	<insert id="insertEmailReceiptInfo" parameterType="PrjEmailVO">
+		insert into p_prj_email_receipt_info(
+						prj_id,
+						email_type_id,
+						email_id,
+						email_receiver_addr,
+						email_receiverd_date,
+						reg_id,
+						reg_date,
+						mod_id,
+						mod_date)
+		values(
+			#{prj_id},
+			#{email_type_id},
+			#{email_id},
+			#{email_receiver_addr},
+			#{email_receiverd_date},
+			#{reg_id},
+			#{reg_date},
+			#{mod_id},
+			#{mod_date})
+	</insert>
+	
+	<select id="getEmailSendInfoList" parameterType="PrjEmailVO" resultType="PrjEmailVO">
+		select *
+		from p_prj_email_send_info
+		where prj_id = #{prj_id}
+	</select>
+	<delete id="deleteEmailSendInfo" parameterType="PrjEmailVO">
+		delete from p_prj_email_send_info 
+		where prj_id = #{prj_id}
+	</delete>
+	<insert id="insertEmailSendInfo" parameterType="PrjEmailVO">
+		insert into p_prj_email_send_info(
+						prj_id,
+						email_type_id,
+						email_id,
+						subject,
+						contents,
+						email_sender_user_id,
+						email_sender_addr,
+						email_receiver_addr,
+						email_send_date,
+						email_receiverd_date,
+						user_data00,
+						email_refer_to,
+						email_bcc,
+						send_yn,
+						reg_id,
+						reg_date,
+						mod_id,
+						mod_date)
+		values(
+			#{prj_id},
+			#{email_type_id},
+			#{email_id},
+			#{subject},
+			#{contents},
+			#{email_sender_user_id},
+			#{email_sender_addr},
+			#{email_receiver_addr},
+			#{email_send_date},
+			#{email_receiverd_date},
+			#{user_data00},
+			#{email_refer_to},
+			#{email_bcc},
+			#{send_yn},
+			#{reg_id},
+			#{reg_date},
+			#{mod_id},
+			#{mod_date})
+	</insert>
+	
+	<select id="getEmailTypeList" parameterType="PrjEmailTypeVO" resultType="PrjEmailTypeVO">
+		select *
+		from p_prj_email_type
+		where prj_id = #{prj_id}
+	</select>
+	<delete id="deleteEmailType" parameterType="PrjEmailTypeVO">
+		delete from p_prj_email_type 
+		where prj_id = #{prj_id}
+	</delete>
+	<insert id="insertEmailType" parameterType="PrjEmailTypeVO">
+		insert into p_prj_email_type(
+						prj_id,
+						email_type_id,
+						email_type,
+						email_feature,
+						email_desc,
+						email_auto_send_yn,
+						reg_id,
+						reg_date,
+						mod_id,
+						mod_date)
+		values(
+			#{prj_id},
+			#{email_type_id},
+			#{email_type},
+			#{email_feature},
+			#{email_desc},
+			#{email_auto_send_yn},
+			#{reg_id},
+			#{reg_date},
+			#{mod_id},
+			#{mod_date})
+	</insert>
+	
+	<select id="getEmailTypeContentsList" parameterType="PrjEmailTypeContentsVO" resultType="PrjEmailTypeContentsVO">
+		select *
+		from p_prj_email_type_contents
+		where prj_id = #{prj_id}
+	</select>
+	<delete id="deleteEmailTypeContents" parameterType="PrjEmailTypeContentsVO">
+		delete from p_prj_email_type_contents 
+		where prj_id = #{prj_id}
+	</delete>
+	<insert id="insertEmailTypeContents" parameterType="PrjEmailTypeContentsVO">
+		insert into p_prj_email_type_contents(
+						prj_id,
+						email_type_id,
+						email_sender_addr,
+						email_receiver_addr,
+						email_referto_addr,
+						email_bcc_addr,
+						file_link_yn,
+						file_rename_yn,
+						file_nm_prefix,
+						subject_prefix,
+						contents,
+						file_direct_attach_type,
+						reg_id,
+						reg_date,
+						mod_id,
+						mod_date)
+		values(
+			#{prj_id},
+			#{email_type_id},
+			#{email_sender_addr},
+			#{email_receiver_addr},
+			#{email_referto_addr},
+			#{email_bcc_addr},
+			#{file_link_yn},
+			#{file_rename_yn},
+			#{file_nm_prefix},
+			#{subject_prefix},
+			#{contents},
+			#{file_direct_attach_type},
+			#{reg_id},
+			#{reg_date},
+			#{mod_id},
+			#{mod_date})
+	</insert>
+	
+	<select id="getEngInfoList" parameterType="PrjEngInfoVO" resultType="PrjEngInfoVO">
+		select *
+		from p_prj_eng_info
+		where prj_id = #{prj_id}
+	</select>
+	<delete id="deleteEngInfo" parameterType="PrjEngInfoVO">
+		delete from p_prj_eng_info 
+		where prj_id = #{prj_id}
+	</delete>
+	<insert id="insertEngInfo" parameterType="PrjEngInfoVO">
+		insert into p_prj_eng_info(
+						prj_id,
+						doc_id,
+						rev_id,
+						folder_id,
+						discip_code_id,
+						designer_id,
+						prfe_designer_id,
+						wbs_code_id,
+						remark,
+						category_cd_id,
+						size_code_id,
+						doc_type_id,
+						reg_id,
+						reg_date,
+						mod_id,
+						mod_date)
+		values(
+			#{prj_id},
+			#{doc_id},
+			#{rev_id},
+			#{folder_id},
+			#{discip_code_id},
+			#{designer_id},
+			#{prfe_designer_id},
+			#{wbs_code_id},
+			#{remark},
+			#{category_cd_id},
+			#{size_code_id},
+			#{doc_type_id},
+			#{reg_id},
+			#{reg_date},
+			#{mod_id},
+			#{mod_date})
+	</insert>
+	
+	<select id="getEngStepList" parameterType="PrjStepVO" resultType="PrjStepVO">
+		select *
+		from p_prj_eng_step
+		where prj_id = #{prj_id}
+	</select>
+	<delete id="deleteEngStep" parameterType="PrjStepVO">
+		delete from p_prj_eng_step 
+		where prj_id = #{prj_id}
+	</delete>
+	<insert id="insertEngStep" parameterType="PrjStepVO">
+		insert into p_prj_eng_step(
+						prj_id,
+						doc_id,
+						rev_id,
+						step_code_id,
+						plan_date,
+						actual_date,
+						fore_date,
+						tr_id,
+						rtn_status,
+						step_seq,
+						folder_id,
+						reg_id,
+						reg_date,
+						mod_id,
+						mod_date)
+		values(
+			#{prj_id},
+			#{doc_id},
+			#{rev_id},
+			#{step_code_id},
+			#{plan_date},
+			#{actual_date},
+			#{fore_date},
+			#{tr_id},
+			#{rtn_status},
+			#{step_seq},
+			#{folder_id},
+			#{reg_id},
+			#{reg_date},
+			#{mod_id},
+			#{mod_date})
+	</insert>
+	
+	<select id="getFolderAuthList" parameterType="FolderAuthVO" resultType="FolderAuthVO">
+		select *
+		from p_prj_folder_auth
+		where prj_id = #{prj_id}
+		order by CONVERT(int, folder_id) asc
+	</select>
+	<delete id="deleteFolderAuth" parameterType="FolderAuthVO">
+		delete from p_prj_folder_auth 
+		where prj_id = #{prj_id}
+	</delete>
+	<insert id="insertFolderAuth" parameterType="FolderAuthVO">
+		insert into p_prj_folder_auth(
+						prj_id,
+						folder_id,
+						auth_lvl1,
+						auth_val,
+						folder_auth_add_yn,
+						parent_folder_inheri_yn,
+						read_auth_yn,
+						write_auth_yn,
+						delete_auth_yn,
+						reg_id,
+						reg_date,
+						mod_id,
+						mod_date)
+		values(
+			#{prj_id},
+			#{folder_id},
+			#{auth_lvl1},
+			#{auth_val},
+			#{folder_auth_add_yn},
+			#{parent_folder_inheri_yn},
+			#{read_auth_yn},
+			#{write_auth_yn},
+			#{delete_auth_yn},
+			#{reg_id},
+			#{reg_date},
+			#{mod_id},
+			#{mod_date})
+	</insert>
+	
+	<select id="getFolderInfoList" parameterType="PrjFolderInfoVO" resultType="PrjFolderInfoVO">
+		select *
+		from p_prj_folder_info
+		where prj_id = #{prj_id}
+		order by CONVERT(int, folder_id) asc 
+	</select>
+	<delete id="deleteFolderInfo" parameterType="PrjFolderInfoVO">
+		delete from p_prj_folder_info 
+		where prj_id = #{prj_id}
+	</delete>
+	<insert id="insertFolderInfo" parameterType="PrjFolderInfoVO">
+		insert into p_prj_folder_info(
+						prj_id,
+						folder_id,
+						parent_folder_id,
+						folder_path,
+						folder_nm,
+						r_folder_path_nm,
+						folder_type,
+						tra_folder_nm,
+						reg_id,
+						reg_date,
+						mod_id,
+						mod_date)
+		values(
+			#{prj_id},
+			#{folder_id},
+			#{parent_folder_id},
+			#{folder_path},
+			#{folder_nm},
+			#{r_folder_path_nm},
+			#{folder_type},
+			#{tra_folder_nm},
+			#{reg_id},
+			#{reg_date},
+			#{mod_id},
+			#{mod_date})
+	</insert>
+	
+	<select id="getGendocInfoList" parameterType="PrjDocumentIndexVO" resultType="PrjDocumentIndexVO">
+		select *
+		from p_prj_gendoc_info
+		where prj_id = #{prj_id}
+	</select>
+	<delete id="deleteGendocInfo" parameterType="PrjDocumentIndexVO">
+		delete from p_prj_gendoc_info 
+		where prj_id = #{prj_id}
+	</delete>
+	<insert id="insertGendocInfo" parameterType="PrjDocumentIndexVO">
+		insert into p_prj_gendoc_info(
+						prj_id,
+						doc_id,
+						rev_id,
+						folder_id,
+						reg_id,
+						reg_date,
+						mod_id,
+						mod_date)
+		values(
+			#{prj_id},
+			#{doc_id},
+			#{rev_id},
+			#{folder_id},
+			#{reg_id},
+			#{reg_date},
+			#{mod_id},
+			#{mod_date})
+	</insert>
+	
+	<!-- 2/4 -->
+	<select id="getGroupMemberList" parameterType="PrjGroupMemberVO" resultType="PrjGroupMemberVO">
+		select *
+		from p_prj_group_member
+		where prj_id = #{prj_id}
+	</select>
+	<delete id="deleteGroupMember" parameterType="PrjGroupMemberVO">
+		delete from p_prj_group_member 
+		where prj_id = #{prj_id}
+	</delete>
+	<insert id="insertGroupMember" parameterType="PrjGroupMemberVO">
+		insert into p_prj_group_member(
+						prj_id,
+						group_id,
+						user_id,
+						group_desc,
+						reg_id,
+						reg_date,
+						mod_id,
+						mod_date)
+		values(
+			#{prj_id},
+			#{group_id},
+			#{user_id},
+			#{group_desc},
+			#{reg_id},
+			#{reg_date},
+			#{mod_id},
+			#{mod_date})
+	</insert>
+	
+	<select id="getPrjInfoList" parameterType="PrjInfoVO" resultType="PrjInfoVO">
+		select *
+		from p_prj_info
+		where prj_id = #{prj_id}
+	</select>
+	<delete id="deletePrjInfo" parameterType="PrjInfoVO">
+		delete from p_prj_info 
+		where prj_id = #{prj_id}
+	</delete>
+	<insert id="insertPrjInfo" parameterType="PrjInfoVO">
+		insert into p_prj_info(
+						prj_id,
+						prj_no,
+						prj_nm,
+						prj_full_nm,
+						prj_hidden_yn,
+						prj_type,
+						client_code,
+						ship_no,
+						prj_order,
+						reg_id,
+						reg_date,
+						mod_id,
+						mod_date)
+		values(
+			#{prj_id},
+			#{prj_no},
+			#{prj_nm},
+			#{prj_full_nm},
+			#{prj_hidden_yn},
+			#{prj_type},
+			#{client_code},
+			#{ship_no},
+			#{prj_order},
+			#{reg_id},
+			#{reg_date},
+			#{mod_id},
+			#{mod_date})
+	</insert>
+	
+	<select id="getPrjMemberList" parameterType="PrjMemberVO" resultType="PrjMemberVO">
+		select *
+		from p_prj_member
+		where prj_id = #{prj_id}
+	</select>
+	<delete id="deletePrjMember" parameterType="PrjMemberVO">
+		delete from p_prj_member 
+		where prj_id = #{prj_id}
+	</delete>
+	<insert id="insertPrjMember" parameterType="PrjMemberVO">
+		insert into p_prj_member(
+						prj_id,
+						user_id,
+						dcc_yn,
+						reg_id,
+						reg_date,
+						mod_id,
+						mod_date)
+		values(
+			#{prj_id},
+			#{user_id},
+			#{dcc_yn},
+			#{reg_id},
+			#{reg_date},
+			#{mod_id},
+			#{mod_date})
+	</insert>
+	
+	
+	<select id="getProInfoList" parameterType="PrjDocumentIndexVO" resultType="PrjDocumentIndexVO">
+		select *
+		from p_prj_pro_info
+		where prj_id = #{prj_id}
+	</select>
+	<delete id="deleteProInfo" parameterType="PrjDocumentIndexVO">
+		delete from p_prj_pro_info 
+		where prj_id = #{prj_id}
+	</delete>
+	<insert id="insertProInfo" parameterType="PrjDocumentIndexVO">
+		insert into p_prj_pro_info(
+						prj_id,
+						doc_id,
+						rev_id,
+						folder_id,
+						discip_code_id,
+						designer_id,
+						prfe_designer_id,
+						wbs_code_id,
+						remark,
+						por_no,
+						por_issue_date,
+						po_no,
+						po_issue_date,
+						vendor_nm,
+						vendor_doc_no,
+						reg_id,
+						reg_date,
+						mod_id,
+						mod_date)
+		values(
+			#{prj_id},
+			#{doc_id},
+			#{rev_id},
+			#{folder_id},
+			#{discip_code_id},
+			#{designer_id},
+			#{prfe_designer_id},
+			#{wbs_code_id},
+			#{remark},
+			#{por_no},
+			#{por_issue_date},
+			#{po_no},
+			#{po_issue_date},
+			#{vendor_nm},
+			#{vendor_doc_no},
+			#{reg_id},
+			#{reg_date},
+			#{mod_id},
+			#{mod_date})
+	</insert>
+	
+	<select id="getProStepList" parameterType="PrjStepVO" resultType="PrjStepVO">
+		select *
+		from p_prj_pro_step
+		where prj_id = #{prj_id}
+	</select>
+	<delete id="deleteProStep" parameterType="PrjStepVO">
+		delete from p_prj_pro_step 
+		where prj_id = #{prj_id}
+	</delete>
+	<insert id="insertProStep" parameterType="PrjStepVO">
+		insert into p_prj_pro_step(
+						prj_id,
+						doc_id,
+						rev_id,
+						step_code_id,
+						plan_date,
+						actual_date,
+						fore_date,
+						tr_id,
+						rtn_status,
+						step_seq,
+						folder_id,
+						reg_id,
+						reg_date,
+						mod_id,
+						mod_date)
+		values(
+			#{prj_id},
+			#{doc_id},
+			#{rev_id},
+			#{step_code_id},
+			#{plan_date},
+			#{actual_date},
+			#{fore_date},
+			#{tr_id},
+			#{rtn_status},
+			#{step_seq},
+			#{folder_id},
+			#{reg_id},
+			#{reg_date},
+			#{mod_id},
+			#{mod_date})
+	</insert>
+	
+	<select id="getProcessInfoList" parameterType="ProcessInfoVO" resultType="ProcessInfoVO">
+		select *
+		from p_prj_process_info
+		where prj_id = #{prj_id}
+	</select>
+	<delete id="deleteProcessInfoList" parameterType="ProcessInfoVO">
+		delete from p_prj_process_info 
+		where prj_id = #{prj_id}
+	</delete>
+	<insert id="insertProcessInfoList" parameterType="ProcessInfoVO">
+		insert into p_prj_process_info(
+						prj_id,
+						process_id,
+						class_lvl,
+						process_type,
+						process_desc,
+						process_folder_path_id,
+						drn_use_yn,
+						process_order,
+						doc_type,
+						reg_id,
+						reg_date,
+						mod_id,
+						mod_date)
+		values(
+			#{prj_id},
+			#{process_id},
+			#{class_lvl},
+			#{process_type},
+			#{process_desc},
+			#{process_folder_path_id},
+			#{drn_use_yn},
+			#{process_order},
+			#{doc_type},
+			#{reg_id},
+			#{reg_date},
+			#{mod_id},
+			#{mod_date})
+	</insert>
+	
+	<select id="getSdcInfoList" parameterType="PrjDocumentIndexVO" resultType="PrjDocumentIndexVO">
+		select *
+		from p_prj_sdc_info
+		where prj_id = #{prj_id}
+	</select>
+	<delete id="deleteSdcInfo" parameterType="PrjDocumentIndexVO">
+		delete from p_prj_sdc_info 
+		where prj_id = #{prj_id}
+	</delete>
+	<insert id="insertSdcInfo" parameterType="PrjDocumentIndexVO">
+		insert into p_prj_sdc_info(
+						prj_id,
+						doc_id,
+						rev_id,
+						folder_id,
+						discip_code_id,
+						designer_id,
+						prfe_designer_id,
+						wbs_code_id,
+						remark,
+						category_cd_id,
+						size_code_id,
+						doc_type_id,
+						reg_id,
+						reg_date,
+						mod_id,
+						mod_date)
+		values(
+			#{prj_id},
+			#{doc_id},
+			#{rev_id},
+			#{folder_id},
+			#{discip_code_id},
+			#{designer_id},
+			#{prfe_designer_id},
+			#{wbs_code_id},
+			#{remark},
+			#{category_cd_id},
+			#{size_code_id},
+			#{doc_type_id},
+			#{reg_id},
+			#{reg_date},
+			#{mod_id},
+			#{mod_date})
+	</insert>
+	
+	<select id="getSdcStepList" parameterType="PrjStepVO" resultType="PrjStepVO">
+		select *
+		from p_prj_sdc_step
+		where prj_id = #{prj_id}
+	</select>
+	<delete id="deleteSdcStep" parameterType="PrjStepVO">
+		delete from p_prj_sdc_step 
+		where prj_id = #{prj_id}
+	</delete>
+	<insert id="insertSdcStep" parameterType="PrjStepVO">
+		insert into p_prj_sdc_step(
+						prj_id,
+						doc_id,
+						rev_id,
+						step_code_id,
+						plan_date,
+						actual_date,
+						fore_date,
+						tr_id,
+						rtn_status,
+						step_seq,
+						folder_id,
+						reg_id,
+						reg_date,
+						mod_id,
+						mod_date)
+		values(
+			#{prj_id},
+			#{doc_id},
+			#{rev_id},
+			#{step_code_id},
+			#{plan_date},
+			#{actual_date},
+			#{fore_date},
+			#{tr_id},
+			#{rtn_status},
+			#{step_seq},
+			#{folder_id},
+			#{reg_id},
+			#{reg_date},
+			#{mod_id},
+			#{mod_date})
+	</insert>
+	
+	<select id="getStrFileList" parameterType="PrjTrVO" resultType="PrjTrVO">
+		select *
+		from p_prj_str_file
+		where prj_id = #{prj_id}
+	</select>
+	<delete id="deleteStrFile" parameterType="PrjTrVO">
+		delete from p_prj_str_file 
+		where prj_id = #{prj_id}
+	</delete>
+	<insert id="insertStrFile" parameterType="PrjTrVO">
+		insert into p_prj_str_file(
+						prj_id,
+						tr_id,
+						doc_id,
+						rev_id,
+						rev_no,
+						issue_step,
+						rtn_status_code_id,
+						doc_table,
+						reg_id,
+						reg_date,
+						mod_id,
+						mod_date)
+		values(
+			#{prj_id},
+			#{tr_id},
+			#{doc_id},
+			#{rev_id},
+			#{rev_no},
+			#{issue_step},
+			#{rtn_status_code_id},
+			#{doc_table},
+			#{reg_id},
+			#{reg_date},
+			#{mod_id},
+			#{mod_date})
+	</insert>
+	
+	<select id="getStrInfoList" parameterType="PrjTrVO" resultType="PrjTrVO">
+		select *
+		from p_prj_str_info
+		where prj_id = #{prj_id}
+	</select>
+	<delete id="deleteStrInfo" parameterType="PrjTrVO">
+		delete from p_prj_str_info 
+		where prj_id = #{prj_id}
+	</delete>
+	<insert id="insertStrInfo" parameterType="PrjTrVO">
+		insert into p_prj_str_info(
+						prj_id,
+						tr_id,
+						tr_no,
+						itr_no,
+						tr_subject,
+						discipline_code_id,
+						inout,
+						issued,
+						tr_status,
+						tr_issuepur_code_id,
+						send_date,
+						req_date,
+						tr_writer_id,
+						tr_modifier_id,
+						tr_from,
+						tr_to,
+						chk_date,
+						tr_remark,
+						tr_distribute,
+						ref_tr_no,
+						reg_id,
+						reg_date,
+						mod_id,
+						mod_date)
+		values(
+			#{prj_id},
+			#{tr_id},
+			#{tr_no},
+			#{itr_no},
+			#{tr_subject},
+			#{discipline_code_id},
+			#{inout},
+			#{issued},
+			#{tr_status},
+			#{tr_issuepur_code_id},
+			#{send_date},
+			#{req_date},
+			#{tr_writer_id},
+			#{tr_modifier_id},
+			#{tr_from},
+			#{tr_to},
+			#{chk_date},
+			#{tr_remark},
+			#{tr_distribute},
+			#{ref_tr_no},
+			#{reg_id},
+			#{reg_date},
+			#{mod_id},
+			#{mod_date})
+	</insert>
+	
+	<select id="getSystemPrefixList" parameterType="PrjSystemPrefixVO" resultType="PrjSystemPrefixVO">
+		select *
+		from p_prj_system_prefix
+		where prj_id = #{prj_id}
+	</select>
+	<delete id="deleteSystemPrefix" parameterType="PrjSystemPrefixVO">
+		delete from p_prj_system_prefix 
+		where prj_id = #{prj_id}
+	</delete>
+	<insert id="insertSystemPrefix" parameterType="PrjSystemPrefixVO">
+		insert into p_prj_system_prefix(
+						prj_id,
+						system_prefix_type,
+						system_prefix_id,
+						prefix,
+						prefix_desc,
+						reg_id,
+						reg_date,
+						mod_id,
+						mod_date)
+		values(
+			#{prj_id},
+			#{system_prefix_type},
+			#{system_prefix_id},
+			#{prefix},
+			#{prefix_desc},
+			#{reg_id},
+			#{reg_date},
+			#{mod_id},
+			#{mod_date})
+	</insert>
+	
+	<select id="getTrFileList" parameterType="PrjTrVO" resultType="PrjTrVO">
+		select *
+		from p_prj_tr_file
+		where prj_id = #{prj_id}
+	</select>
+	<delete id="deleteTrFile" parameterType="PrjTrVO">
+		delete from p_prj_tr_file 
+		where prj_id = #{prj_id}
+	</delete>
+	<insert id="insertTrFile" parameterType="PrjTrVO">
+		insert into p_prj_tr_file(
+						prj_id,
+						tr_id,
+						doc_id,
+						rev_id,
+						rev_no,
+						issue_step,
+						rtn_status_code_id,
+						doc_table,
+						reg_id,
+						reg_date,
+						mod_id,
+						mod_date)
+		values(
+			#{prj_id},
+			#{tr_id},
+			#{doc_id},
+			#{rev_id},
+			#{rev_no},
+			#{issue_step},
+			#{rtn_status_code_id},
+			#{doc_table},
+			#{reg_id},
+			#{reg_date},
+			#{mod_id},
+			#{mod_date})
+	</insert>
+	
+	<select id="getTrInfoList" parameterType="PrjTrVO" resultType="PrjTrVO">
+		select *
+		from p_prj_tr_info
+		where prj_id = #{prj_id}
+	</select>
+	<delete id="deleteTrInfo" parameterType="PrjTrVO">
+		delete from p_prj_tr_info 
+		where prj_id = #{prj_id}
+	</delete>
+	<insert id="insertTrInfo" parameterType="PrjTrVO">
+		insert into p_prj_tr_info(
+						prj_id,
+						tr_id,
+						tr_no,
+						itr_no,
+						tr_subject,
+						discipline_code_id,
+						inout,
+						issued,
+						tr_status,
+						tr_issuepur_code_id,
+						send_date,
+						req_date,
+						tr_writer_id,
+						tr_modifier_id,
+						tr_from,
+						tr_to,
+						chk_date,
+						tr_remark,
+						tr_distribute,
+						ref_tr_no,
+						reg_id,
+						reg_date,
+						mod_id,
+						mod_date)
+		values(
+			#{prj_id},
+			#{tr_id},
+			#{tr_no},
+			#{itr_no},
+			#{tr_subject},
+			#{discipline_code_id},
+			#{inout},
+			#{issued},
+			#{tr_status},
+			#{tr_issuepur_code_id},
+			#{send_date},
+			#{req_date},
+			#{tr_writer_id},
+			#{tr_modifier_id},
+			#{tr_from},
+			#{tr_to},
+			#{chk_date},
+			#{tr_remark},
+			#{tr_distribute},
+			#{ref_tr_no},
+			#{reg_id},
+			#{reg_date},
+			#{mod_id},
+			#{mod_date})
+	</insert>
+	
+	<select id="getVdrInfoList" parameterType="PrjDocumentIndexVO" resultType="PrjDocumentIndexVO">
+		select *
+		from p_prj_vdr_info
+		where prj_id = #{prj_id}
+	</select>
+	<delete id="deleteVdrInfo" parameterType="PrjDocumentIndexVO">
+		delete from p_prj_vdr_info 
+		where prj_id = #{prj_id}
+	</delete>
+	<insert id="insertVdrInfo" parameterType="PrjDocumentIndexVO">
+		insert into p_prj_vdr_info(
+						prj_id,
+						doc_id,
+						rev_id,
+						folder_id,
+						discip_code_id,
+						designer_id,
+						prfe_designer_id,
+						wbs_code_id,
+						remark,
+						po_doc_no,
+						po_doc_title,
+						vendor_nm,
+						design_part,
+						category_cd_id,
+						size_code_id,
+						doc_type_id,
+						reg_id,
+						reg_date,
+						mod_id,
+						mod_date)
+		values(
+			#{prj_id},
+			#{doc_id},
+			#{rev_id},
+			#{folder_id},
+			#{discip_code_id},
+			#{designer_id},
+			#{prfe_designer_id},
+			#{wbs_code_id},
+			#{remark},
+			#{po_doc_no},
+			#{po_doc_title},
+			#{vendor_nm},
+			#{design_part},
+			#{category_cd_id},
+			#{size_code_id},
+			#{doc_type_id},
+			#{reg_id},
+			#{reg_date},
+			#{mod_id},
+			#{mod_date})
+	</insert>
+	
+	<select id="getVdrStepList" parameterType="PrjStepVO" resultType="PrjStepVO">
+		select *
+		from p_prj_vdr_step
+		where prj_id = #{prj_id}
+	</select>
+	<delete id="deleteVdrStep" parameterType="PrjStepVO">
+		delete from p_prj_vdr_step 
+		where prj_id = #{prj_id}
+	</delete>
+	<insert id="insertVdrStep" parameterType="PrjStepVO">
+		insert into p_prj_vdr_step(
+						prj_id,
+						doc_id,
+						rev_id,
+						step_code_id,
+						plan_date,
+						actual_date,
+						fore_date,
+						tr_id,
+						rtn_status,
+						step_seq,
+						folder_id,
+						reg_id,
+						reg_date,
+						mod_id,
+						mod_date)
+		values(
+			#{prj_id},
+			#{doc_id},
+			#{rev_id},
+			#{step_code_id},
+			#{plan_date},
+			#{actual_date},
+			#{fore_date},
+			#{tr_id},
+			#{rtn_status},
+			#{step_seq},
+			#{folder_id},
+			#{reg_id},
+			#{reg_date},
+			#{mod_id},
+			#{mod_date})
+	</insert>
+	
+	<select id="getVtrFileList" parameterType="PrjTrVO" resultType="PrjTrVO">
+		select *
+		from p_prj_vtr_file
+		where prj_id = #{prj_id}
+	</select>
+	<delete id="deleteVtrFile" parameterType="PrjTrVO">
+		delete from p_prj_vtr_file 
+		where prj_id = #{prj_id}
+	</delete>
+	<insert id="insertVtrFile" parameterType="PrjTrVO">
+		insert into p_prj_vtr_file(
+						prj_id,
+						tr_id,
+						doc_id,
+						rev_id,
+						rev_no,
+						issue_step,
+						rtn_status_code_id,
+						doc_table,
+						reg_id,
+						reg_date,
+						mod_id,
+						mod_date)
+		values(
+			#{prj_id},
+			#{tr_id},
+			#{doc_id},
+			#{rev_id},
+			#{rev_no},
+			#{issue_step},
+			#{rtn_status_code_id},
+			#{doc_table},
+			#{reg_id},
+			#{reg_date},
+			#{mod_id},
+			#{mod_date})
+	</insert>
+	
+	<select id="getVtrInfoList" parameterType="PrjTrVO" resultType="PrjTrVO">
+		select *
+		from p_prj_vtr_info
+		where prj_id = #{prj_id}
+	</select>
+	<delete id="deleteVtrInfo" parameterType="PrjTrVO">
+		delete from p_prj_vtr_info 
+		where prj_id = #{prj_id}
+	</delete>
+	<insert id="insertVtrInfo" parameterType="PrjTrVO">
+		insert into p_prj_vtr_info(
+						prj_id,
+						tr_id,
+						tr_no,
+						itr_no,
+						tr_subject,
+						discipline_code_id,
+						inout,
+						issued,
+						tr_status,
+						tr_issuepur_code_id,
+						send_date,
+						req_date,
+						tr_writer_id,
+						tr_modifier_id,
+						tr_from,
+						tr_to,
+						chk_date,
+						tr_remark,
+						tr_distribute,
+						ref_tr_no,
+						reg_id,
+						reg_date,
+						mod_id,
+						mod_date)
+		values(
+			#{prj_id},
+			#{tr_id},
+			#{tr_no},
+			#{itr_no},
+			#{tr_subject},
+			#{discipline_code_id},
+			#{inout},
+			#{issued},
+			#{tr_status},
+			#{tr_issuepur_code_id},
+			#{send_date},
+			#{req_date},
+			#{tr_writer_id},
+			#{tr_modifier_id},
+			#{tr_from},
+			#{tr_to},
+			#{chk_date},
+			#{tr_remark},
+			#{tr_distribute},
+			#{ref_tr_no},
+			#{reg_id},
+			#{reg_date},
+			#{mod_id},
+			#{mod_date})
+	</insert>
+	
+	<select id="getMigWbsCodeList" parameterType="PrjWbsCodeVO" resultType="PrjWbsCodeVO">
+		select *
+		from p_prj_wbs_code
+		where prj_id = #{prj_id}
+	</select>
+	<delete id="deleteMigWbsCode" parameterType="PrjWbsCodeVO">
+		delete from p_prj_wbs_code 
+		where prj_id = #{prj_id}
+	</delete>
+	<insert id="insertMigWbsCode" parameterType="PrjWbsCodeVO">
+		insert into p_prj_wbs_code(
+						prj_id,
+						wbs_code_id,
+						wbs_code,
+						wbs_desc,
+						doc_no,
+						wgtval,
+						doc_type,
+						discipline,
+						code_seq,
+						gad,
+						distribute,
+						information,
+						siteact,
+						sitecc,
+						disact,
+						discc,
+						reg_id,
+						reg_date,
+						mod_id,
+						mod_date)
+		values(
+			#{prj_id},
+			#{wbs_code_id},
+			#{wbs_code},
+			#{wbs_desc},
+			#{doc_no},
+			#{wgtval},
+			#{doc_type},
+			#{discipline},
+			#{code_seq},
+			#{gad},
+			#{distribute},
+			#{information},
+			#{siteact},
+			#{sitecc},
+			#{disact},
+			#{discc},
+			#{reg_id},
+			#{reg_date},
+			#{mod_id},
+			#{mod_date})
+	</insert>
+	
+	
+	
+	<select id="getMigUsersList" parameterType="UsersVO" resultType="UsersVO">
+		select * from p_users
+		order by user_id asc;
+	</select>
+	<insert id="insertMigUsers" parameterType="UsersVO">
+		insert into p_users(
+						user_id,
+						user_kor_nm,
+						user_eng_nm,
+						user_address,
+						user_group_nm,
+						user_type,
+						passwd,
+						company_nm,
+						first_login_yn,
+						hld_offi_gbn,
+						job_tit_cd,
+						offi_res_cd,
+						email_addr,
+						offi_tel,
+						admin_yn,
+						sfile_nm,
+						rfile_nm,
+						file_path,
+						file_size,
+						last_con_prj_id,
+						remote_ip,
+						user_st,
+						reg_id,
+						reg_date,
+						mod_id,
+						mod_date)
+		values(
+			#{user_id},
+			#{user_kor_nm},
+			#{user_eng_nm},
+			#{user_address},
+			#{user_group_nm},
+			#{user_type},
+			#{passwd},
+			#{company_nm},
+			#{first_login_yn},
+			#{hld_offi_gbn},
+			#{job_tit_cd},
+			#{offi_res_cd},
+			#{email_addr},
+			#{offi_tel},
+			#{admin_yn},
+			#{sfile_nm},
+			#{rfile_nm},
+			#{file_path},
+			#{file_size},
+			#{last_con_prj_id},
+			#{remote_ip},
+			#{user_st},
+			#{reg_id},
+			#{reg_date},
+			#{mod_id},
+			#{mod_date})
+	</insert>
+</mapper>

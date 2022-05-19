@@ -1,0 +1,2562 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="prjdocumentindexSqlMap">
+	<select id="getPrjDocumentIndexList" resultType="PrjDocumentIndexVO" parameterType="PrjDocumentIndexVO">
+		<choose>
+			<when test='unread_yn != "N"'>
+				select CONCAT(pu.user_kor_nm, ' ', pci.code_nm) as designer , main.*
+				from (	
+						select isnull(ppei.designer_id,isnull(ppvi.designer_id,isnull(ppsi.designer_id,isnull(pppi.designer_id,ppmi.designer_id)))) as designer_id
+						       ,isnull(ppcs1.set_code,isnull(ppcs2.set_code,'')) as category 
+							   ,a.prj_id, a.doc_id, a.rev_id, a.folder_id, a.doc_no, a.doc_type
+						       ,a.rev_code_id, (select code.set_code from p_prj_code_settings code where code.prj_id = a.prj_id and  code.set_code_type = 'REVISION NUMBER' and code.set_code_id = a.rev_code_id) as rev_no
+						       ,a.sfile_nm,a.rfile_nm, a.file_type, a.file_size, a.title, a.del_yn, a.unread_yn, a.lock_yn, a.trans_ref_doc_id, a.reg_id, a.reg_date, a.mod_id, a.mod_date
+						from p_prj_document_index a
+							left outer join p_prj_eng_info ppei on (a.prj_id = ppei.prj_id and a.doc_id = ppei.doc_id and a.rev_id = ppei.rev_id) left outer join p_prj_code_settings ppcs1 on(ppei.prj_id = ppcs1.prj_id and ppei.category_cd_id = ppcs1.set_code_id and ppcs1.set_code_type = 'DOC.CATEGORY' )
+							left outer join p_prj_vdr_info ppvi on (a.prj_id = ppvi.prj_id and a.doc_id = ppvi.doc_id and a.rev_id = ppvi.rev_id) left outer join p_prj_code_settings ppcs2 on(ppvi.prj_id = ppcs2.prj_id and ppvi.category_cd_id = ppcs2.set_code_id and ppcs2.set_code_type = 'VENDOR DOC.CATEGORY' )
+							left outer join p_prj_sdc_info ppsi on (a.prj_id = ppsi.prj_id and a.doc_id = ppsi.doc_id and a.rev_id = ppsi.rev_id)
+							left outer join p_prj_pro_info pppi on (a.prj_id = pppi.prj_id and a.doc_id = pppi.doc_id and a.rev_id = pppi.rev_id)
+							left outer join p_prj_mdc_info ppmi on (a.prj_id = ppmi.prj_id and a.doc_id = ppmi.doc_id and a.rev_id = ppmi.rev_id)
+							,
+							(select doc_id, max(rev_id) as rev_id from p_prj_document_index
+							where prj_id = #{prj_id}
+							and folder_id = #{folder_id} and del_yn!='Y'
+							group by doc_id)b
+						where  a.prj_id = #{prj_id}
+						and a.folder_id = #{folder_id}
+						and a.doc_id = b.doc_id
+						and a.rev_id = b.rev_id
+				        except
+						select isnull(ppei.designer_id,isnull(ppvi.designer_id,isnull(ppsi.designer_id,isnull(pppi.designer_id,ppmi.designer_id)))) as designer_id
+							   ,isnull(ppcs1.set_code,isnull(ppcs2.set_code,'')) as category  
+							   ,a.prj_id, a.doc_id, a.rev_id, a.folder_id, a.doc_no, a.doc_type
+						       ,a.rev_code_id, (select code.set_code from p_prj_code_settings code where code.prj_id = a.prj_id and  code.set_code_type = 'REVISION NUMBER' and code.set_code_id = a.rev_code_id) as rev_no
+						       ,a.sfile_nm,a.rfile_nm, a.file_type, a.file_size, a.title, a.del_yn, a.unread_yn, a.lock_yn, a.trans_ref_doc_id, a.reg_id, a.reg_date, a.mod_id, a.mod_date
+						from p_prj_document_index a
+						    inner join p_prj_document_index_read c on a.prj_id = c.prj_id and a.doc_id = c.doc_id and a.rev_id = c.rev_id and c.reg_id = #{reg_id}
+							left outer join p_prj_eng_info ppei on (a.prj_id = ppei.prj_id and a.doc_id = ppei.doc_id and a.rev_id = ppei.rev_id) left outer join p_prj_code_settings ppcs1 on(ppei.prj_id = ppcs1.prj_id and ppei.category_cd_id = ppcs1.set_code_id and ppcs1.set_code_type = 'DOC.CATEGORY' )
+							left outer join p_prj_vdr_info ppvi on (a.prj_id = ppvi.prj_id and a.doc_id = ppvi.doc_id and a.rev_id = ppvi.rev_id) left outer join p_prj_code_settings ppcs2 on(ppvi.prj_id = ppcs2.prj_id and ppvi.category_cd_id = ppcs2.set_code_id and ppcs2.set_code_type = 'VENDOR DOC.CATEGORY' )
+							left outer join p_prj_sdc_info ppsi on (a.prj_id = ppsi.prj_id and a.doc_id = ppsi.doc_id and a.rev_id = ppsi.rev_id)
+							left outer join p_prj_pro_info pppi on (a.prj_id = pppi.prj_id and a.doc_id = pppi.doc_id and a.rev_id = pppi.rev_id)
+							left outer join p_prj_mdc_info ppmi on (a.prj_id = ppmi.prj_id and a.doc_id = ppmi.doc_id and a.rev_id = ppmi.rev_id)
+							,(select doc_id, max(rev_id) as rev_id from p_prj_document_index
+							where prj_id = #{prj_id}
+							and folder_id = #{folder_id} and del_yn!='Y'
+							group by doc_id)b
+						where  a.prj_id = #{prj_id}
+						and a.folder_id = #{folder_id}
+						and a.doc_id = b.doc_id
+						and a.rev_id = b.rev_id        
+				)main LEFT OUTER JOIN p_users pu ON (pu.user_id = designer_id and pu.user_st != 'D')
+					  LEFT OUTER JOIN p_code_info pci ON (pu.job_tit_cd = pci.code and pci.code_gubun = 'JOB')
+				order by main.doc_id desc, main.rev_id desc, main.reg_date desc	    	 
+				<!-- order by a.doc_id, a.rev_id, a.doc_no -->
+			</when>
+			<otherwise>
+				select CONCAT(pu.user_kor_nm, ' ', pci.code_nm) as designer , main.*
+				FROM
+					(select isnull(ppei.designer_id,isnull(ppvi.designer_id,isnull(ppsi.designer_id,isnull(pppi.designer_id,ppmi.designer_id)))) as designer_id
+						   ,isnull(ppcs1.set_code,isnull(ppcs2.set_code,'')) as category 
+						   , a.prj_id, a.doc_id, a.rev_id, a.folder_id, a.doc_no, a.doc_type
+					       ,a.rev_code_id, (select code.set_code from p_prj_code_settings code where code.prj_id = a.prj_id and  code.set_code_type = 'REVISION NUMBER' and code.set_code_id = a.rev_code_id) as rev_no
+					       ,a.sfile_nm,a.rfile_nm, a.file_type, a.file_size, a.title, a.del_yn, a.unread_yn, a.lock_yn, a.trans_ref_doc_id, a.reg_id, a.reg_date, a.mod_id, a.mod_date
+					from p_prj_document_index a
+					     left outer join p_prj_eng_info ppei on (a.prj_id = ppei.prj_id and a.doc_id = ppei.doc_id and a.rev_id = ppei.rev_id) left outer join p_prj_code_settings ppcs1 on(ppei.prj_id = ppcs1.prj_id and ppei.category_cd_id = ppcs1.set_code_id and ppcs1.set_code_type = 'DOC.CATEGORY' )
+						 left outer join p_prj_vdr_info ppvi on (a.prj_id = ppvi.prj_id and a.doc_id = ppvi.doc_id and a.rev_id = ppvi.rev_id) left outer join p_prj_code_settings ppcs2 on(ppvi.prj_id = ppcs2.prj_id and ppvi.category_cd_id = ppcs2.set_code_id and ppcs2.set_code_type = 'VENDOR DOC.CATEGORY' )
+						 left outer join p_prj_sdc_info ppsi on (a.prj_id = ppsi.prj_id and a.doc_id = ppsi.doc_id and a.rev_id = ppsi.rev_id)
+						 left outer join p_prj_pro_info pppi on (a.prj_id = pppi.prj_id and a.doc_id = pppi.doc_id and a.rev_id = pppi.rev_id)
+						 left outer join p_prj_mdc_info ppmi on (a.prj_id = ppmi.prj_id and a.doc_id = ppmi.doc_id and a.rev_id = ppmi.rev_id),
+						(select doc_id, max(rev_id) as rev_id from p_prj_document_index
+						where prj_id = #{prj_id}
+						and folder_id = #{folder_id} and del_yn!='Y'
+						group by doc_id)b
+					where  a.prj_id = #{prj_id}
+					and a.folder_id = #{folder_id}
+					and a.doc_id = b.doc_id
+					and a.rev_id = b.rev_id) main
+					  LEFT OUTER JOIN p_users pu ON (pu.user_id = designer_id and pu.user_st != 'D')
+					  LEFT OUTER JOIN p_code_info pci ON (pu.job_tit_cd = pci.code and pci.code_gubun = 'JOB')
+				order by main.doc_id desc, main.rev_id desc, main.reg_date desc
+				<!-- order by a.doc_id, a.rev_id, a.doc_no -->
+			</otherwise>
+		</choose>
+    </select>    
+	<select id="getPrjDocumentIndexList_old" resultType="PrjDocumentIndexVO" parameterType="PrjDocumentIndexVO">
+		select a.prj_id, a.doc_id, a.rev_id, a.folder_id, a.doc_no, a.doc_type
+		       ,a.rev_code_id, (select code.set_code from p_prj_code_settings code where code.prj_id = a.prj_id and  code.set_code_type = 'REVISION NUMBER' and code.set_code_id = a.rev_code_id) as rev_no
+		       ,a.sfile_nm,a.rfile_nm, a.file_type, a.file_size, a.title, a.del_yn, a.unread_yn, a.lock_yn, a.trans_ref_doc_id, a.reg_id, a.reg_date, a.mod_id, a.mod_date
+		from p_prj_document_index a,
+			(select doc_id, max(rev_id) as rev_id from p_prj_document_index
+			where prj_id = #{prj_id}
+			and folder_id = #{folder_id} and del_yn!='Y'
+			group by doc_id)b
+		where  a.prj_id = #{prj_id}
+		and a.folder_id = #{folder_id}
+		and a.doc_id = b.doc_id
+		and a.rev_id = b.rev_id
+		<if test='unread_yn != "N"'>
+			and a.unread_yn!='N'
+		</if>
+		order by a.reg_date desc 
+		<!-- order by a.doc_id, a.rev_id, a.doc_no -->
+    </select>    
+	<select id="searchDocByFilter" resultType="PrjDocumentIndexVO" parameterType="PrjDocumentIndexVO">
+		select CONCAT(pu.user_kor_nm, ' ', pci.code_nm) as designer ,*
+			from(
+				  select isnull(ppei.designer_id,isnull(ppvi.designer_id,isnull(ppsi.designer_id,isnull(pppi.designer_id,ppmi.designer_id)))) as designer_id
+				   ,isnull(ppcs1.set_code,isnull(ppcs2.set_code,'')) as category
+				   ,a.prj_id, a.doc_id, a.rev_id, a.folder_id, a.doc_no, a.doc_type
+			       ,a.rev_code_id, (select code.set_code from p_prj_code_settings code where code.prj_id = a.prj_id and  code.set_code_type = 'REVISION NUMBER' and code.set_code_id = a.rev_code_id) as rev_no
+			       ,a.sfile_nm,a.rfile_nm, a.file_type, a.file_size, a.title, a.del_yn, a.unread_yn, a.lock_yn, a.trans_ref_doc_id, a.reg_id, a.reg_date, a.mod_id, a.mod_date
+			from p_prj_document_index a
+				 left outer join p_prj_eng_info ppei on (a.prj_id = ppei.prj_id and a.doc_id = ppei.doc_id and a.rev_id = ppei.rev_id) left outer join p_prj_code_settings ppcs1 on(ppei.prj_id = ppcs1.prj_id and ppei.category_cd_id = ppcs1.set_code_id and ppcs1.set_code_type = 'DOC.CATEGORY' )
+				 left outer join p_prj_vdr_info ppvi on (a.prj_id = ppvi.prj_id and a.doc_id = ppvi.doc_id and a.rev_id = ppvi.rev_id) left outer join p_prj_code_settings ppcs2 on(ppvi.prj_id = ppcs2.prj_id and ppvi.category_cd_id = ppcs2.set_code_id and ppcs2.set_code_type = 'VENDOR DOC.CATEGORY' )
+				 left outer join p_prj_sdc_info ppsi on (a.prj_id = ppsi.prj_id and a.doc_id = ppsi.doc_id and a.rev_id = ppsi.rev_id)
+				 left outer join p_prj_pro_info pppi on (a.prj_id = pppi.prj_id and a.doc_id = pppi.doc_id and a.rev_id = pppi.rev_id)
+				 left outer join p_prj_mdc_info ppmi on (a.prj_id = ppmi.prj_id and a.doc_id = ppmi.doc_id and a.rev_id = ppmi.rev_id)
+				,(select doc_id, max(rev_id) as rev_id from p_prj_document_index
+				where prj_id = #{prj_id}
+				and folder_id = #{folder_id} and del_yn!='Y'
+				group by doc_id)b
+			where  a.prj_id = #{prj_id}
+			and a.folder_id = #{folder_id}
+			and a.doc_id = b.doc_id
+			and a.rev_id = b.rev_id
+			<if test='unread_yn != "N"'>
+				and a.unread_yn!='N'
+			</if>
+			and (a.doc_no like CONCAT('%',#{filterKeyword},'%') or a.title like CONCAT('%',#{filterKeyword},'%'))
+			) main LEFT OUTER JOIN p_users pu ON (pu.user_id = main.designer_id and pu.user_st != 'D')
+				   LEFT OUTER JOIN p_code_info pci ON (pu.job_tit_cd = pci.code and pci.code_gubun = 'JOB')
+			order by main.reg_date desc 
+	
+	
+<!-- 		select a.prj_id, a.doc_id, a.rev_id, a.folder_id, a.doc_no, a.doc_type -->
+<!-- 		       ,a.rev_code_id, (select code.set_code from p_prj_code_settings code where code.prj_id = a.prj_id and  code.set_code_type = 'REVISION NUMBER' and code.set_code_id = a.rev_code_id) as rev_no -->
+<!-- 		       ,a.sfile_nm,a.rfile_nm, a.file_type, a.file_size, a.title, a.del_yn, a.unread_yn, a.lock_yn, a.trans_ref_doc_id, a.reg_id, a.reg_date, a.mod_id, a.mod_date -->
+<!-- 		from p_prj_document_index a, -->
+<!-- 			(select doc_id, max(rev_id) as rev_id from p_prj_document_index -->
+<!-- 			where prj_id = #{prj_id} -->
+<!-- 			and folder_id = #{folder_id} and del_yn!='Y' -->
+<!-- 			group by doc_id)b -->
+<!-- 		where  a.prj_id = #{prj_id} -->
+<!-- 		and a.folder_id = #{folder_id} -->
+<!-- 		and a.doc_id = b.doc_id -->
+<!-- 		and a.rev_id = b.rev_id -->
+<!-- 		<if test='unread_yn != "N"'> -->
+<!-- 			and a.unread_yn!='N' -->
+<!-- 		</if> -->
+<!-- 		and (a.doc_no like CONCAT('%',#{filterKeyword},'%') or a.title like CONCAT('%',#{filterKeyword},'%')) -->
+<!-- 		order by a.reg_date desc  -->
+		<!-- order by a.doc_id, a.rev_id, a.doc_no -->
+    </select>    
+	<select id="getPrjDocumentIndexListAll_old_old" resultType="PrjDocumentIndexVO" parameterType="PrjDocumentIndexVO">
+		select a.prj_id, a.doc_id, a.rev_id, a.folder_id, a.doc_no, a.doc_type
+		       ,a.rev_code_id, (select code.set_code from p_prj_code_settings code where code.prj_id = a.prj_id and  code.set_code_type = 'REVISION NUMBER' and code.set_code_id = a.rev_code_id) as rev_no
+		       ,a.sfile_nm,a.rfile_nm, a.file_type, a.file_size, a.title, a.del_yn, a.unread_yn, a.lock_yn, a.trans_ref_doc_id, a.reg_id, a.reg_date, a.mod_id, a.mod_date
+		from p_prj_document_index a
+		where  a.prj_id = #{prj_id}
+		and a.folder_id = #{folder_id}
+		and del_yn!='Y'
+		<if test='unread_yn != "N"'>
+			and a.unread_yn!='N'
+		</if>
+		order by a.doc_id, a.rev_id, a.doc_no
+    </select>
+	<select id="getPrjDocumentIndexListAll_old" resultType="PrjDocumentIndexVO" parameterType="PrjDocumentIndexVO">
+		select main.prj_id, main.doc_id, main.rev_id, main.folder_id, main.doc_no, main.doc_type
+		      ,main.rev_code_id, main.rev_no
+		      ,main.sfile_nm,main.rfile_nm, main.file_type, main.file_size, main.title, main.del_yn, main.unread_yn, main.lock_yn, main.trans_ref_doc_id, main.reg_id, main.reg_date, main.mod_id, main.mod_date
+		      ,CASE 
+		       WHEN main.rev_id = main.max_rev_id THEN 'NEW'
+		       ELSE 'OLD' 
+		       END status
+		from
+		(
+			select a.prj_id, a.doc_id, a.rev_id, a.folder_id, a.doc_no, a.doc_type
+			       ,a.rev_code_id, (select code.set_code from p_prj_code_settings code where code.prj_id = a.prj_id and  code.set_code_type = 'REVISION NUMBER' and code.set_code_id = a.rev_code_id) as rev_no
+			       ,a.sfile_nm,a.rfile_nm, a.file_type, a.file_size, a.title, a.del_yn, a.unread_yn, a.lock_yn, a.trans_ref_doc_id, a.reg_id, a.reg_date, a.mod_id, a.mod_date
+				   ,(select max(s1.rev_id) as rev_id 
+				    from p_prj_document_index s1
+					where s1.del_yn!='Y'
+					and s1.prj_id = a.prj_id 
+					and s1.folder_id = a.folder_id 
+					and s1.doc_id = a.doc_id 				
+					)max_rev_id		       
+			from p_prj_document_index a
+			where  a.prj_id = #{prj_id}
+			and a.folder_id = #{folder_id}
+			and del_yn!='Y'
+			<if test='unread_yn != "N"'>
+				and a.unread_yn!='N'
+			</if>					
+		)main		
+		order by main.doc_id, main.rev_id, main.doc_no
+    </select>    
+	<select id="getPrjDocumentIndexListAll" resultType="PrjDocumentIndexVO" parameterType="PrjDocumentIndexVO">
+		<choose>
+			<when test='unread_yn != "N"'>
+			select CONCAT(pu.user_kor_nm, ' ', pci.code_nm) as designer ,* 
+				from (
+						select main.category,main.designer_id ,main.prj_id, main.doc_id, main.rev_id, main.folder_id, main.doc_no, main.doc_type
+						      ,main.rev_code_id, main.rev_no
+						      ,main.sfile_nm,main.rfile_nm, main.file_type, main.file_size, main.title, main.del_yn, main.unread_yn, main.lock_yn, main.trans_ref_doc_id, main.reg_id, main.reg_date, main.mod_id, main.mod_date
+						      ,CASE 
+						       WHEN main.rev_id = main.max_rev_id THEN 'NEW'
+						       ELSE 'OLD' 
+						       END status
+						from
+						(
+							select isnull(ppei.designer_id,isnull(ppvi.designer_id,isnull(ppsi.designer_id,isnull(pppi.designer_id,ppmi.designer_id)))) as designer_id
+								   ,isnull(ppcs1.set_code,isnull(ppcs2.set_code,'')) as category
+								   ,a.prj_id, a.doc_id, a.rev_id, a.folder_id, a.doc_no, a.doc_type
+							       ,a.rev_code_id, (select code.set_code from p_prj_code_settings code where code.prj_id = a.prj_id and  code.set_code_type = 'REVISION NUMBER' and code.set_code_id = a.rev_code_id) as rev_no
+							       ,a.sfile_nm,a.rfile_nm, a.file_type, a.file_size, a.title, a.del_yn, a.unread_yn, a.lock_yn, a.trans_ref_doc_id, a.reg_id, a.reg_date, a.mod_id, a.mod_date
+								   ,(select max(s1.rev_id) as rev_id 
+								    from p_prj_document_index s1
+									where s1.del_yn!='Y'
+									and s1.prj_id = a.prj_id 
+									and s1.folder_id = a.folder_id 
+									and s1.doc_id = a.doc_id 				
+									)max_rev_id		       
+							from p_prj_document_index a
+								 left outer join p_prj_eng_info ppei on (a.prj_id = ppei.prj_id and a.doc_id = ppei.doc_id and a.rev_id = ppei.rev_id) left outer join p_prj_code_settings ppcs1 on(ppei.prj_id = ppcs1.prj_id and ppei.category_cd_id = ppcs1.set_code_id and ppcs1.set_code_type = 'DOC.CATEGORY' )
+								 left outer join p_prj_vdr_info ppvi on (a.prj_id = ppvi.prj_id and a.doc_id = ppvi.doc_id and a.rev_id = ppvi.rev_id) left outer join p_prj_code_settings ppcs2 on(ppvi.prj_id = ppcs2.prj_id and ppvi.category_cd_id = ppcs2.set_code_id and ppcs2.set_code_type = 'VENDOR DOC.CATEGORY' )
+								 left outer join p_prj_sdc_info ppsi on (a.prj_id = ppsi.prj_id and a.doc_id = ppsi.doc_id and a.rev_id = ppsi.rev_id)
+								 left outer join p_prj_pro_info pppi on (a.prj_id = pppi.prj_id and a.doc_id = pppi.doc_id and a.rev_id = pppi.rev_id)
+								 left outer join p_prj_mdc_info ppmi on (a.prj_id = ppmi.prj_id and a.doc_id = ppmi.doc_id and a.rev_id = ppmi.rev_id)
+							where  a.prj_id = #{prj_id}
+							and a.folder_id = #{folder_id}
+							and del_yn!='Y'	
+						)main
+						EXCEPT
+						select main.category,main.designer_id ,main.prj_id, main.doc_id, main.rev_id, main.folder_id, main.doc_no, main.doc_type
+						      ,main.rev_code_id, main.rev_no
+						      ,main.sfile_nm,main.rfile_nm, main.file_type, main.file_size, main.title, main.del_yn, main.unread_yn, main.lock_yn, main.trans_ref_doc_id, main.reg_id, main.reg_date, main.mod_id, main.mod_date
+						      ,CASE 
+						       WHEN main.rev_id = main.max_rev_id THEN 'NEW'
+						       ELSE 'OLD' 
+						       END status
+						from
+						(
+							select isnull(ppei.designer_id,isnull(ppvi.designer_id,ppsi.designer_id)) as designer_id 
+								   ,isnull(ppcs1.set_code,isnull(ppcs2.set_code,'')) as category
+								   ,a.prj_id, a.doc_id, a.rev_id, a.folder_id, a.doc_no, a.doc_type
+							       ,a.rev_code_id, (select code.set_code from p_prj_code_settings code where code.prj_id = a.prj_id and  code.set_code_type = 'REVISION NUMBER' and code.set_code_id = a.rev_code_id) as rev_no
+							       ,a.sfile_nm,a.rfile_nm, a.file_type, a.file_size, a.title, a.del_yn, a.unread_yn, a.lock_yn, a.trans_ref_doc_id, a.reg_id, a.reg_date, a.mod_id, a.mod_date
+								   ,(select max(s1.rev_id) as rev_id 
+								    from p_prj_document_index s1
+									where s1.del_yn!='Y'
+									and s1.prj_id = a.prj_id 
+									and s1.folder_id = a.folder_id 
+									and s1.doc_id = a.doc_id 				
+									)max_rev_id		       
+							from p_prj_document_index a
+								 left outer join p_prj_eng_info ppei on (a.prj_id = ppei.prj_id and a.doc_id = ppei.doc_id and a.rev_id = ppei.rev_id) left outer join p_prj_code_settings ppcs1 on(ppei.prj_id = ppcs1.prj_id and ppei.category_cd_id = ppcs1.set_code_id and ppcs1.set_code_type = 'DOC.CATEGORY' )
+								 left outer join p_prj_vdr_info ppvi on (a.prj_id = ppvi.prj_id and a.doc_id = ppvi.doc_id and a.rev_id = ppvi.rev_id) left outer join p_prj_code_settings ppcs2 on(ppvi.prj_id = ppcs2.prj_id and ppvi.category_cd_id = ppcs2.set_code_id and ppcs2.set_code_type = 'VENDOR DOC.CATEGORY' )
+								 left outer join p_prj_sdc_info ppsi on (a.prj_id = ppsi.prj_id and a.doc_id = ppsi.doc_id and a.rev_id = ppsi.rev_id)
+								 left outer join p_prj_pro_info pppi on (a.prj_id = pppi.prj_id and a.doc_id = pppi.doc_id and a.rev_id = pppi.rev_id)
+								 left outer join p_prj_mdc_info ppmi on (a.prj_id = ppmi.prj_id and a.doc_id = ppmi.doc_id and a.rev_id = ppmi.rev_id)
+							inner join p_prj_document_index_read c on a.prj_id = c.prj_id and a.doc_id = c.doc_id and a.rev_id = c.rev_id and c.reg_id = #{reg_id}
+							where  a.prj_id = #{prj_id}
+							and a.folder_id = #{folder_id}
+							and del_yn!='Y'	
+						)main
+				)realmain  LEFT OUTER JOIN p_users pu ON (pu.user_id = realmain.designer_id AND pu.user_st != 'D')
+					  LEFT OUTER JOIN p_code_info pci ON (pu.job_tit_cd = pci.code and pci.code_gubun = 'JOB')
+				order by realmain.doc_id desc, realmain.rev_id desc, realmain.reg_date desc
+			
+<!-- 				select *  -->
+<!-- 				from ( -->
+<!-- 						select main.prj_id, main.doc_id, main.rev_id, main.folder_id, main.doc_no, main.doc_type -->
+<!-- 						      ,main.rev_code_id, main.rev_no -->
+<!-- 						      ,main.sfile_nm,main.rfile_nm, main.file_type, main.file_size, main.title, main.del_yn, main.unread_yn, main.lock_yn, main.trans_ref_doc_id, main.reg_id, main.reg_date, main.mod_id, main.mod_date -->
+<!-- 						      ,CASE  -->
+<!-- 						       WHEN main.rev_id = main.max_rev_id THEN 'NEW' -->
+<!-- 						       ELSE 'OLD'  -->
+<!-- 						       END status -->
+<!-- 						from -->
+<!-- 						( -->
+<!-- 							select a.prj_id, a.doc_id, a.rev_id, a.folder_id, a.doc_no, a.doc_type -->
+<!-- 							       ,a.rev_code_id, (select code.set_code from p_prj_code_settings code where code.prj_id = a.prj_id and  code.set_code_type = 'REVISION NUMBER' and code.set_code_id = a.rev_code_id) as rev_no -->
+<!-- 							       ,a.sfile_nm,a.rfile_nm, a.file_type, a.file_size, a.title, a.del_yn, a.unread_yn, a.lock_yn, a.trans_ref_doc_id, a.reg_id, a.reg_date, a.mod_id, a.mod_date -->
+<!-- 								   ,(select max(s1.rev_id) as rev_id  -->
+<!-- 								    from p_prj_document_index s1 -->
+<!-- 									where s1.del_yn!='Y' -->
+<!-- 									and s1.prj_id = a.prj_id  -->
+<!-- 									and s1.folder_id = a.folder_id  -->
+<!-- 									and s1.doc_id = a.doc_id 				 -->
+<!-- 									)max_rev_id		        -->
+<!-- 							from p_prj_document_index a -->
+<!-- 							where  a.prj_id = #{prj_id} -->
+<!-- 							and a.folder_id = #{folder_id} -->
+<!-- 							and del_yn!='Y'	 -->
+<!-- 						)main -->
+<!-- 						EXCEPT -->
+<!-- 						select main.prj_id, main.doc_id, main.rev_id, main.folder_id, main.doc_no, main.doc_type -->
+<!-- 						      ,main.rev_code_id, main.rev_no -->
+<!-- 						      ,main.sfile_nm,main.rfile_nm, main.file_type, main.file_size, main.title, main.del_yn, main.unread_yn, main.lock_yn, main.trans_ref_doc_id, main.reg_id, main.reg_date, main.mod_id, main.mod_date -->
+<!-- 						      ,CASE  -->
+<!-- 						       WHEN main.rev_id = main.max_rev_id THEN 'NEW' -->
+<!-- 						       ELSE 'OLD'  -->
+<!-- 						       END status -->
+<!-- 						from -->
+<!-- 						( -->
+<!-- 							select a.prj_id, a.doc_id, a.rev_id, a.folder_id, a.doc_no, a.doc_type -->
+<!-- 							       ,a.rev_code_id, (select code.set_code from p_prj_code_settings code where code.prj_id = a.prj_id and  code.set_code_type = 'REVISION NUMBER' and code.set_code_id = a.rev_code_id) as rev_no -->
+<!-- 							       ,a.sfile_nm,a.rfile_nm, a.file_type, a.file_size, a.title, a.del_yn, a.unread_yn, a.lock_yn, a.trans_ref_doc_id, a.reg_id, a.reg_date, a.mod_id, a.mod_date -->
+<!-- 								   ,(select max(s1.rev_id) as rev_id  -->
+<!-- 								    from p_prj_document_index s1 -->
+<!-- 									where s1.del_yn!='Y' -->
+<!-- 									and s1.prj_id = a.prj_id  -->
+<!-- 									and s1.folder_id = a.folder_id  -->
+<!-- 									and s1.doc_id = a.doc_id 				 -->
+<!-- 									)max_rev_id		        -->
+<!-- 							from p_prj_document_index a -->
+<!-- 							inner join p_prj_document_index_read c on a.prj_id = c.prj_id and a.doc_id = c.doc_id and a.rev_id = c.rev_id and c.reg_id = #{reg_id} -->
+<!-- 							where  a.prj_id = #{prj_id} -->
+<!-- 							and a.folder_id = #{folder_id} -->
+<!-- 							and del_yn!='Y'	 -->
+<!-- 						)main -->
+<!-- 				)realmain -->
+<!-- 				order by realmain.doc_id desc, realmain.rev_id desc, realmain.reg_date desc -->
+			</when>
+			<otherwise>
+			SELECT CONCAT(pu.user_kor_nm, ' ', pci.code_nm) as designer ,main2.*
+				FROM(
+				select main.category,designer_id,main.prj_id, main.doc_id, main.rev_id, main.folder_id, main.doc_no, main.doc_type
+				      ,main.rev_code_id, main.rev_no
+				      ,main.sfile_nm,main.rfile_nm, main.file_type, main.file_size, main.title, main.del_yn, main.unread_yn, main.lock_yn, main.trans_ref_doc_id, main.reg_id, main.reg_date, main.mod_id, main.mod_date
+				      ,CASE 
+				       WHEN main.rev_id = main.max_rev_id THEN 'NEW'
+				       ELSE 'OLD' 
+				       END status
+					from
+				(
+					select isnull(ppei.designer_id,isnull(ppvi.designer_id,isnull(ppsi.designer_id,isnull(pppi.designer_id,ppmi.designer_id)))) as designer_id
+						   ,isnull(ppcs1.set_code,isnull(ppcs2.set_code,'')) as category
+						   ,a.prj_id, a.doc_id, a.rev_id, a.folder_id, a.doc_no, a.doc_type
+					       ,a.rev_code_id, (select code.set_code from p_prj_code_settings code where code.prj_id = a.prj_id and  code.set_code_type = 'REVISION NUMBER' and code.set_code_id = a.rev_code_id) as rev_no
+					       ,a.sfile_nm,a.rfile_nm, a.file_type, a.file_size, a.title, a.del_yn, a.unread_yn, a.lock_yn, a.trans_ref_doc_id, a.reg_id, a.reg_date, a.mod_id, a.mod_date
+						   ,(select max(s1.rev_id) as rev_id 
+						    from p_prj_document_index s1
+							where s1.del_yn!='Y'
+							and s1.prj_id = a.prj_id 
+							and s1.folder_id = a.folder_id 
+							and s1.doc_id = a.doc_id 				
+							)max_rev_id		       
+					from p_prj_document_index a
+						 left outer join p_prj_eng_info ppei on (a.prj_id = ppei.prj_id and a.doc_id = ppei.doc_id and a.rev_id = ppei.rev_id) left outer join p_prj_code_settings ppcs1 on(ppei.prj_id = ppcs1.prj_id and ppei.category_cd_id = ppcs1.set_code_id and ppcs1.set_code_type = 'DOC.CATEGORY' )
+						 left outer join p_prj_vdr_info ppvi on (a.prj_id = ppvi.prj_id and a.doc_id = ppvi.doc_id and a.rev_id = ppvi.rev_id) left outer join p_prj_code_settings ppcs2 on(ppvi.prj_id = ppcs2.prj_id and ppvi.category_cd_id = ppcs2.set_code_id and ppcs2.set_code_type = 'VENDOR DOC.CATEGORY' )
+						 left outer join p_prj_sdc_info ppsi on (a.prj_id = ppsi.prj_id and a.doc_id = ppsi.doc_id and a.rev_id = ppsi.rev_id)
+						 left outer join p_prj_pro_info pppi on (a.prj_id = pppi.prj_id and a.doc_id = pppi.doc_id and a.rev_id = pppi.rev_id)
+						 left outer join p_prj_mdc_info ppmi on (a.prj_id = ppmi.prj_id and a.doc_id = ppmi.doc_id and a.rev_id = ppmi.rev_id)
+					where  a.prj_id = #{prj_id}
+					and a.folder_id = #{folder_id}
+					and del_yn!='Y'			
+				)main
+				 ) main2 LEFT OUTER JOIN p_users pu ON (pu.user_id = main2.designer_id AND pu.user_st != 'D')
+					  LEFT OUTER JOIN p_code_info pci ON (pu.job_tit_cd = pci.code and pci.code_gubun = 'JOB')
+				order by main2.doc_id desc, main2.rev_id desc, main2.reg_date desc
+			
+			
+<!-- 				select main.prj_id, main.doc_id, main.rev_id, main.folder_id, main.doc_no, main.doc_type -->
+<!-- 				      ,main.rev_code_id, main.rev_no -->
+<!-- 				      ,main.sfile_nm,main.rfile_nm, main.file_type, main.file_size, main.title, main.del_yn, main.unread_yn, main.lock_yn, main.trans_ref_doc_id, main.reg_id, main.reg_date, main.mod_id, main.mod_date -->
+<!-- 				      ,CASE  -->
+<!-- 				       WHEN main.rev_id = main.max_rev_id THEN 'NEW' -->
+<!-- 				       ELSE 'OLD'  -->
+<!-- 				       END status -->
+<!-- 				from -->
+<!-- 				( -->
+<!-- 					select a.prj_id, a.doc_id, a.rev_id, a.folder_id, a.doc_no, a.doc_type -->
+<!-- 					       ,a.rev_code_id, (select code.set_code from p_prj_code_settings code where code.prj_id = a.prj_id and  code.set_code_type = 'REVISION NUMBER' and code.set_code_id = a.rev_code_id) as rev_no -->
+<!-- 					       ,a.sfile_nm,a.rfile_nm, a.file_type, a.file_size, a.title, a.del_yn, a.unread_yn, a.lock_yn, a.trans_ref_doc_id, a.reg_id, a.reg_date, a.mod_id, a.mod_date -->
+<!-- 						   ,(select max(s1.rev_id) as rev_id  -->
+<!-- 						    from p_prj_document_index s1 -->
+<!-- 							where s1.del_yn!='Y' -->
+<!-- 							and s1.prj_id = a.prj_id  -->
+<!-- 							and s1.folder_id = a.folder_id  -->
+<!-- 							and s1.doc_id = a.doc_id 				 -->
+<!-- 							)max_rev_id		        -->
+<!-- 					from p_prj_document_index a -->
+<!-- 					where  a.prj_id = #{prj_id} -->
+<!-- 					and a.folder_id = #{folder_id} -->
+<!-- 					and del_yn!='Y'			 -->
+<!-- 				)main		 -->
+<!-- 				order by main.doc_id desc, main.rev_id desc, main.reg_date desc -->
+			</otherwise>
+		</choose>
+    </select>    
+	<select id="searchDocByFilterAll" resultType="PrjDocumentIndexVO" parameterType="PrjDocumentIndexVO">
+		select CONCAT(pu.user_kor_nm, ' ', pci.code_nm) as designer ,*
+			from(
+				select main.category,main.designer_id ,main.prj_id, main.doc_id, main.rev_id, main.folder_id, main.doc_no, main.doc_type
+				      ,main.rev_code_id, main.rev_no
+				      ,main.sfile_nm,main.rfile_nm, main.file_type, main.file_size, main.title, main.del_yn, main.unread_yn, main.lock_yn, main.trans_ref_doc_id, main.reg_id, main.reg_date, main.mod_id, main.mod_date
+				      ,CASE 
+				       WHEN main.rev_id = main.max_rev_id THEN 'NEW'
+				       ELSE 'OLD' 
+				       END status
+				from
+				(
+					select isnull(ppei.designer_id,isnull(ppvi.designer_id,isnull(ppsi.designer_id,isnull(pppi.designer_id,ppmi.designer_id)))) as designer_id
+						   ,isnull(ppcs1.set_code,isnull(ppcs2.set_code,'')) as category 
+						   ,a.prj_id, a.doc_id, a.rev_id, a.folder_id, a.doc_no, a.doc_type
+					       ,a.rev_code_id, (select code.set_code from p_prj_code_settings code where code.prj_id = a.prj_id and  code.set_code_type = 'REVISION NUMBER' and code.set_code_id = a.rev_code_id) as rev_no
+					       ,a.sfile_nm,a.rfile_nm, a.file_type, a.file_size, a.title, a.del_yn, a.unread_yn, a.lock_yn, a.trans_ref_doc_id, a.reg_id, a.reg_date, a.mod_id, a.mod_date
+						   ,(select max(s1.rev_id) as rev_id 
+						    from p_prj_document_index s1
+							where s1.del_yn!='Y'
+							and s1.prj_id = a.prj_id 
+							and s1.folder_id = a.folder_id 
+							and s1.doc_id = a.doc_id 				
+							)max_rev_id		       
+					from p_prj_document_index a
+						 left outer join p_prj_eng_info ppei on (a.prj_id = ppei.prj_id and a.doc_id = ppei.doc_id and a.rev_id = ppei.rev_id) left outer join p_prj_code_settings ppcs1 on(ppei.prj_id = ppcs1.prj_id and ppei.category_cd_id = ppcs1.set_code_id and ppcs1.set_code_type = 'DOC.CATEGORY' )
+						 left outer join p_prj_vdr_info ppvi on (a.prj_id = ppvi.prj_id and a.doc_id = ppvi.doc_id and a.rev_id = ppvi.rev_id) left outer join p_prj_code_settings ppcs2 on(ppvi.prj_id = ppcs2.prj_id and ppvi.category_cd_id = ppcs2.set_code_id and ppcs2.set_code_type = 'VENDOR DOC.CATEGORY' )
+						 left outer join p_prj_sdc_info ppsi on (a.prj_id = ppsi.prj_id and a.doc_id = ppsi.doc_id and a.rev_id = ppsi.rev_id)
+						 left outer join p_prj_pro_info pppi on (a.prj_id = pppi.prj_id and a.doc_id = pppi.doc_id and a.rev_id = pppi.rev_id)
+						 left outer join p_prj_mdc_info ppmi on (a.prj_id = ppmi.prj_id and a.doc_id = ppmi.doc_id and a.rev_id = ppmi.rev_id)
+					where  a.prj_id = #{prj_id}
+					and a.folder_id = #{folder_id}
+					and del_yn!='Y'
+					<if test='unread_yn != "N"'>
+						and a.unread_yn!='N'
+					</if>
+					and (a.doc_no like CONCAT('%',#{filterKeyword},'%') or a.title like CONCAT('%',#{filterKeyword},'%'))					
+				)main
+			) realmain LEFT OUTER JOIN p_users pu ON (pu.user_id = realmain.designer_id and pu.user_st != 'D')
+						  LEFT OUTER JOIN p_code_info pci ON (pu.job_tit_cd = pci.code and pci.code_gubun = 'JOB')
+			order by realmain.doc_id desc, realmain.rev_id desc, realmain.reg_date desc
+	
+	
+<!-- 		select main.prj_id, main.doc_id, main.rev_id, main.folder_id, main.doc_no, main.doc_type -->
+<!-- 		      ,main.rev_code_id, main.rev_no -->
+<!-- 		      ,main.sfile_nm,main.rfile_nm, main.file_type, main.file_size, main.title, main.del_yn, main.unread_yn, main.lock_yn, main.trans_ref_doc_id, main.reg_id, main.reg_date, main.mod_id, main.mod_date -->
+<!-- 		      ,CASE  -->
+<!-- 		       WHEN main.rev_id = main.max_rev_id THEN 'NEW' -->
+<!-- 		       ELSE 'OLD'  -->
+<!-- 		       END status -->
+<!-- 		from -->
+<!-- 		( -->
+<!-- 			select a.prj_id, a.doc_id, a.rev_id, a.folder_id, a.doc_no, a.doc_type -->
+<!-- 			       ,a.rev_code_id, (select code.set_code from p_prj_code_settings code where code.prj_id = a.prj_id and  code.set_code_type = 'REVISION NUMBER' and code.set_code_id = a.rev_code_id) as rev_no -->
+<!-- 			       ,a.sfile_nm,a.rfile_nm, a.file_type, a.file_size, a.title, a.del_yn, a.unread_yn, a.lock_yn, a.trans_ref_doc_id, a.reg_id, a.reg_date, a.mod_id, a.mod_date -->
+<!-- 				   ,(select max(s1.rev_id) as rev_id  -->
+<!-- 				    from p_prj_document_index s1 -->
+<!-- 					where s1.del_yn!='Y' -->
+<!-- 					and s1.prj_id = a.prj_id  -->
+<!-- 					and s1.folder_id = a.folder_id  -->
+<!-- 					and s1.doc_id = a.doc_id 				 -->
+<!-- 					)max_rev_id		        -->
+<!-- 			from p_prj_document_index a -->
+<!-- 			where  a.prj_id = #{prj_id} -->
+<!-- 			and a.folder_id = #{folder_id} -->
+<!-- 			and del_yn!='Y' -->
+<!-- 			<if test='unread_yn != "N"'> -->
+<!-- 				and a.unread_yn!='N' -->
+<!-- 			</if> -->
+<!-- 			and (a.doc_no like CONCAT('%',#{filterKeyword},'%') or a.title like CONCAT('%',#{filterKeyword},'%'))					 -->
+<!-- 		)main		 -->
+<!-- 		order by main.doc_id desc, main.rev_id desc, main.reg_date desc -->
+    </select>   
+	<insert id="insertDocNoChgHist" parameterType="PrjDocTrNoChgHistVO">
+		insert into p_prj_docno_chg_hist(log_date,prj_id,old_doc_no,chg_doc_no,reg_id,remote_ip)
+		values(#{log_date},#{prj_id},#{old_doc_no},#{chg_doc_no},#{reg_id},#{remote_ip})
+	</insert>
+    <select id="getDocNoChgHist" parameterType="PrjDocTrNoChgHistVO" resultType="PrjDocTrNoChgHistVO">
+    	select * from p_prj_docno_chg_hist 
+    	where 1=1
+		<if test="prj_id != '' ">
+    		and prj_id=#{prj_id}
+		</if>
+		<if test="from != '' ">
+			and substring(log_date,1,8) between #{from} and #{to}
+		</if>
+		order by log_date desc
+    </select>
+	<select id="getFolderIsContanisDoc" resultType="int" parameterType="PrjDocumentIndexVO">
+		select count(*)
+		from p_prj_document_index a join p_prj_folder_info b on a.prj_id=b.prj_id and a.folder_id=b.folder_id 
+		where a.prj_id=#{prj_id} and a.del_yn!='Y' and (a.folder_id=#{folder_id} or b.folder_path like concat('%>',#{folder_id},'>%'))
+    </select> 
+	<select id="getPoNoIsNull" resultType="PrjDocumentIndexVO" parameterType="PrjDocumentIndexVO">
+		select * from p_prj_pro_info where (por_no!='' and por_no IS NOT NULL) and (po_no='' or po_no IS NULL)
+    </select>
+	<select id="getBulkPoNoIsNull" resultType="PrjDocumentIndexVO" parameterType="PrjDocumentIndexVO">
+		select * from p_prj_mdc_info where (por_no!='' and por_no IS NOT NULL) and (po_no='' or po_no IS NULL)
+    </select>
+    <update id="updatePoNo" parameterType="PrjDocumentIndexVO">
+    	update p_prj_pro_info
+    	set por_issue_date=#{por_issue_date}, po_no=#{po_no}, po_issue_date=#{po_issue_date},vendor_nm=#{vendor}
+    	where por_no=#{por_no}
+    </update>
+    <update id="updateBulkPoNo" parameterType="PrjDocumentIndexVO">
+    	update p_prj_mdc_info
+    	set por_issue_date=#{por_issue_date}, po_no=#{po_no}, po_issue_date=#{po_issue_date},vendor_nm=#{vendor}
+    	where por_no=#{por_no}
+    </update>
+	<select id="getDocNo" resultType="String" parameterType="PrjDocumentIndexVO">
+		select doc_no
+		from p_prj_document_index
+    	where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id}
+    </select>
+    <update id="changeDocNo" parameterType="PrjDocumentIndexVO">
+    	update p_prj_document_index
+    	set doc_no=#{change_doc_no}
+    	where prj_id=#{prj_id} and doc_no=#{old_doc_no}
+    		and doc_type!='LETTER' and doc_type!='E-MAIL'
+    </update>
+    <update id="changeVendorPoDocNo" parameterType="PrjDocumentIndexVO">
+    	update p_prj_vdr_info
+    	set po_doc_no=#{change_doc_no}
+    	where prj_id=#{prj_id} and po_doc_no=#{old_doc_no}
+    </update>
+	<select id="DRNisReject" resultType="int" parameterType="PrjDocumentIndexVO">
+		select count(*) from p_prj_drn_info a left outer join p_prj_drn_attch_file b on a.prj_id = b.prj_id  and a.drn_id = b.drn_id
+		where a.prj_id=#{prj_id} and b.doc_id=#{doc_id} and b.rev_id=#{rev_id} and a.drn_approval_status='R'
+    </select>
+    <update id="documentCheckOut" parameterType="PrjDocumentIndexVO">
+    	update p_prj_document_index
+    	set lock_yn='Y', mod_id=#{mod_id}, mod_date=#{mod_date}
+    	where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id}
+    </update>
+    <update id="documentCheckOutCancel" parameterType="PrjDocumentIndexVO">
+    	update p_prj_document_index
+    	set lock_yn='N', mod_id=#{mod_id}, mod_date=#{mod_date}
+    	where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id}
+    </update>
+    <update id="documentDelete" parameterType="PrjDocumentIndexVO">
+    	update p_prj_document_index
+    	set del_yn='Y', mod_id=#{mod_id}, mod_date=#{mod_date}
+    	where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id}
+    </update>
+    <update id="changeDesignerEng" parameterType="PrjDocumentIndexVO">
+    	update p_prj_eng_info
+    	set designer_id=#{designer_id}, prfe_designer_id=#{prfe_designer_id}
+    	where prj_id=#{prj_id} and designer_id=#{prfe_designer_id}
+    </update>
+    <update id="changeDesignerVendor" parameterType="PrjDocumentIndexVO">
+    	update p_prj_vdr_info
+    	set designer_id=#{designer_id}, prfe_designer_id=#{prfe_designer_id}
+    	where prj_id=#{prj_id} and designer_id=#{prfe_designer_id}
+    </update>
+    <update id="changeDesignerProc" parameterType="PrjDocumentIndexVO">
+    	update p_prj_pro_info
+    	set designer_id=#{designer_id}, prfe_designer_id=#{prfe_designer_id}
+    	where prj_id=#{prj_id} and designer_id=#{prfe_designer_id}
+    </update>
+    <update id="changeDesignerBulk" parameterType="PrjDocumentIndexVO">
+    	update p_prj_mdc_info
+    	set designer_id=#{designer_id}, prfe_designer_id=#{prfe_designer_id}
+    	where prj_id=#{prj_id} and designer_id=#{prfe_designer_id}
+    </update>
+    <update id="changeDesignerSite" parameterType="PrjDocumentIndexVO">
+    	update p_prj_sdc_info
+    	set designer_id=#{designer_id}, prfe_designer_id=#{prfe_designer_id}
+    	where prj_id=#{prj_id} and designer_id=#{prfe_designer_id}
+    </update>
+    <update id="changeDesignerCorr" parameterType="PrjDocumentIndexVO">
+    	update p_prj_cordoc_info
+    	set person_in_charge_id=#{person_in_charge_id}
+    	where prj_id=#{prj_id} and person_in_charge_id=#{prfe_designer_id}
+    </update>
+    <select id="getDownloadFileInfo" parameterType="PrjDocumentIndexVO" resultType="PrjDocumentIndexVO">
+    	select  doc_no,
+				(select code.set_code from p_prj_code_settings code where code.prj_id = a.prj_id and  code.set_code_type = 'REVISION NUMBER' and code.set_code_id = a.rev_code_id) as rev_no,
+				sfile_nm,
+				rfile_nm,
+				title,
+				file_type
+		from p_prj_document_index a
+    	where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id}
+    </select>
+    <select id="getTRFileInfo" parameterType="PrjDocumentIndexVO" resultType="PrjDocumentIndexVO">
+		select  pptf.prj_id,
+		        pptf.tr_id,
+		        pptf.doc_id,
+		        pptf.rev_id,
+        		ppdi.rev_code_id,
+		        pptf.rev_no,
+		        pptf.issue_step,
+		        pptf.rtn_status_code_id,
+		        (select concat(a.set_code, ':',a.set_desc) as set_desc from p_prj_code_settings a where a.prj_id = pptf.prj_id and a.set_code_type ='TR RETURN STATUS' and a.set_code_id = pptf.rtn_status_code_id) return_status,
+		        pptf.doc_table as doc_type,
+		        ppdi.doc_no,
+		        ppdi.file_type,
+		        ppdi.title,
+		        ppei.discip_code_id,
+		        (select a.discip_code as set_desc from p_prj_discipline_info a where a.prj_id = pptf.prj_id and a.discip_code_id = ppei.discip_code_id) discip,
+		        ppei.category_cd_id,
+		        ppdi.lock_yn,
+		        ppdi.mod_id,
+		        ppdi.folder_id,
+		        ppdi.rfile_nm,
+		        ppdi.sfile_nm,
+        		(select a.set_code from p_prj_code_settings a where a.prj_id=pptf.prj_id and a.set_code_type='DOC.SIZE' and a.set_code_id=ppei.size_code_id) as size_code,
+		        (select a.set_code as set_desc from p_prj_code_settings a where a.prj_id = pptf.prj_id and a.set_code_type ='DOC.CATEGORY' and a.set_code_id = ppei.category_cd_id) category,
+		        <!-- (select cs.set_code
+		         from p_prj_code_settings cs
+		         where cs.prj_id = ppdi.prj_id
+		         and cs.set_code_type = 'REVISION NUMBER'
+		         and cs.set_code_id = (CASE
+								      WHEN  ppdi.rev_code_id = '00001'  THEN  ''
+								      ELSE RIGHT('00000' + CAST(CONVERT(int, ppdi.rev_code_id) - 1 AS NVARCHAR), 5)
+							          END)
+			    )p_rev -->
+			    (select top 1 a.rev_no from p_prj_tr_file a where a.prj_id=pptf.prj_id and a.doc_id=pptf.doc_id and a.rev_id!=pptf.rev_id order by tr_id desc) as p_rev
+		from p_prj_tr_file pptf,
+		     p_prj_document_index ppdi,
+		     p_prj_eng_info ppei
+		where pptf.prj_id=#{prj_id} and pptf.tr_id = #{tr_id}
+		and pptf.prj_id = ppdi.prj_id and ppdi.doc_id  = ppei.doc_id and ppdi.rev_id = ppei.rev_id
+		and ppdi.del_yn = 'N'
+		and pptf.prj_id = ppei.prj_id and pptf.doc_id = ppei.doc_id and pptf.rev_id = ppei.rev_id
+    </select>
+    <select id="getVTRFileInfo" parameterType="PrjDocumentIndexVO" resultType="PrjDocumentIndexVO">
+		select  pptf.prj_id,
+		        pptf.tr_id,
+		        pptf.doc_id,
+		        pptf.rev_id,
+        		ppdi.rev_code_id,
+		        pptf.rev_no,
+		        pptf.issue_step,
+		        pptf.rtn_status_code_id,
+		        (select concat(a.set_code, ':',a.set_desc) as set_desc from p_prj_code_settings a where a.prj_id = pptf.prj_id and a.set_code_type ='VTR RETURN STATUS' and a.set_code_id = pptf.rtn_status_code_id) return_status,
+		        pptf.doc_table as doc_type,
+		        ppdi.doc_no,
+		        ppdi.file_type,
+		        ppdi.title,
+		        ppei.discip_code_id,
+		        (select a.discip_code as set_desc from p_prj_discipline_info a where a.prj_id = pptf.prj_id and a.discip_code_id = ppei.discip_code_id) discip,
+		        ppei.category_cd_id,
+		        ppdi.lock_yn,
+		        ppdi.mod_id,
+		        ppdi.folder_id,
+		        ppdi.rfile_nm,
+		        ppdi.sfile_nm,
+        		(select a.set_code from p_prj_code_settings a where a.prj_id=pptf.prj_id and a.set_code_type='VENDOR DOC.SIZE' and a.set_code_id=ppei.size_code_id) as size_code,
+		        (select a.set_code as set_desc from p_prj_code_settings a where a.prj_id = pptf.prj_id and a.set_code_type ='VENDOR DOC.CATEGORY' and a.set_code_id = ppei.category_cd_id) category,
+		        (select top 1 a.rev_no from p_prj_vtr_file a where a.prj_id=pptf.prj_id and a.doc_id=pptf.doc_id and a.rev_id!=pptf.rev_id order by tr_id desc) as p_rev
+		from p_prj_vtr_file pptf,
+		     p_prj_document_index ppdi,
+		     p_prj_vdr_info ppei
+		where pptf.prj_id=#{prj_id} and pptf.tr_id = #{tr_id}
+		and pptf.prj_id = ppdi.prj_id and ppdi.doc_id  = ppei.doc_id and ppdi.rev_id = ppei.rev_id
+		and ppdi.del_yn = 'N'
+		and pptf.prj_id = ppei.prj_id and pptf.doc_id = ppei.doc_id and pptf.rev_id = ppei.rev_id
+    </select>
+    <select id="getSTRFileInfo" parameterType="PrjDocumentIndexVO" resultType="PrjDocumentIndexVO">
+		select  pptf.prj_id,
+		        pptf.tr_id,
+		        pptf.doc_id,
+		        pptf.rev_id,
+        		ppdi.rev_code_id,
+		        pptf.rev_no,
+		        pptf.issue_step,
+		        pptf.rtn_status_code_id,
+		        (select concat(a.set_code, ':',a.set_desc) as set_desc from p_prj_code_settings a where a.prj_id = pptf.prj_id and a.set_code_type ='STR RETURN STATUS' and a.set_code_id = pptf.rtn_status_code_id) return_status,
+		        pptf.doc_table as doc_type,
+		        ppdi.doc_no,
+		        ppdi.file_type,
+		        ppdi.title,
+		        ppei.discip_code_id,
+		        (select a.discip_code as set_desc from p_prj_discipline_info a where a.prj_id = pptf.prj_id and a.discip_code_id = ppei.discip_code_id) discip,
+		        ppei.category_cd_id,
+		        ppdi.lock_yn,
+		        ppdi.mod_id,
+		        ppdi.folder_id,
+		        ppdi.rfile_nm,
+		        ppdi.sfile_nm,
+        		(select a.set_code from p_prj_code_settings a where a.prj_id=pptf.prj_id and a.set_code_type='DOC.SIZE' and a.set_code_id=ppei.size_code_id) as size_code,
+		        (select a.set_code as set_desc from p_prj_code_settings a where a.prj_id = pptf.prj_id and a.set_code_type ='DOC.CATEGORY' and a.set_code_id = ppei.category_cd_id) category,
+		        (select top 1 a.rev_no from p_prj_str_file a where a.prj_id=pptf.prj_id and a.doc_id=pptf.doc_id and a.rev_id!=pptf.rev_id order by tr_id desc) as p_rev
+		from p_prj_str_file pptf,
+		     p_prj_document_index ppdi,
+		     p_prj_sdc_info ppei
+		where pptf.prj_id=#{prj_id} and pptf.tr_id = #{tr_id}
+		and pptf.prj_id = ppdi.prj_id and ppdi.doc_id  = ppei.doc_id and ppdi.rev_id = ppei.rev_id
+		and ppdi.del_yn = 'N'
+		and pptf.prj_id = ppei.prj_id and pptf.doc_id = ppei.doc_id and pptf.rev_id = ppei.rev_id
+    </select>
+    <select id="getDocumentInfo" parameterType="PrjDocumentIndexVO" resultType="PrjDocumentIndexVO">
+		select 
+			a.doc_no,
+			(select doc_no from p_prj_document_index where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=(select FORMAT(MAX(CONVERT(INT,rev_id))-1,'000') from p_prj_document_index where prj_id=#{prj_id} and doc_id=#{doc_id})) as old_doc_no,
+			a.doc_type,
+			(select code.set_code from p_prj_code_settings code where code.prj_id = a.prj_id and  code.set_code_type = 'REVISION NUMBER' and code.set_code_id = a.rev_code_id) as rev_no,
+			a.rev_code_id,
+			a.sfile_nm,
+			a.rfile_nm,
+			a.file_type,
+			a.file_size,
+			a.attach_file_date,
+			a.title,
+			a.lock_yn,
+			(select users.user_eng_nm from p_users users where user_id=a.reg_id) as reg_nm,
+			(select users.user_eng_nm from p_users users where user_id=a.mod_id) as mod_nm,
+			(select users.user_kor_nm from p_users users where user_id=a.reg_id) as reg_kor_nm,
+			(select users.user_kor_nm from p_users users where user_id=a.mod_id) as mod_kor_nm,
+			a.reg_id,
+			a.reg_date,
+			a.mod_id,
+			a.mod_date,
+			(select discip_code from p_prj_discipline_info where prj_id=#{prj_id} and discip_code_id=b.discip_code_id) as discip_code,
+			b.discip_code_id,
+			b.designer_id,
+			(select user_kor_nm from p_users where user_id=b.designer_id) as designer_nm,
+			b.prfe_designer_id,
+			(select user_kor_nm from p_users where user_id=b.prfe_designer_id) as pre_designer_nm,
+			b.wbs_code_id,
+			(select wbs_code from p_prj_wbs_code where prj_id=#{prj_id} and wbs_code_id=b.wbs_code_id) as wbs_code,
+			(select wbs_desc from p_prj_wbs_code where prj_id=#{prj_id} and wbs_code_id=b.wbs_code_id) as wbs_desc,
+			(select wgtval from p_prj_wbs_code where prj_id=#{prj_id} and wbs_code_id=b.wbs_code_id) as wgtval,
+			(select discip_code from p_prj_discipline_info where prj_id=#{prj_id} and discip_code_id=b.discip_code_id) as discipline,
+			b.remark,
+			(select set_code from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='DOC.CATEGORY' and set_code_id=b.category_cd_id) as category_code,
+			(select set_desc from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='DOC.CATEGORY' and set_code_id=b.category_cd_id) as category_display,
+			b.category_cd_id,
+			(select set_code from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='DOC.SIZE' and set_code_id=b.size_code_id) as size_code,
+			b.size_code_id,
+			(select set_code from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='DOC.TYPE' and set_code_id=b.doc_type_id) as doc_type_code,
+			b.doc_type_id,
+			(select discip_display from p_prj_discipline_info where prj_id=#{prj_id} and discip_code_id=b.discip_code_id) as discip_display,
+			(select max(rev_id) from p_prj_document_index where prj_id = #{prj_id} and doc_id=#{doc_id} and del_yn!='Y') as rev_max,
+			a.doc_id,
+			a.rev_id,
+			a.folder_id,
+		    (select top 1 tf.rev_no from p_prj_tr_file tf where tf.prj_id=a.prj_id and tf.doc_id=a.doc_id and tf.rev_id!=a.rev_id order by tr_id desc) as p_rev
+			<!-- (select rtn_status_code_id from p_prj_tr_file a join p_prj_tr_info b on a.prj_id=b.prj_id and a.tr_id=b.tr_id where a.prj_id=#{prj_id} and a.doc_id=#{doc_id} and a.rev_id=#{rev_id} and b.inout='IN') as rtn_status_code_id -->
+		from p_prj_document_index a left outer join p_prj_eng_info b on a.prj_id=b.prj_id and a.doc_id=b.doc_id and a.rev_id=b.rev_id
+    	where a.prj_id=#{prj_id} and a.doc_id=#{doc_id} and a.rev_id=#{rev_id}
+    </select>
+    <select id="getVendorDocumentInfo" parameterType="PrjDocumentIndexVO" resultType="PrjDocumentIndexVO">
+		select 
+			a.doc_no,
+			(select doc_no from p_prj_document_index where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=(select FORMAT(MAX(CONVERT(INT,rev_id))-1,'000') from p_prj_document_index where prj_id=#{prj_id} and doc_id=#{doc_id})) as old_doc_no,
+			a.doc_type,
+			(select code.set_code from p_prj_code_settings code where code.prj_id = a.prj_id and  code.set_code_type = 'REVISION NUMBER' and code.set_code_id = a.rev_code_id) as rev_no,
+			a.rev_code_id,
+			a.sfile_nm,
+			a.rfile_nm,
+			a.file_type,
+			a.file_size,
+			a.attach_file_date,
+			a.title,
+			a.lock_yn,
+			(select users.user_eng_nm from p_users users where user_id=a.reg_id) as reg_nm,
+			(select users.user_eng_nm from p_users users where user_id=a.mod_id) as mod_nm,
+			(select users.user_kor_nm from p_users users where user_id=a.reg_id) as reg_kor_nm,
+			(select users.user_kor_nm from p_users users where user_id=a.mod_id) as mod_kor_nm,
+			a.reg_id,
+			a.reg_date,
+			a.mod_id,
+			a.mod_date,
+			(select discip_code from p_prj_discipline_info where prj_id=#{prj_id} and discip_code_id=b.discip_code_id) as discip_code,
+			b.discip_code_id,
+			b.designer_id,
+			(select user_kor_nm from p_users where user_id=b.designer_id) as designer_nm,
+			b.prfe_designer_id,
+			(select user_kor_nm from p_users where user_id=b.prfe_designer_id) as pre_designer_nm,
+			b.wbs_code_id,
+			(select wbs_code from p_prj_wbs_code where prj_id=#{prj_id} and wbs_code_id=b.wbs_code_id) as wbs_code,
+			(select wbs_desc from p_prj_wbs_code where prj_id=#{prj_id} and wbs_code_id=b.wbs_code_id) as wbs_desc,
+			(select wgtval from p_prj_wbs_code where prj_id=#{prj_id} and wbs_code_id=b.wbs_code_id) as wgtval,
+			(select discip_code from p_prj_discipline_info where prj_id=#{prj_id} and discip_code_id=b.discip_code_id) as discipline,
+			b.remark,
+			b.po_doc_no,
+			b.po_doc_title,
+			b.vendor_nm,
+			b.design_part,
+			(select set_code from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='VENDOR DOC.CATEGORY' and set_code_id=b.category_cd_id) as category_code,
+			(select set_desc from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='VENDOR DOC.CATEGORY' and set_code_id=b.category_cd_id) as category_display,
+			b.category_cd_id,
+			(select set_code from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='VENDOR DOC.SIZE' and set_code_id=b.size_code_id) as size_code,
+			b.size_code_id,
+			(select set_code from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='DOC.TYPE' and set_code_id=b.doc_type_id) as doc_type_code,
+			b.doc_type_id,
+			(select discip_display from p_prj_discipline_info where prj_id=#{prj_id} and discip_code_id=b.discip_code_id) as discip_display,
+			(select max(rev_id) from p_prj_document_index where prj_id = #{prj_id} and doc_id=#{doc_id} and del_yn!='Y') as rev_max,
+			a.doc_id,
+			a.rev_id,
+			a.folder_id,
+			<!-- (select cs.set_code
+		         from p_prj_code_settings cs
+		         where cs.prj_id = a.prj_id
+		         and cs.set_code_type = 'REVISION NUMBER'
+		         and cs.set_code_id = (CASE
+								      WHEN  a.rev_code_id = '00001'  THEN  ''
+								      ELSE RIGHT('00000' + CAST(CONVERT(int, a.rev_code_id) - 1 AS NVARCHAR), 5)
+							          END)
+			    )p_rev -->
+		    (select top 1 tf.rev_no from p_prj_vtr_file tf where tf.prj_id=a.prj_id and tf.doc_id=a.doc_id and tf.rev_id!=a.rev_id order by tr_id desc) as p_rev
+			<!-- (select rtn_status_code_id from p_prj_vtr_file a join p_prj_vtr_info b on a.prj_id=b.prj_id and a.tr_id=b.tr_id where a.prj_id=#{prj_id} and a.doc_id=#{doc_id} and a.rev_id=#{rev_id} and b.inout='IN') as rtn_status_code_id -->
+		from p_prj_document_index a left outer join p_prj_vdr_info b on a.prj_id=b.prj_id and a.doc_id=b.doc_id and a.rev_id=b.rev_id
+    	where a.prj_id=#{prj_id} and a.doc_id=#{doc_id} and a.rev_id=#{rev_id}
+    </select>
+    <select id="getProcDocumentInfo" parameterType="PrjDocumentIndexVO" resultType="PrjDocumentIndexVO">
+		select 
+			a.doc_no,
+			(select doc_no from p_prj_document_index where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=(select FORMAT(MAX(CONVERT(INT,rev_id))-1,'000') from p_prj_document_index where prj_id=#{prj_id} and doc_id=#{doc_id})) as old_doc_no,
+			a.doc_type,
+			(select code.set_code from p_prj_code_settings code where code.prj_id = a.prj_id and  code.set_code_type = 'REVISION NUMBER' and code.set_code_id = a.rev_code_id) as rev_no,
+			a.rev_code_id,
+			a.sfile_nm,
+			a.rfile_nm,
+			a.file_type,
+			a.file_size,
+			a.attach_file_date,
+			a.title,
+			a.lock_yn,
+			(select users.user_eng_nm from p_users users where user_id=a.reg_id) as reg_nm,
+			(select users.user_eng_nm from p_users users where user_id=a.mod_id) as mod_nm,
+			(select users.user_kor_nm from p_users users where user_id=a.reg_id) as reg_kor_nm,
+			(select users.user_kor_nm from p_users users where user_id=a.mod_id) as mod_kor_nm,
+			a.reg_id,
+			a.reg_date,
+			a.mod_id,
+			a.mod_date,
+			(select discip_code from p_prj_discipline_info where prj_id=#{prj_id} and discip_code_id=b.discip_code_id) as discip_code,
+			b.discip_code_id,
+			b.designer_id,
+			(select user_kor_nm from p_users where user_id=b.designer_id) as designer_nm,
+			b.prfe_designer_id,
+			(select user_kor_nm from p_users where user_id=b.prfe_designer_id) as pre_designer_nm,
+			b.wbs_code_id,
+			(select wbs_code from p_prj_wbs_code where prj_id=#{prj_id} and wbs_code_id=b.wbs_code_id) as wbs_code,
+			(select wbs_desc from p_prj_wbs_code where prj_id=#{prj_id} and wbs_code_id=b.wbs_code_id) as wbs_desc,
+			(select wgtval from p_prj_wbs_code where prj_id=#{prj_id} and wbs_code_id=b.wbs_code_id) as wgtval,
+			(select discip_code from p_prj_discipline_info where prj_id=#{prj_id} and discip_code_id=b.discip_code_id) as discipline,
+			b.remark,
+			b.por_no,
+			b.por_issue_date,
+			b.po_no,
+			b.po_issue_date,
+			b.vendor_nm,
+			b.vendor_doc_no,
+			a.doc_id,
+			a.rev_id,
+			a.folder_id,
+			(select discip_display from p_prj_discipline_info where prj_id=#{prj_id} and discip_code_id=b.discip_code_id) as discip_display,
+			(select max(rev_id) from p_prj_document_index where prj_id = #{prj_id} and doc_id=#{doc_id} and del_yn!='Y') as rev_max
+		from p_prj_document_index a left outer join p_prj_pro_info b on a.prj_id=b.prj_id and a.doc_id=b.doc_id and a.rev_id=b.rev_id
+    	where a.prj_id=#{prj_id} and a.doc_id=#{doc_id} and a.rev_id=#{rev_id}
+    </select>
+    <select id="getBulkDocumentInfo" parameterType="PrjDocumentIndexVO" resultType="PrjDocumentIndexVO">
+		select 
+			a.doc_no,
+			(select doc_no from p_prj_document_index where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=(select FORMAT(MAX(CONVERT(INT,rev_id))-1,'000') from p_prj_document_index where prj_id=#{prj_id} and doc_id=#{doc_id})) as old_doc_no,
+			a.doc_type,
+			(select code.set_code from p_prj_code_settings code where code.prj_id = a.prj_id and  code.set_code_type = 'REVISION NUMBER' and code.set_code_id = a.rev_code_id) as rev_no,
+			a.rev_code_id,
+			a.sfile_nm,
+			a.rfile_nm,
+			a.file_type,
+			a.file_size,
+			a.attach_file_date,
+			a.title,
+			a.lock_yn,
+			(select users.user_eng_nm from p_users users where user_id=a.reg_id) as reg_nm,
+			(select users.user_eng_nm from p_users users where user_id=a.mod_id) as mod_nm,
+			(select users.user_kor_nm from p_users users where user_id=a.reg_id) as reg_kor_nm,
+			(select users.user_kor_nm from p_users users where user_id=a.mod_id) as mod_kor_nm,
+			a.reg_id,
+			a.reg_date,
+			a.mod_id,
+			a.mod_date,
+			(select discip_code from p_prj_discipline_info where prj_id=#{prj_id} and discip_code_id=b.discip_code_id) as discip_code,
+			b.discip_code_id,
+			b.designer_id,
+			(select user_kor_nm from p_users where user_id=b.designer_id) as designer_nm,
+			b.prfe_designer_id,
+			(select user_kor_nm from p_users where user_id=b.prfe_designer_id) as pre_designer_nm,
+			b.wbs_code_id,
+			(select wbs_code from p_prj_wbs_code where prj_id=#{prj_id} and wbs_code_id=b.wbs_code_id) as wbs_code,
+			(select wbs_desc from p_prj_wbs_code where prj_id=#{prj_id} and wbs_code_id=b.wbs_code_id) as wbs_desc,
+			(select wgtval from p_prj_wbs_code where prj_id=#{prj_id} and wbs_code_id=b.wbs_code_id) as wgtval,
+			(select discip_code from p_prj_discipline_info where prj_id=#{prj_id} and discip_code_id=b.discip_code_id) as discipline,
+			b.remark,
+			b.por_no,
+			b.por_issue_date,
+			b.po_no,
+			b.po_issue_date,
+			b.vendor_nm,
+			b.vendor_doc_no,
+			a.doc_id,
+			a.rev_id,
+			a.folder_id,
+			(select discip_display from p_prj_discipline_info where prj_id=#{prj_id} and discip_code_id=b.discip_code_id) as discip_display,
+			(select max(rev_id) from p_prj_document_index where prj_id = #{prj_id} and doc_id=#{doc_id} and del_yn!='Y') as rev_max
+		from p_prj_document_index a left outer join p_prj_mdc_info b on a.prj_id=b.prj_id and a.doc_id=b.doc_id and a.rev_id=b.rev_id
+    	where a.prj_id=#{prj_id} and a.doc_id=#{doc_id} and a.rev_id=#{rev_id}
+    </select>
+    <select id="getSiteDocumentInfo" parameterType="PrjDocumentIndexVO" resultType="PrjDocumentIndexVO">
+		select 
+			a.doc_no,
+			(select doc_no from p_prj_document_index where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=(select FORMAT(MAX(CONVERT(INT,rev_id))-1,'000') from p_prj_document_index where prj_id=#{prj_id} and doc_id=#{doc_id})) as old_doc_no,
+			a.doc_type,
+			(select code.set_code from p_prj_code_settings code where code.prj_id = a.prj_id and  code.set_code_type = 'REVISION NUMBER' and code.set_code_id = a.rev_code_id) as rev_no,
+			a.rev_code_id,
+			a.sfile_nm,
+			a.rfile_nm,
+			a.file_type,
+			a.file_size,
+			a.attach_file_date,
+			a.title,
+			a.lock_yn,
+			(select users.user_eng_nm from p_users users where user_id=a.reg_id) as reg_nm,
+			(select users.user_eng_nm from p_users users where user_id=a.mod_id) as mod_nm,
+			(select users.user_kor_nm from p_users users where user_id=a.reg_id) as reg_kor_nm,
+			(select users.user_kor_nm from p_users users where user_id=a.mod_id) as mod_kor_nm,
+			a.reg_id,
+			a.reg_date,
+			a.mod_id,
+			a.mod_date,
+			(select discip_code from p_prj_discipline_info where prj_id=#{prj_id} and discip_code_id=b.discip_code_id) as discip_code,
+			b.discip_code_id,
+			b.designer_id,
+			(select user_kor_nm from p_users where user_id=b.designer_id) as designer_nm,
+			b.prfe_designer_id,
+			(select user_kor_nm from p_users where user_id=b.prfe_designer_id) as pre_designer_nm,
+			b.wbs_code_id,
+			(select wbs_code from p_prj_wbs_code where prj_id=#{prj_id} and wbs_code_id=b.wbs_code_id) as wbs_code,
+			(select wbs_desc from p_prj_wbs_code where prj_id=#{prj_id} and wbs_code_id=b.wbs_code_id) as wbs_desc,
+			(select wgtval from p_prj_wbs_code where prj_id=#{prj_id} and wbs_code_id=b.wbs_code_id) as wgtval,
+			(select discip_code from p_prj_discipline_info where prj_id=#{prj_id} and discip_code_id=b.discip_code_id) as discipline,
+			b.remark,
+			(select set_code from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='DOC.CATEGORY' and set_code_id=b.category_cd_id) as category_code,
+			(select set_desc from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='DOC.CATEGORY' and set_code_id=b.category_cd_id) as category_display,
+			b.category_cd_id,
+			(select set_code from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='DOC.SIZE' and set_code_id=b.size_code_id) as size_code,
+			b.size_code_id,
+			(select set_code from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='DOC.TYPE' and set_code_id=b.doc_type_id) as doc_type_code,
+			b.doc_type_id,
+			(select discip_display from p_prj_discipline_info where prj_id=#{prj_id} and discip_code_id=b.discip_code_id) as discip_display,
+			(select max(rev_id) from p_prj_document_index where prj_id = #{prj_id} and doc_id=#{doc_id} and del_yn!='Y') as rev_max,
+			a.doc_id,
+			a.rev_id,
+			a.folder_id,
+		    (select top 1 tf.rev_no from p_prj_str_file tf where tf.prj_id=a.prj_id and tf.doc_id=a.doc_id and tf.rev_id!=a.rev_id order by tr_id desc) as p_rev
+			<!-- (select rtn_status_code_id from p_prj_str_file a join p_prj_str_info b on a.prj_id=b.prj_id and a.tr_id=b.tr_id where a.prj_id=#{prj_id} and a.doc_id=#{doc_id} and a.rev_id=#{rev_id} and b.inout='IN') as rtn_status_code_id -->
+		from p_prj_document_index a left outer join p_prj_sdc_info b on a.prj_id=b.prj_id and a.doc_id=b.doc_id and a.rev_id=b.rev_id
+    	where a.prj_id=#{prj_id} and a.doc_id=#{doc_id} and a.rev_id=#{rev_id}
+    </select>
+    <select id="getCorrDocumentInfo" parameterType="PrjDocumentIndexVO" resultType="PrjDocumentIndexVO">
+		select 
+			a.doc_no,
+			a.doc_type,
+			a.sfile_nm,
+			a.rfile_nm,
+			a.file_type,
+			a.file_size,
+			a.attach_file_date,
+			a.title,
+			a.lock_yn,
+			(select users.user_eng_nm from p_users users where user_id=a.reg_id) as reg_nm,
+			(select users.user_eng_nm from p_users users where user_id=a.mod_id) as mod_nm,
+			(select users.user_kor_nm from p_users users where user_id=a.reg_id) as reg_kor_nm,
+			(select users.user_kor_nm from p_users users where user_id=a.mod_id) as mod_kor_nm,
+			a.reg_id,
+			a.reg_date,
+			a.mod_id,
+			a.mod_date,
+			b.in_out,
+			b.doc_date,
+			b.sender_code_id,
+			(select set_code from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='CORRESPONDENCE_FROM' and set_code_id=b.sender_code_id) as sender_code,
+			b.receiver_code_id,
+			(select set_code from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='CORRESPONDENCE_FROM' and set_code_id=b.receiver_code_id) as receiver_code,
+			b.doc_type_code_id,
+			(select set_code from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='CORRESPONDENCE_TYPE' and set_code_id=b.doc_type_code_id) as doc_type_code,
+			b.serial,
+			b.corr_no,
+			b.sys_corr_no,
+			b.send_recv_date,
+			b.ref_corr_doc_id,
+			b.responsibility_code_id,
+			(select set_code from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='CORRESPONDENCE RESPONSIBILITY' and set_code_id=b.responsibility_code_id) as responsibility_code,
+			b.replyreqdate,
+			b.remark,
+			b.ref_grp,
+			b.person_in_charge_id,
+    		b.item_info_code_id,
+			(select set_code from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='CORRESPONDENCE ITEM' and set_code_id=b.item_info_code_id) as item_info_code,
+    		b.item_note,
+    		a.doc_id,
+			a.rev_id,
+			a.folder_id
+		from p_prj_document_index a left outer join p_prj_cordoc_info b on a.prj_id=b.prj_id and a.doc_id=b.doc_id and a.rev_id=b.rev_id
+    	where a.prj_id=#{prj_id} and a.doc_id=#{doc_id} and a.rev_id=#{rev_id}
+    </select>
+    <select id="getGeneralDocumentInfo" parameterType="PrjDocumentIndexVO" resultType="PrjDocumentIndexVO">
+		select 
+			a.doc_no,
+			(select code.set_code from p_prj_code_settings code where code.prj_id = a.prj_id and  code.set_code_type = 'REVISION NUMBER' and code.set_code_id = a.rev_code_id) as rev_no,
+			a.rev_code_id,
+			a.sfile_nm,
+			a.rfile_nm,
+			a.file_type,
+			a.file_size,
+			a.attach_file_date,
+			a.title,
+			a.lock_yn,
+			(select users.user_eng_nm from p_users users where user_id=a.reg_id) as reg_nm,
+			(select users.user_eng_nm from p_users users where user_id=a.mod_id) as mod_nm,
+			(select users.user_kor_nm from p_users users where user_id=a.reg_id) as reg_kor_nm,
+			(select users.user_kor_nm from p_users users where user_id=a.mod_id) as mod_kor_nm,
+			a.reg_id,
+			a.reg_date,
+			a.mod_id,
+			a.mod_date,
+    		a.doc_id,
+			a.rev_id,
+			a.folder_id,
+			(select max(rev_id) from p_prj_document_index where prj_id = #{prj_id} and doc_id=#{doc_id} and del_yn!='Y') as rev_max
+		from p_prj_document_index a left outer join p_prj_gendoc_info b on a.prj_id=b.prj_id and a.doc_id=b.doc_id and a.rev_id=b.rev_id
+    	where a.prj_id=#{prj_id} and a.doc_id=#{doc_id} and a.rev_id=#{rev_id}
+    </select>
+    <select id="getCorrDocNo" parameterType="PrjDocumentIndexVO" resultType="String">
+		select 
+			a.doc_no
+		from p_prj_document_index a left outer join p_prj_cordoc_info b on a.prj_id=b.prj_id and a.doc_id=b.doc_id and a.rev_id=b.rev_id
+    	where a.prj_id=#{prj_id} and a.doc_id=#{doc_id} and a.rev_id='001'
+    </select>
+    <select id="getCorrSerialLength" parameterType="PrjDocumentIndexVO" resultType="int">
+		select top 1 LEN(set_val4) from p_prj_code_settings ppcs where prj_id=#{prj_id} AND set_code_type = 'CORRESPONDENCE_FROM'
+	</select>
+    <select id="getCorrSerial" parameterType="PrjDocumentIndexVO" resultType="String">
+		select ISNULL((SELECT TOP 1 (FORMAT(CONVERT(int,dbo.fn_getNumber(RIGHT(ppci.corr_no,CHARINDEX('-', REVERSE(ppci.corr_no))-1)))+1,'D${corrLength}')) as serialMax
+				from p_prj_cordoc_info ppci
+				where prj_id=#{prj_id} and 
+					 ppci.corr_no like CONCAT(
+						(select set_code from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='CORRESPONDENCE_FROM' and set_code_id=#{sender_code_id}),'-',
+						(select set_code from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='CORRESPONDENCE_FROM' and set_code_id=#{receiver_code_id}),'-',
+						(select set_code from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='CORRESPONDENCE_TYPE' and set_code_id=#{doc_type_code_id}),'-%'
+					)
+				ORDER BY serialMax desc),(select top 1 set_val4 from p_prj_code_settings ppcs where prj_id=#{prj_id} AND set_code_type = 'CORRESPONDENCE_FROM')
+			) AS serial
+	</select>
+    <insert id="insertDocumentIndex" parameterType="PrjDocumentIndexVO">
+    	insert into p_prj_document_index(prj_id,doc_id,rev_id,folder_id,doc_no,doc_type,title,del_yn,unread_yn,lock_yn,reg_id,reg_date,mod_id,mod_date)
+    	values(#{prj_id},(select ISNULL(FORMAT(MAX(CONVERT(INT,doc_id))+1,'0000000000'),'0000000001') from p_prj_document_index where prj_id=#{prj_id}),'001',#{folder_id},#{doc_no},#{doc_type},#{title},'N','Y','N',#{reg_id},#{reg_date},#{reg_id},#{reg_date})
+    	<selectKey keyProperty="doc_id" resultType="String">
+			select FORMAT(MAX(CONVERT(INT,doc_id)),'0000000000') from p_prj_document_index where prj_id=#{prj_id}
+		</selectKey>
+    </insert>
+    <insert id="insertDocumentIndexTRCover" parameterType="PrjDocumentIndexVO">
+    	insert into p_prj_document_index(prj_id,doc_id,rev_id,folder_id,doc_no,doc_type,rev_code_id,sfile_nm,rfile_nm,file_type,file_size,attach_file_date,title,del_yn,unread_yn,lock_yn,trans_ref_doc_id,reg_id,reg_date,mod_id,mod_date)
+    	values(#{prj_id},(select ISNULL(FORMAT(MAX(CONVERT(INT,doc_id))+1,'0000000000'),'0000000001') from p_prj_document_index where prj_id=#{prj_id}),'001',#{folder_id},#{doc_no},#{doc_type},#{rev_code_id},#{sfile_nm},#{rfile_nm},#{file_type},#{file_size},#{attach_file_date},#{title},'N','Y','N','COVER',#{reg_id},#{reg_date},#{reg_id},#{reg_date})
+    	<selectKey keyProperty="doc_id" resultType="String">
+			select FORMAT(MAX(CONVERT(INT,doc_id)),'0000000000') from p_prj_document_index where prj_id=#{prj_id}
+		</selectKey>
+    </insert>
+	<insert id="insertCopyDocumentIndex" parameterType="PrjDocumentIndexVO">
+		insert p_prj_document_index(prj_id,doc_id,rev_id,folder_id,doc_no,doc_type,rev_code_id,sfile_nm,rfile_nm,file_type,file_size,title,del_yn,unread_yn,lock_yn,attach_file_date,trans_ref_doc_id,reg_id,reg_date,mod_id,mod_date)
+		select prj_id,(select FORMAT(MAX(CONVERT(INT,doc_id))+1,'0000000000') from p_prj_document_index where prj_id=#{prj_id}),rev_id,#{folder_id},doc_no,doc_type,rev_code_id,sfile_nm,rfile_nm,file_type,file_size,title,del_yn,unread_yn,lock_yn,attach_file_date,#{doc_id},#{reg_id},#{reg_date},#{reg_id},#{reg_date}
+		from p_prj_document_index
+		where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id}
+    </insert>
+    <update id="updateDocumentIndex" parameterType="PrjDocumentIndexVO">
+    	update p_prj_document_index
+    	set doc_no=#{doc_no},
+    		<!-- doc_type=#{doc_type}, -->
+    		title=#{title},
+    		mod_id=#{mod_id},
+    		mod_date=#{mod_date}
+    	where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id}
+    </update>
+    <update id="updateDocumentIndexFileAttach" parameterType="PrjDocumentIndexVO">
+    	update p_prj_document_index
+    	set doc_no=#{doc_no},
+    		sfile_nm=#{sfile_nm},
+    		rfile_nm=#{rfile_nm},
+    		file_type=#{file_type},
+    		file_size=#{file_size},
+    		title=#{title},
+    		attach_file_date=#{mod_date},
+    		mod_id=#{mod_id},
+    		mod_date=#{mod_date}
+    	where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id}
+    </update>
+    <update id="updateDocumentIndexFileAttachProcAndBulk" parameterType="PrjDocumentIndexVO">
+    	update p_prj_document_index
+    	set doc_no=#{doc_no},
+    		rev_code_id=#{rev_code_id},
+    		sfile_nm=#{sfile_nm},
+    		rfile_nm=#{rfile_nm},
+    		file_type=#{file_type},
+    		file_size=#{file_size},
+    		title=#{title},
+    		attach_file_date=#{mod_date},
+    		mod_id=#{mod_id},
+    		mod_date=#{mod_date}
+    	where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id}
+    </update>
+    <insert id="insertDocumentIndexForCorr" parameterType="PrjDocumentIndexVO">
+    	insert into p_prj_document_index(prj_id,doc_id,rev_id,folder_id,doc_no,doc_type,sfile_nm,rfile_nm,file_type,file_size,title,del_yn,unread_yn,lock_yn,attach_file_date,reg_id,reg_date,mod_id,mod_date)
+    	values(#{prj_id},(select ISNULL(FORMAT(MAX(CONVERT(INT,doc_id))+1,'0000000000'),'0000000001') from p_prj_document_index where prj_id=#{prj_id}),'001',#{folder_id},#{doc_no},#{doc_type},CONCAT((select FORMAT(MAX(CONVERT(INT,doc_id))+1,'0000000000') from p_prj_document_index where prj_id=#{prj_id}),'_001.',#{file_type}),#{rfile_nm},#{file_type},#{file_size},#{title},'N','Y','N',#{reg_date},#{reg_id},#{reg_date},#{reg_id},#{reg_date})
+    	<selectKey keyProperty="doc_id" resultType="String">
+			select FORMAT(MAX(CONVERT(INT,doc_id)),'0000000000') from p_prj_document_index where prj_id=#{prj_id}
+		</selectKey>
+    </insert>
+    <update id="updateDocumentIndexForCorr" parameterType="PrjDocumentIndexVO">
+    	update p_prj_document_index
+    	set doc_no=#{doc_no},
+    		sfile_nm=#{sfile_nm},
+    		rfile_nm=#{rfile_nm},
+    		file_type=#{file_type},
+    		file_size=#{file_size},
+    		title=#{title},
+    		attach_file_date=#{mod_date},
+    		mod_id=#{mod_id},
+    		mod_date=#{mod_date}
+    	where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id}
+    </update>
+    <insert id="updateRevisionOfDocumentIndex" parameterType="PrjDocumentIndexVO">
+		INSERT INTO p_prj_document_index (prj_id,doc_id,rev_id,folder_id,doc_no,doc_type,rev_code_id,sfile_nm,rfile_nm,file_type,file_size,title,del_yn,unread_yn,lock_yn,attach_file_date,reg_id,reg_date,mod_id,mod_date)
+		SELECT prj_id,doc_id,(select FORMAT(MAX(CONVERT(INT,rev_id))+1,'000') from p_prj_document_index where prj_id=#{prj_id} and doc_id=#{doc_id}),folder_id,doc_no,doc_type,#{rev_code_id},CONCAT(#{doc_id},'_',(select FORMAT(MAX(CONVERT(INT,rev_id))+1,'000') from p_prj_document_index where prj_id=#{prj_id} and doc_id=#{doc_id}),'.',#{file_type}),#{rfile_nm},#{file_type},#{file_size},title,del_yn,unread_yn,lock_yn,#{attach_file_date},#{reg_id},#{reg_date},#{reg_id},#{reg_date}
+		FROM p_prj_document_index
+		WHERE prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{origin_rev_id}
+		<selectKey keyProperty="rev_id" resultType="String">
+			select FORMAT(MAX(CONVERT(INT,rev_id)),'000') from p_prj_document_index where prj_id=#{prj_id} and doc_id=#{doc_id}
+		</selectKey>
+    </insert>
+    <insert id="insertEngInfo" parameterType="PrjDocumentIndexVO">
+    	insert into p_prj_eng_info(prj_id,doc_id,rev_id,folder_id,discip_code_id,designer_id,prfe_designer_id,wbs_code_id,remark,category_cd_id,size_code_id,doc_type_id,reg_id,reg_date,mod_id,mod_date)
+    	values(#{prj_id},#{doc_id},'001',#{folder_id},#{discip_code_id},#{designer_id},#{prfe_designer_id},#{wbs_code_id},#{remark},#{category_cd_id},#{size_code_id},#{doc_type_id},#{reg_id},#{reg_date},#{reg_id},#{reg_date})
+    </insert>
+    <update id="updateEngInfo" parameterType="PrjDocumentIndexVO">
+    	update p_prj_eng_info
+    	set discip_code_id=#{discip_code_id},
+    		designer_id=#{designer_id},
+    		prfe_designer_id=#{prfe_designer_id},
+    		wbs_code_id=#{wbs_code_id},
+    		remark=#{remark},
+    		category_cd_id=#{category_cd_id},
+    		size_code_id=#{size_code_id},
+    		doc_type_id=#{doc_type_id},
+    		mod_id=#{mod_id},
+    		mod_date=#{mod_date}
+    	where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id}
+    </update>
+    <insert id="insertEngInfoForUpdateRevision" parameterType="PrjDocumentIndexVO">
+    	INSERT INTO p_prj_eng_info(prj_id,doc_id,rev_id,folder_id,discip_code_id,designer_id,prfe_designer_id,wbs_code_id,remark,category_cd_id,size_code_id,doc_type_id,reg_id,reg_date,mod_id,mod_date)
+    	SELECT prj_id,doc_id,#{rev_id},folder_id,discip_code_id,designer_id,prfe_designer_id,wbs_code_id,remark,category_cd_id,size_code_id,doc_type_id,#{reg_id},#{reg_date},#{reg_id},#{reg_date}
+		FROM p_prj_eng_info
+		WHERE prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{origin_rev_id}
+    </insert>
+    
+    <insert id="insertVendorInfo" parameterType="PrjDocumentIndexVO">
+    	insert into p_prj_vdr_info(prj_id,doc_id,rev_id,folder_id,discip_code_id,designer_id,prfe_designer_id,wbs_code_id,remark,po_doc_no,po_doc_title,vendor_nm,design_part,category_cd_id,size_code_id,doc_type_id,reg_id,reg_date,mod_id,mod_date)
+    	values(#{prj_id},#{doc_id},'001',#{folder_id},#{discip_code_id},#{designer_id},#{prfe_designer_id},#{wbs_code_id},#{remark},#{po_doc_no},#{po_doc_title},#{vendor_nm},#{design_part},#{category_cd_id},#{size_code_id},#{doc_type_id},#{reg_id},#{reg_date},#{reg_id},#{reg_date})
+    </insert>
+    <update id="updateVendorInfo" parameterType="PrjDocumentIndexVO">
+    	update p_prj_vdr_info
+    	set discip_code_id=#{discip_code_id},
+    		designer_id=#{designer_id},
+    		prfe_designer_id=#{prfe_designer_id},
+    		wbs_code_id=#{wbs_code_id},
+    		remark=#{remark},
+    		po_doc_no=#{po_doc_no},
+    		po_doc_title=#{po_doc_title},
+    		vendor_nm=#{vendor_nm},
+    		design_part=#{design_part},
+    		category_cd_id=#{category_cd_id},
+    		size_code_id=#{size_code_id},
+    		doc_type_id=#{doc_type_id},
+    		mod_id=#{mod_id},
+    		mod_date=#{mod_date}
+    	where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id}
+    </update>
+    <insert id="insertVendorInfoForUpdateRevision" parameterType="PrjDocumentIndexVO">
+    	INSERT INTO p_prj_vdr_info(prj_id,doc_id,rev_id,folder_id,discip_code_id,designer_id,prfe_designer_id,wbs_code_id,remark,po_doc_no,po_doc_title,vendor_nm,design_part,category_cd_id,size_code_id,doc_type_id,reg_id,reg_date,mod_id,mod_date)
+    	SELECT prj_id,doc_id,#{rev_id},folder_id,discip_code_id,designer_id,prfe_designer_id,wbs_code_id,remark,po_doc_no,po_doc_title,vendor_nm,design_part,category_cd_id,size_code_id,doc_type_id,#{reg_id},#{reg_date},#{reg_id},#{reg_date}
+		FROM p_prj_vdr_info
+		WHERE prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{origin_rev_id}
+    </insert>
+    
+    <insert id="insertProcInfo" parameterType="PrjDocumentIndexVO">
+    	insert into p_prj_pro_info(prj_id,doc_id,rev_id,folder_id,discip_code_id,designer_id,prfe_designer_id,wbs_code_id,remark,por_no,por_issue_date,po_no,po_issue_date,vendor_nm,vendor_doc_no,reg_id,reg_date,mod_id,mod_date)
+    	values(#{prj_id},#{doc_id},'001',#{folder_id},#{discip_code_id},#{designer_id},#{prfe_designer_id},#{wbs_code_id},#{remark},#{por_no},#{por_issue_date},#{po_no},#{po_issue_date},#{vendor_nm},#{vendor_doc_no},#{reg_id},#{reg_date},#{reg_id},#{reg_date})
+    </insert>
+    <update id="updateProcInfo" parameterType="PrjDocumentIndexVO">
+    	update p_prj_pro_info
+    	set discip_code_id=#{discip_code_id},
+    		designer_id=#{designer_id},
+    		prfe_designer_id=#{prfe_designer_id},
+    		wbs_code_id=#{wbs_code_id},
+    		remark=#{remark},
+    		por_no=#{por_no},
+    		por_issue_date=#{por_issue_date},
+    		po_no=#{po_no},
+    		po_issue_date=#{po_issue_date},
+    		vendor_nm=#{vendor_nm},
+    		vendor_doc_no=#{vendor_doc_no},
+    		mod_id=#{mod_id},
+    		mod_date=#{mod_date}
+    	where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id}
+    </update>
+    <insert id="insertProcInfoForUpdateRevision" parameterType="PrjDocumentIndexVO">
+    	INSERT INTO p_prj_pro_info(prj_id,doc_id,rev_id,folder_id,discip_code_id,designer_id,prfe_designer_id,wbs_code_id,remark,por_no,por_issue_date,po_no,po_issue_date,vendor_nm,vendor_doc_no,reg_id,reg_date,mod_id,mod_date)
+    	SELECT prj_id,doc_id,#{rev_id},folder_id,discip_code_id,designer_id,prfe_designer_id,wbs_code_id,remark,por_no,por_issue_date,po_no,po_issue_date,vendor_nm,vendor_doc_no,#{reg_id},#{reg_date},#{reg_id},#{reg_date}
+		FROM p_prj_pro_info
+		WHERE prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{origin_rev_id}
+    </insert>
+    
+    <insert id="insertBulkInfo" parameterType="PrjDocumentIndexVO">
+    	insert into p_prj_mdc_info(prj_id,doc_id,rev_id,folder_id,discip_code_id,designer_id,prfe_designer_id,wbs_code_id,remark,por_no,por_issue_date,po_no,po_issue_date,vendor_nm,vendor_doc_no,reg_id,reg_date,mod_id,mod_date)
+    	values(#{prj_id},#{doc_id},'001',#{folder_id},#{discip_code_id},#{designer_id},#{prfe_designer_id},#{wbs_code_id},#{remark},#{por_no},#{por_issue_date},#{po_no},#{po_issue_date},#{vendor_nm},#{vendor_doc_no},#{reg_id},#{reg_date},#{reg_id},#{reg_date})
+    </insert>
+    <update id="updateBulkInfo" parameterType="PrjDocumentIndexVO">
+    	update p_prj_mdc_info
+    	set discip_code_id=#{discip_code_id},
+    		designer_id=#{designer_id},
+    		prfe_designer_id=#{prfe_designer_id},
+    		wbs_code_id=#{wbs_code_id},
+    		remark=#{remark},
+    		por_no=#{por_no},
+    		por_issue_date=#{por_issue_date},
+    		po_no=#{po_no},
+    		po_issue_date=#{po_issue_date},
+    		vendor_nm=#{vendor_nm},
+    		vendor_doc_no=#{vendor_doc_no},
+    		mod_id=#{mod_id},
+    		mod_date=#{mod_date}
+    	where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id}
+    </update>
+    <insert id="insertBulkInfoForUpdateRevision" parameterType="PrjDocumentIndexVO">
+    	INSERT INTO p_prj_mdc_info(prj_id,doc_id,rev_id,folder_id,discip_code_id,designer_id,prfe_designer_id,wbs_code_id,remark,por_no,por_issue_date,po_no,po_issue_date,vendor_nm,vendor_doc_no,reg_id,reg_date,mod_id,mod_date)
+    	SELECT prj_id,doc_id,#{rev_id},folder_id,discip_code_id,designer_id,prfe_designer_id,wbs_code_id,remark,por_no,por_issue_date,po_no,po_issue_date,vendor_nm,vendor_doc_no,#{reg_id},#{reg_date},#{reg_id},#{reg_date}
+		FROM p_prj_mdc_info
+		WHERE prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{origin_rev_id}
+    </insert>
+    
+    <insert id="insertSiteInfo" parameterType="PrjDocumentIndexVO">
+    	insert into p_prj_sdc_info(prj_id,doc_id,rev_id,folder_id,discip_code_id,designer_id,prfe_designer_id,wbs_code_id,remark,category_cd_id,size_code_id,doc_type_id,reg_id,reg_date,mod_id,mod_date)
+    	values(#{prj_id},#{doc_id},'001',#{folder_id},#{discip_code_id},#{designer_id},#{prfe_designer_id},#{wbs_code_id},#{remark},#{category_cd_id},#{size_code_id},#{doc_type_id},#{reg_id},#{reg_date},#{reg_id},#{reg_date})
+    </insert>
+    <update id="updateSiteInfo" parameterType="PrjDocumentIndexVO">
+    	update p_prj_sdc_info
+    	set discip_code_id=#{discip_code_id},
+    		designer_id=#{designer_id},
+    		prfe_designer_id=#{prfe_designer_id},
+    		wbs_code_id=#{wbs_code_id},
+    		remark=#{remark},
+    		category_cd_id=#{category_cd_id},
+    		size_code_id=#{size_code_id},
+    		doc_type_id=#{doc_type_id},
+    		mod_id=#{mod_id},
+    		mod_date=#{mod_date}
+    	where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id}
+    </update>
+    <insert id="insertSiteInfoForUpdateRevision" parameterType="PrjDocumentIndexVO">
+    	INSERT INTO p_prj_sdc_info(prj_id,doc_id,rev_id,folder_id,discip_code_id,designer_id,prfe_designer_id,wbs_code_id,remark,category_cd_id,size_code_id,doc_type_id,reg_id,reg_date,mod_id,mod_date)
+    	SELECT prj_id,doc_id,#{rev_id},folder_id,discip_code_id,designer_id,prfe_designer_id,wbs_code_id,remark,category_cd_id,size_code_id,doc_type_id,#{reg_id},#{reg_date},#{reg_id},#{reg_date}
+		FROM p_prj_sdc_info
+		WHERE prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{origin_rev_id}
+    </insert>
+    
+    <!-- getRefGrp prj_id 구하는것 빼면 안됨 -->
+    <select id="getRefGrp" parameterType="PrjDocumentIndexVO" resultType="PrjDocumentIndexVO">
+		select prj_id,ref_corr_doc_id,ref_grp from p_prj_cordoc_info where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id='001'
+    </select>
+    <update id="updateRefGrp" parameterType="PrjDocumentIndexVO">
+    	update p_prj_cordoc_info
+    	set ref_grp=#{ref_grp}
+    	where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id='001'
+    </update>
+    <insert id="insertCorrInfo" parameterType="PrjDocumentIndexVO">
+    	insert into p_prj_cordoc_info(prj_id,doc_id,rev_id,folder_id,in_out,doc_date,sender_code_id,receiver_code_id,doc_type_code_id,corr_no,sys_corr_no,ref_corr_doc_id,responsibility_code_id,replyreqdate,send_recv_date,person_in_charge_id,remark,item_info_code_id,item_note,ref_grp,reg_id,reg_date,mod_id,mod_date)
+    	values(#{prj_id},#{doc_id},'001',#{folder_id},#{in_out},#{doc_date},#{sender_code_id},#{receiver_code_id},#{doc_type_code_id},#{corr_no},#{sys_corr_no},#{ref_corr_doc_id},#{responsibility_code_id},#{replyreqdate},#{send_recv_date},#{person_in_charge_id},#{remark},#{item_info_code_id},#{item_note},#{ref_grp},#{reg_id},#{reg_date},#{mod_id},#{mod_date})
+    </insert>
+    <update id="updateCorrInfo" parameterType="PrjDocumentIndexVO">
+    	update p_prj_cordoc_info
+    	set in_out=#{in_out},
+    		doc_date=#{doc_date},
+    		sender_code_id=#{sender_code_id},
+    		receiver_code_id=#{receiver_code_id},
+    		doc_type_code_id=#{doc_type_code_id},
+    		corr_no=#{corr_no},
+    		ref_corr_doc_id=#{ref_corr_doc_id},
+    		responsibility_code_id=#{responsibility_code_id},
+    		replyreqdate=#{replyreqdate},
+    		send_recv_date=#{send_recv_date},
+    		person_in_charge_id=#{person_in_charge_id},
+    		remark=#{remark},
+    		item_info_code_id=#{item_info_code_id},
+    		item_note=#{item_note},
+    		mod_id=#{mod_id},
+    		mod_date=#{mod_date}
+    	where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id}
+    </update>
+    <update id="updateCorrInfoSendDateByFirstEmailing" parameterType="PrjDocumentIndexVO">
+    	update p_prj_cordoc_info
+    	set send_recv_date=#{send_recv_date},
+    		mod_id=#{mod_id},
+    		mod_date=#{mod_date}
+    	where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id}
+    </update>
+    <insert id="insertGeneralInfo" parameterType="PrjDocumentIndexVO">
+    	insert into p_prj_gendoc_info(prj_id,doc_id,rev_id,folder_id,reg_id,reg_date,mod_id,mod_date)
+    	values(#{prj_id},#{doc_id},'001',#{folder_id},#{reg_id},#{reg_date},#{reg_id},#{reg_date})
+    </insert>
+    <update id="updateGeneralInfo" parameterType="PrjDocumentIndexVO">
+    	update p_prj_gendoc_info
+    	set mod_id=#{mod_id},
+    		mod_date=#{mod_date}
+    	where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id}
+    </update>
+    <insert id="insertGeneralInfoForUpdateRevision" parameterType="PrjDocumentIndexVO">
+    	INSERT INTO p_prj_gendoc_info(prj_id,doc_id,rev_id,folder_id,reg_id,reg_date,mod_id,mod_date)
+    	SELECT prj_id,doc_id,#{rev_id},folder_id,#{reg_id},#{reg_date},#{reg_id},#{reg_date}
+		FROM p_prj_gendoc_info
+		WHERE prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{origin_rev_id}
+    </insert>
+    <select id="getCorrSerialMax" parameterType="PrjDocumentIndexVO" resultType="int">
+		select isnull(max(serial),0) from p_prj_cordoc_info where prj_id=#{prj_id} and sender_code_id=#{sender_code_id} and receiver_code_id=#{receiver_code_id} and doc_type_code_id=#{doc_type_code_id}
+    </select>
+    <select id="getCorrRefDocList" parameterType="PrjDocumentIndexVO" resultType="PrjDocumentIndexVO">
+	    select 'Y' as refYN,
+				b.doc_id,
+				b.rev_id,
+				a.in_out,
+				b.doc_no,
+				b.title,
+				a.doc_date,
+				(select set_code from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='CORRESPONDENCE RESPONSIBILITY' and set_code_id=a.responsibility_code_id) as responsibility_code,
+				a.mod_date
+		from p_prj_cordoc_info a join p_prj_document_index b on a.prj_id=b.prj_id and a.doc_id=b.doc_id and a.rev_id=b.rev_id and a.folder_id=b.folder_id
+		where a.prj_id = #{prj_id} and b.doc_type=#{doc_type} and b.del_yn!='Y'
+		and a.doc_id not in (	select doc_id
+							from p_prj_cordoc_info
+							where prj_id = #{prj_id}
+							and doc_id not in (select value as ref_corr_doc_id   from STRING_SPLIT(dbo.fn_getRefDocId(#{prj_id}), ',') ))
+	    union all								 
+		select 'N' as refYN,
+				b.doc_id,
+				b.rev_id,
+				a.in_out,
+				b.doc_no,
+				b.title,
+				a.doc_date,
+				(select set_code from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='CORRESPONDENCE RESPONSIBILITY' and set_code_id=a.responsibility_code_id) as responsibility_code,
+				a.mod_date
+		from p_prj_cordoc_info a join p_prj_document_index b on a.prj_id=b.prj_id and a.doc_id=b.doc_id and a.rev_id=b.rev_id and a.folder_id=b.folder_id
+		where a.prj_id = #{prj_id} and b.doc_type=#{doc_type} and b.del_yn!='Y'
+		and a.doc_id not in (select value as ref_corr_doc_id   from STRING_SPLIT(dbo.fn_getRefDocId(#{prj_id}), ',') )
+    </select>
+    <select id="getCorrHistory" parameterType="PrjDocumentIndexVO" resultType="PrjDocumentIndexVO">
+	    select b.prj_id,b.email_send_date, a.*
+		from p_prj_cordoc_info a
+		       LEFT OUTER JOIN p_prj_email_send_info b on a.prj_id = b.prj_id and a.sys_corr_no = b.user_data00
+		where a.prj_id = #{prj_id}
+		and a.ref_grp = #{ref_grp}
+		order by a.reg_date asc
+	    <!-- (select 'O' as in_out,user_data00,reg_date from p_prj_email_send_info
+    	where prj_id=#{prj_id} and user_data00 in (select sys_corr_no from p_prj_cordoc_info where prj_id=#{prj_id} and ref_grp=#{ref_grp} and in_out='O'))
+		UNION ALL
+		(select 'I' as in_out,sys_corr_no,reg_date from p_prj_cordoc_info where prj_id=#{prj_id} and ref_grp=#{ref_grp} and in_out='I')
+		order by reg_date asc -->
+    </select>
+    <select id="getCorrNoSearch" parameterType="PrjDocumentIndexVO" resultType="PrjDocumentIndexVO">
+		select 
+			a.in_out,
+			b.doc_no,
+			b.title,
+			a.doc_date,
+			(select set_code from p_prj_code_settings where prj_id=#{prj_id} and set_code_type='CORRESPONDENCE RESPONSIBILITY' and set_code_id=a.responsibility_code_id) as responsibility_code,
+			a.originator,
+			a.mod_date
+		from p_prj_cordoc_info a join p_prj_document_index b on a.prj_id=b.prj_id and a.doc_id=b.doc_id and a.rev_id=b.rev_id and a.folder_id=b.folder_id where a.prj_id=#{prj_id}
+		<if test='corr_no != ""'>
+			and corr_no like CONCAT('%',#{corr_no},'%')
+		</if>
+    </select>
+    <select id="getCorrSerialExistYN" parameterType="PrjDocumentIndexVO" resultType="int">
+		select count(*) from p_prj_cordoc_info where prj_id=#{prj_id} and sender_code_id=#{sender_code_id} and receiver_code_id=#{receiver_code_id} and doc_type_code_id=#{doc_type_code_id} and serial=#{serial}
+	</select>
+    <delete id="deleteDocumentInTRAFolder" parameterType="PrjDocumentIndexVO">
+    	delete from p_prj_document_index
+    	where prj_id=#{prj_id} and folder_id=#{folder_id}
+    </delete>
+	<select id="getUsedRevCodeId" resultType="PrjDocumentIndexVO" parameterType="PrjDocumentIndexVO">
+		select rev_code_id 
+		from p_prj_document_index
+		where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_code_id is not NULL and del_yn!='Y'
+    </select>
+	
+	
+<!--     <insert id="insertDCI" parameterType="PrjDocumentIndexVO"> -->
+<!--     	INSERT INTO p_prj_document_index (prj_id,doc_id,doc_no,rev_id,folder_id) -->
+<!--     	VALUES(#{prj_id},#{doc_id},#{doc_no},#{rev_id},#{folder_id}) -->
+    	
+<!--     </insert> -->
+    
+    
+    <select id="getDisciplineDisplay" parameterType="PrjDocumentIndexVO" resultType="String">
+	    SELECT D1.discip_display
+		FROM (p_prj_discipline_info D1 LEFT OUTER JOIN p_prj_discipline_folder_info D2 ON D1.prj_id = D2.prj_id AND D1.discip_code_id = D2.discip_code_id)
+				LEFT OUTER JOIN p_prj_folder_info F ON (D1.prj_id = F.prj_id AND (F.folder_path LIKE CONCAT('%>',D2.discip_folder_id,'>%') OR F.folder_id = D2.discip_folder_id))
+		WHERE D1.prj_id = #{prj_id} and (F.folder_path LIKE #{concatFolderPath} OR F.folder_id = #{folder_id})
+		GROUP BY D1.discip_display
+    </select>
+    
+     <select id="getDiscipline_DRN" parameterType="PrjDocumentIndexVO" resultType="String">
+	    SELECT D1.discip_code
+		FROM (p_prj_discipline_info D1 LEFT OUTER JOIN p_prj_discipline_folder_info D2 ON D1.prj_id = D2.prj_id AND D1.discip_code_id = D2.discip_code_id)
+				LEFT OUTER JOIN p_prj_folder_info F ON (D1.prj_id = F.prj_id AND (F.folder_path LIKE CONCAT('%>',D2.discip_folder_id,'>%') OR F.folder_id = D2.discip_folder_id))
+		WHERE D1.prj_id = #{prj_id} and (F.folder_path LIKE #{concatFolderPath} OR F.folder_id = #{folder_id})
+		GROUP BY D1.discip_code
+    </select>
+    
+    
+    <select id="getDiscipDisplay" parameterType="PrjDocumentIndexVO" resultType="String">
+		<!-- docDownload 파일명을 위한 쿼리문 -->
+	    SELECT discip_display
+		FROM p_prj_discipline_info 
+		WHERE prj_id = #{prj_id} AND discip_code_id = #{discip}
+    </select>
+    
+    
+    <select id="getDiscipDisplayList" parameterType="PrjDocumentIndexVO" resultType="String">
+	    SELECT DISTINCT a.discip_display 
+		FROM p_prj_discipline_info a join p_prj_discipline_folder_info b on (a.prj_id = b.prj_id and a.discip_code_id = b.discip_code_id)
+		     JOIN p_prj_folder_info ppfi ON (b.prj_id = ppfi.prj_id and b.discip_folder_id = ppfi.folder_id)
+		WHERE a.prj_id = #{prj_id} and #{folder_id} IN (select value from string_split(ppfi.folder_path,'>')  )
+    </select>
+    
+    
+    
+    <select id="getDciList_DCI" parameterType="PrjDocumentIndexVO" resultType="PrjDocumentIndexVO">
+		SELECT a.doc_id,a.rev_id, doc_no, a.title ,category_cd_id , wbs_code_id, pu.user_kor_nm as designer_id,remark,a.file_size , a1.*
+		FROM p_prj_document_index a LEFT OUTER JOIN  p_prj_eng_info a1 ON a.prj_id = a1.prj_id AND a.doc_id = a1.doc_id AND a1.rev_id = a.rev_id
+			LEFT OUTER JOIN p_users pu ON (a1.designer_id = pu.user_id),
+				(select doc_id, max(rev_id) as rev_id from p_prj_document_index
+				 where prj_id = #{prj_id} and folder_id = #{folder_id} and del_yn = 'N'
+				 group by doc_id) b
+		WHERE	a.prj_id = #{prj_id}
+			AND a.folder_id = #{folder_id}
+			AND a.doc_id = b.doc_id
+			AND a.rev_id = b.rev_id
+		ORDER BY a.mod_date,a.doc_id, a.rev_id, doc_no
+    </select>
+    
+    <select id="getDciList_VDCI" parameterType="PrjDocumentIndexVO" resultType="PrjDocumentIndexVO">
+		SELECT a.doc_id,a.rev_id, doc_no, a.title ,category_cd_id , wbs_code_id, pu.user_kor_nm as designer_id,remark,a.file_size , a1.*
+		FROM p_prj_document_index a LEFT OUTER JOIN p_prj_vdr_info a1 ON a.prj_id = a1.prj_id AND a.doc_id = a1.doc_id AND a1.rev_id = a.rev_id
+			LEFT OUTER JOIN p_users pu ON (a1.designer_id = pu.user_id),
+				(select doc_id, max(rev_id) as rev_id from p_prj_document_index
+				 where prj_id = #{prj_id} and folder_id = #{folder_id} and del_yn = 'N'
+				 group by doc_id) b
+		WHERE	a.prj_id = #{prj_id}
+			AND a.folder_id = #{folder_id}
+			AND a.doc_id = b.doc_id
+			AND a.rev_id = b.rev_id
+		ORDER BY a.mod_date,a.doc_id, a.rev_id, doc_no
+    </select>
+    
+    <select id="getDciList_SDCI" parameterType="PrjDocumentIndexVO" resultType="PrjDocumentIndexVO">
+		SELECT a.doc_id,a.rev_id, doc_no, a.title ,category_cd_id , wbs_code_id, pu.user_kor_nm as designer_id,remark,a.file_size , a1.*
+		FROM p_prj_document_index a LEFT OUTER JOIN p_prj_sdc_info a1 ON a.prj_id = a1.prj_id AND a.doc_id = a1.doc_id AND a1.rev_id = a.rev_id
+			LEFT OUTER JOIN p_users pu ON (a1.designer_id = pu.user_id),
+				(select doc_id, max(rev_id) as rev_id from p_prj_document_index
+				 where prj_id = #{prj_id} and folder_id = #{folder_id} and del_yn = 'N'
+				 group by doc_id) b
+		WHERE	a.prj_id = #{prj_id}
+			AND a.folder_id = #{folder_id}
+			AND a.doc_id = b.doc_id
+			AND a.rev_id = b.rev_id
+		ORDER BY a.mod_date,a.doc_id, a.rev_id, doc_no
+    </select>
+    
+    <select id="getDciList_PCI" parameterType="PrjDocumentIndexVO" resultType="PrjDocumentIndexVO">
+		SELECT a.doc_id,a.rev_id, doc_no, a.title , wbs_code_id, pu.user_kor_nm as designer_id,remark,a.file_size , a1.*
+		FROM p_prj_document_index a LEFT OUTER JOIN p_prj_pro_info a1 ON a.prj_id = a1.prj_id AND a.doc_id = a1.doc_id AND a1.rev_id = a.rev_id
+			LEFT OUTER JOIN p_users pu ON (a1.designer_id = pu.user_id),
+				(select doc_id, max(rev_id) as rev_id from p_prj_document_index
+				 where prj_id = #{prj_id} and folder_id = #{folder_id} and del_yn = 'N'
+				 group by doc_id) b
+		WHERE	a.prj_id = #{prj_id}
+			AND a.folder_id = #{folder_id}
+			AND a.doc_id = b.doc_id
+			AND a.rev_id = b.rev_id
+		ORDER BY a.mod_date,a.doc_id, a.rev_id, doc_no
+    </select>
+    
+     <select id="getDciList_MCI" parameterType="PrjDocumentIndexVO" resultType="PrjDocumentIndexVO">
+		SELECT a.doc_id,a.rev_id, doc_no, a.title  , wbs_code_id, pu.user_kor_nm as designer_id,remark,a.file_size , a1.*
+		FROM p_prj_document_index a LEFT OUTER JOIN p_prj_mdc_info a1 ON a.prj_id = a1.prj_id AND a.doc_id = a1.doc_id AND a1.rev_id = a.rev_id
+			LEFT OUTER JOIN p_users pu ON (a1.designer_id = pu.user_id),
+				(select doc_id, max(rev_id) as rev_id from p_prj_document_index
+				 where prj_id = #{prj_id} and folder_id = #{folder_id} and del_yn = 'N'
+				 group by doc_id) b
+		WHERE	a.prj_id = #{prj_id}
+			AND a.folder_id = #{folder_id}
+			AND a.doc_id = b.doc_id
+			AND a.rev_id = b.rev_id
+		ORDER BY a.mod_date,a.doc_id, a.rev_id, doc_no
+    </select>
+    
+    
+    
+    
+     <select id="getDocumentIndexList" parameterType="PrjDocumentIndexVO" resultType="PrjDocumentIndexVO">
+     	SELECT *
+     	FROM p_prj_document_index
+     	WHERE	prj_id = #{prj_id} AND folder_id = #{folder_id} AND del_yn = 'N'
+    </select>
+    
+    <select id="getStepField" parameterType="PrjDocumentIndexVO" resultType="String">
+	    SELECT set_code
+		FROM p_prj_code_settings
+		WHERE  prj_id = #{prj_id} AND set_code_type = #{set_code_type}
+		ORDER BY set_order 
+	</select>
+	
+	  <select id="getStepCode" parameterType="PrjDocumentIndexVO" resultType="String">
+	    SELECT set_code_id
+		FROM p_prj_code_settings
+		WHERE  prj_id = #{prj_id} AND set_code_type = #{set_code_type}
+		ORDER BY set_order 
+	</select>
+	
+	<select id="getDocSize" parameterType="PrjDocumentIndexVO" resultType="PrjCodeSettingsVO">
+		SELECT * 
+		FROM p_prj_code_settings
+		WHERE prj_id = #{prj_id} AND set_code_type = 'DOC.SIZE'
+	</select>
+	
+	<select id="getDocCate" parameterType="PrjDocumentIndexVO" resultType="PrjCodeSettingsVO">
+		SELECT * 
+		FROM p_prj_code_settings
+		WHERE prj_id = #{prj_id} AND set_code_type = 'DOC.CATEGORY'
+	</select>
+	
+	<select id="getDocType" parameterType="PrjDocumentIndexVO" resultType="PrjCodeSettingsVO">
+		SELECT * 
+		FROM p_prj_code_settings
+		WHERE prj_id = #{prj_id} AND set_code_type = 'DOC.TYPE'
+	</select>
+	
+	
+	<select id="getVDocSize" parameterType="PrjDocumentIndexVO" resultType="PrjCodeSettingsVO">
+		SELECT * 
+		FROM p_prj_code_settings
+		WHERE prj_id = #{prj_id} AND set_code_type = 'VENDOR DOC.SIZE'
+	</select>
+	
+	<select id="getVDocCate" parameterType="PrjDocumentIndexVO" resultType="PrjCodeSettingsVO">
+		SELECT * 
+		FROM p_prj_code_settings
+		WHERE prj_id = #{prj_id} AND set_code_type = 'VENDOR DOC.CATEGORY'
+	</select>
+	
+	
+	
+	<select id="getStepDate" parameterType="PrjDocumentIndexVO" resultType="PrjDocumentIndexVO">		
+		SELECT *
+		FROM p_prj_code_settings a left outer join ${tbl_type} b 
+			 on ( a.set_code_id = b.step_code_id  and doc_id=#{doc_id} and rev_id=#{rev_id}  and a.prj_id = b.prj_id)
+		WHERE a.set_code_type=#{set_code_type} and a.prj_id=#{prj_id}
+		ORDER BY a.set_order 
+	</select>
+	
+	<select id="isInDocNo" parameterType="PrjDocumentIndexVO" resultType="PrjDocumentIndexVO">
+		SELECT doc_id, doc_no, max(rev_id) as rev_id , lock_yn
+		FROM p_prj_document_index
+		WHERE prj_id = #{prj_id} and doc_no = #{doc_no} and folder_id = #{folder_id} and del_yn = 'N'
+		GROUP BY doc_id, doc_no, lock_yn
+		ORDER BY rev_id desc
+	</select>
+	
+	<select id="isInDocNoOtherFolder" parameterType="PrjDocumentIndexVO" resultType="PrjDocumentIndexVO">
+		SELECT doc_id, doc_no, max(rev_id) as rev_id , lock_yn
+		FROM p_prj_document_index
+		WHERE prj_id = #{prj_id} and doc_no = #{doc_no} and folder_id != #{folder_id} and del_yn = 'N'
+		GROUP BY doc_id, doc_no, lock_yn
+		ORDER BY rev_id desc
+	</select>
+	
+	
+	<select id="isInDocNoOtherFolder_Primary" parameterType="PrjDocumentIndexVO" resultType="PrjDocumentIndexVO">
+		SELECT doc_id, doc_no, max(rev_id) as rev_id , lock_yn
+		FROM p_prj_document_index
+		WHERE prj_id = #{prj_id} and doc_no = #{doc_no} and folder_id != #{folder_id} and del_yn = 'N'
+				and (doc_type IN ('DCI','VDCI','SDCI'))
+		GROUP BY doc_id, doc_no, lock_yn
+		ORDER BY rev_id desc
+	</select>
+	
+	<select id="isInDocNoOtherFolder_Secondary" parameterType="PrjDocumentIndexVO" resultType="PrjDocumentIndexVO">
+		SELECT doc_id, doc_no, max(rev_id) as rev_id , lock_yn
+		FROM p_prj_document_index
+		WHERE prj_id = #{prj_id} and doc_no = #{doc_no} and folder_id != #{folder_id} and del_yn = 'N'
+				and (doc_type IN ('MCI','PCI'))
+		GROUP BY doc_id, doc_no, lock_yn
+		ORDER BY rev_id desc
+	</select>
+	
+	
+	
+	<select id="isInDesigner" parameterType="PrjDocumentIndexVO" resultType="UsersVO">
+		SELECT TOP 1 pu.user_id, pu.user_kor_nm 
+		FROM p_users pu LEFT OUTER JOIN p_prj_member ppm ON pu.user_id = ppm.user_id  
+		WHERE ppm.prj_id = #{prj_id} AND user_kor_nm = #{designer_id}
+		ORDER BY pu.user_id
+	</select>
+	
+	 <update id="updateDCI" parameterType="PrjDocumentIndexVO">
+    	UPDATE ${tbl_type}
+    	SET designer_id = #{designer_id},
+			wbs_code_id = #{wbs_code},
+			category_cd_id = #{category_cd},
+			size_code_id = #{size_code},
+			doc_type_id = #{doc_type},
+			remark = #{remark}
+    	WHERE prj_id = #{prj_id} and doc_id = #{doc_id} and rev_id = #{rev_id}
+    </update>
+    
+    <update id="updateMCI" parameterType="PrjDocumentIndexVO">
+    	UPDATE ${tbl_type}
+    	SET designer_id = #{designer_id},
+			wbs_code_id = #{wbs_code},
+			remark = #{remark}
+    	WHERE prj_id = #{prj_id} and doc_id = #{doc_id} and rev_id = #{rev_id}
+    </update>
+    <update id="updateDCI_step" parameterType="PrjDocumentIndexVO">
+    	UPDATE ${tbl_type}
+    	SET plan_date = #{plan_date},
+    		fore_date = #{fore_date}
+    	WHERE prj_id = #{prj_id} 
+    		  and doc_id = #{doc_id}
+    		  and rev_id = #{rev_id}
+    		  and step_code_id = #{step_code}
+    </update>
+	
+	  <insert id="insertGenDoc" parameterType="PrjDocumentIndexVO">
+    	INSERT INTO p_prj_gendoc_info
+    		(prj_id,
+    		 doc_id,
+    		 rev_id,
+    		 folder_id,
+    		 reg_id,
+    		 reg_date,
+    		 mod_id,
+    		 mod_date
+    		 )
+    	VALUES(
+			#{prj_id},
+			#{doc_id},
+			#{rev_id},
+			#{folder_id},
+			#{reg_id},
+			#{reg_date},
+			#{reg_id},
+			#{reg_date}
+    		 )
+    </insert>
+    
+	
+	
+     <insert id="insertDCI" parameterType="PrjDocumentIndexVO">
+    	INSERT INTO ${tbl_type}
+    		(prj_id,
+    		 doc_id,
+    		 rev_id,
+    		 folder_id,
+    		 discip_code_id,
+    		 designer_id,
+    		 wbs_code_id,
+    		 category_cd_id,
+    		 size_code_id,
+    		 doc_type_id,
+    		 remark ,
+    		 reg_id,
+    		 reg_date,
+    		 prfe_designer_id
+    		 )
+    	VALUES(
+    		 #{prj_id},
+    		 #{doc_id},
+    		 #{rev_id},
+    		 #{folder_id},
+    		 #{discip_code_id},
+    		 #{designer_id},
+    		 #{wbs_code},
+    		 #{category_cd},
+    		 #{size_code},
+    		 #{doc_type},
+    		 #{remark},
+    		 #{reg_id},
+    		 #{reg_date},
+    		 #{prfe_designer_id}
+    		 )
+    </insert>
+    
+     <insert id="insertMCI" parameterType="PrjDocumentIndexVO">
+    	INSERT INTO ${tbl_type}
+    		(prj_id,
+    		 doc_id,
+    		 rev_id,
+    		 folder_id,
+    		 discip_code_id,
+    		 designer_id,
+    		 wbs_code_id,
+    		 remark ,
+    		 reg_id,
+    		 reg_date,
+    		 mod_id,
+    		 mod_date,
+    		 prfe_designer_id
+    		 )
+    	VALUES(
+    		 #{prj_id},
+    		 #{doc_id},
+    		 #{rev_id},
+    		 #{folder_id},
+    		 #{discip_code_id},
+    		 #{designer_id},
+    		 #{wbs_code},
+    		 #{remark},
+    		 #{reg_id},
+    		 #{reg_date},
+    		 #{reg_id},
+    		 #{reg_date},
+    		 #{prfe_designer_id}
+    		 )
+    </insert>
+    
+    <insert id="insertDCI2" parameterType="PrjDocumentIndexVO">
+    	INSERT INTO p_prj_document_index (
+			prj_id,
+			doc_id,
+			rev_id,
+			folder_id,
+			doc_no,
+			title,
+			del_yn,
+			doc_type,
+			reg_id,
+			reg_date,
+			mod_id,
+			mod_date
+			)
+		VALUES(
+			#{prj_id},
+			#{doc_id},
+			#{rev_id},
+			#{folder_id},
+			#{doc_no},
+			#{title},
+			'N',
+			#{doc_type},
+			#{reg_id},
+			#{reg_date},
+			#{reg_id},
+			#{reg_date}
+			)
+    </insert>
+    
+    <insert id="fileUpload" parameterType="PrjDocumentIndexVO">
+   		INSERT INTO p_prj_document_index (
+			prj_id,
+			doc_id,
+			doc_no,
+			doc_type,
+			rev_id,
+			title,
+			folder_id,
+			del_yn,
+			reg_id,
+			sfile_nm,
+			rfile_nm,
+			file_type,
+			file_size,
+			attach_file_date,
+			reg_date
+			)
+		VALUES(
+			#{prj_id},
+			#{doc_id},
+			#{doc_no},
+			#{doc_type},
+			#{rev_id},
+			#{title},
+			#{folder_id},
+			'N',
+			#{reg_id},
+			#{sfile_nm},
+			#{rfile_nm},
+			#{file_type},
+			#{file_size},
+			#{attach_file_date},
+			#{reg_date})
+    </insert>
+
+    
+    
+    
+    <insert id="insertDCI_step" parameterType="PrjDocumentIndexVO">
+    	INSERT INTO ${tbl_type} (
+			prj_id,
+			doc_id,
+			rev_id,
+			step_code_id,
+			plan_date,
+			fore_date,
+			folder_id,
+			reg_id,
+			mod_id,
+			reg_date,
+			mod_date)
+		VALUES(
+			#{prj_id},
+			#{doc_id},
+			#{rev_id},
+			#{step_code},
+			#{plan_date},
+			#{fore_date},
+			#{folder_id},
+			#{reg_id},
+			#{reg_id},
+			#{reg_date},
+			#{reg_date})
+    </insert>
+	
+	
+	<select id="getMaxDocId" parameterType="PrjDocumentIndexVO" resultType="Integer">
+		SELECT MAX(doc_id) +1
+		FROM p_prj_document_index
+		WHERE prj_id = #{prj_id}
+	</select>
+	
+	<select id="getRevNo" parameterType="PrjInfoVO" resultType="PrjCodeSettingsVO">
+		SELECT *
+		FROM p_prj_code_settings
+		WHERE prj_id = #{prj_id} AND set_code_type = 'REVISION NUMBER'
+	</select>
+	
+	<select id="getUsedRevNo" parameterType="PrjDocumentIndexVO" resultType="String">
+		SELECT rev_code_id
+		FROM p_prj_document_index
+		WHERE prj_id = #{prj_id} AND doc_id = #{doc_id} AND del_yn = 'N'
+	</select>
+	
+	<select id="getRevNoList" parameterType="PrjDocumentIndexVO" resultType="PrjDocumentIndexVO">
+		SELECT set_code , set_code_id
+		FROM p_prj_code_settings 
+		WHERE prj_id = #{prj_id} AND set_code_type = 'REVISION NUMBER'
+		ORDER BY set_order
+	</select>
+	
+	<select id="getIFCReason" parameterType="PrjInfoVO" resultType="PrjCodeSettingsVO">
+		SELECT *
+		FROM p_prj_code_settings
+		WHERE prj_id = #{prj_id} AND set_code_type = 'IFC REVISED REASON'
+	</select>
+	
+	<select id="getMaxRevDoc" parameterType="PrjDocumentIndexVO" resultType="PrjDocumentIndexVO">>
+		SELECT *
+		FROM p_prj_document_index
+		WHERE prj_id = #{prj_id} AND doc_id = #{doc_id} AND 
+			rev_id = (SELECT MAX(rev_id) FROM p_prj_document_index WHERE prj_id = #{prj_id} AND doc_id = #{doc_id} AND del_yn = 'N')
+	</select>
+	
+	<select id="getMaxRevId" parameterType="PrjDocumentIndexVO" resultType="Integer">
+		SELECT max(rev_id) + 1 
+		FROM p_prj_document_index
+		WHERE prj_id = #{prj_id} AND doc_id = #{doc_id}
+	</select>
+	
+	<select id="getProcessDocType" parameterType="PrjDocumentIndexVO" resultType="ProcessInfoVO">
+		SELECT *
+		FROM p_prj_process_info
+		WHERE prj_id=#{prj_id} AND class_lvl != 'SYSTEM'
+		  AND process_folder_path_id in 
+		  (SELECT value FROM STRING_SPLIT( (SELECT folder_path FROM p_prj_folder_info WHERE prj_id = #{prj_id} AND folder_id = #{folder_id}) , '>'))
+		  AND doc_type IS NOT NULL			
+	</select>
+	
+	<select id="getRegId" parameterType="PrjDocumentIndexVO" resultType="String">
+		 SELECT TOP 1 reg_id
+		 FROM p_prj_document_index
+		 WHERE prj_id = #{prj_id} AND doc_id = #{doc_id}
+		 ORDER BY reg_date asc
+	</select>
+	
+	<insert id="checkIn" parameterType="PrjDocumentIndexVO">
+   		INSERT INTO p_prj_document_index (
+			prj_id
+			,doc_id
+			,doc_no
+			,doc_type
+			,rev_id
+			,rev_code_id
+			,title
+			,folder_id
+			,del_yn
+			,reg_id
+			,mod_id
+			,sfile_nm
+			,rfile_nm
+			,file_type
+			,file_size
+			,reg_date
+			,mod_date
+			,attach_file_date
+			)
+		VALUES(
+			#{prj_id}
+			,#{doc_id}
+			,#{doc_no}
+			,#{doc_type}
+			,#{rev_max}
+			,#{rev_code_id}
+			,#{title}
+			,#{folder_id}
+			,'N'
+			,#{reg_id}
+			,#{mod_id}
+			,#{sfile_nm}
+			,#{rfile_nm}
+			,#{file_type}
+			,#{file_size}
+			,#{reg_date}
+			,#{mod_date}
+			,#{attach_file_date}
+			)
+    </insert>
+    
+    <insert id="checkInDCI" parameterType="PrjDocumentIndexVO">
+    	INSERT INTO p_prj_eng_info(
+			prj_id,
+			doc_id,
+			rev_id,
+			folder_id,
+			discip_code_id,
+			designer_id,
+			prfe_designer_id,
+			wbs_code_id,
+			remark,
+			category_cd_id,
+			size_code_id,
+			doc_type_id,
+			reg_id,
+			reg_date,
+			mod_id,
+			mod_date
+			)
+		VALUES(
+			#{prj_id},
+			#{doc_id},
+			#{rev_id},
+			#{folder_id},
+			#{discip_code_id},
+			#{designer_id},
+			#{prfe_designer_id},
+			#{wbs_code_id},
+			#{remark},
+			#{category_cd_id},
+			#{size_code_id},
+			#{doc_type_id},
+			#{reg_id},
+			#{reg_date},
+			#{mod_id},
+			#{mod_date}
+			)
+    </insert>
+    
+        <insert id="checkInVDCI" parameterType="PrjDocumentIndexVO">
+    	INSERT INTO p_prj_vdr_info(
+			prj_id,
+			doc_id,
+			rev_id,
+			folder_id,
+			discip_code_id,
+			designer_id,
+			prfe_designer_id,
+			wbs_code_id,
+			remark,
+			po_doc_no,
+			po_doc_title,
+			vendor_nm,
+			design_part,
+			category_cd_id,
+			size_code_id,
+			doc_type_id,
+			reg_id,
+			reg_date,
+			mod_id,
+			mod_date
+			)
+		VALUES(
+			#{prj_id},
+			#{doc_id},
+			#{rev_id},
+			#{folder_id},
+			#{discip_code_id},
+			#{designer_id},
+			#{prfe_designer_id},
+			#{wbs_code_id},
+			#{remark},
+			#{po_doc_no},
+			#{po_doc_title},
+			#{vendor_nm},
+			#{design_part},
+			#{category_cd_id},
+			#{size_code_id},
+			#{doc_type_id},
+			#{reg_id},
+			#{reg_date},
+			#{mod_id},
+			#{mod_date}
+			)
+    </insert>
+    
+    <insert id="checkInSDCI" parameterType="PrjDocumentIndexVO">
+    	INSERT INTO p_prj_sdc_info(
+			prj_id,
+			doc_id,
+			rev_id,
+			folder_id,
+			discip_code_id,
+			designer_id,
+			prfe_designer_id,
+			wbs_code_id,
+			remark,
+			category_cd_id,
+			size_code_id,
+			doc_type_id,
+			reg_id,
+			reg_date,
+			mod_id,
+			mod_date
+			)
+		VALUES(
+			#{prj_id},
+			#{doc_id},
+			#{rev_id},
+			#{folder_id},
+			#{discip_code_id},
+			#{designer_id},
+			#{prfe_designer_id},
+			#{wbs_code_id},
+			#{remark},
+			#{category_cd_id},
+			#{size_code_id},
+			#{doc_type_id},
+			#{reg_id},
+			#{reg_date},
+			#{mod_id},
+			#{mod_date}
+			)
+    </insert>
+    
+    <insert id="checkInPCI" parameterType="PrjDocumentIndexVO">
+    	INSERT INTO p_prj_pro_info(
+			prj_id,
+			doc_id,
+			rev_id,
+			folder_id,
+			discip_code_id,
+			designer_id,
+			prfe_designer_id,
+			wbs_code_id,
+			remark,
+			por_no,
+			por_issue_date,
+			po_no,
+			po_issue_date,
+			vendor_nm,
+			vendor_doc_no,
+			reg_id,
+			reg_date,
+			mod_id,
+			mod_date
+			)
+		VALUES(
+			#{prj_id},
+			#{doc_id},
+			#{rev_id},
+			#{folder_id},
+			#{discip_code_id},
+			#{designer_id},
+			#{prfe_designer_id},
+			#{wbs_code_id},
+			#{remark},
+			#{por_no},
+			#{por_issue_date},
+			#{po_no},
+			#{po_issue_date},
+			#{vendor_nm},
+			#{vendor_doc_no},
+			#{reg_id},
+			#{reg_date},
+			#{mod_id},
+			#{mod_date}
+			)
+    </insert>
+    
+    
+     <insert id="checkInMCI" parameterType="PrjDocumentIndexVO">
+    	INSERT INTO p_prj_mdc_info(
+			prj_id,
+			doc_id,
+			rev_id,
+			folder_id,
+			discip_code_id,
+			designer_id,
+			prfe_designer_id,
+			wbs_code_id,
+			remark,
+			por_no,
+			por_issue_date,
+			po_no,
+			po_issue_date,
+			vendor_nm,
+			vendor_doc_no,
+			reg_id,
+			reg_date,
+			mod_id,
+			mod_date
+			)
+		VALUES(
+			#{prj_id},
+			#{doc_id},
+			#{rev_id},
+			#{folder_id},
+			#{discip_code_id},
+			#{designer_id},
+			#{prfe_designer_id},
+			#{wbs_code_id},
+			#{remark},
+			#{por_no},
+			#{por_issue_date},
+			#{po_no},
+			#{po_issue_date},
+			#{vendor_nm},
+			#{vendor_doc_no},
+			#{reg_id},
+			#{reg_date},
+			#{mod_id},
+			#{mod_date}
+			)
+    </insert>
+    
+    
+    <insert id="checkInGEN" parameterType="PrjDocumentIndexVO">
+    	INSERT INTO p_prj_gendoc_info(
+			prj_id,
+			doc_id,
+			rev_id,
+			folder_id,
+			reg_id,
+			reg_date,
+			mod_id,
+			mod_date
+			)
+		VALUES(
+			#{prj_id},
+			#{doc_id},
+			#{rev_id},
+			#{folder_id},
+			#{reg_id},
+			#{reg_date},
+			#{mod_id},
+			#{mod_date}
+			)
+    </insert>
+    
+    
+    
+	<select id="isReadDoc" resultType="int" parameterType="PrjDocumentIndexVO">
+		select count(*) from p_prj_document_index_read where prj_id=#{prj_id} and doc_id=#{doc_id} and rev_id=#{rev_id} and reg_id=#{reg_id}
+	</select>
+	<insert id="insertReadDoc" parameterType="PrjDocumentIndexVO">
+		insert into p_prj_document_index_read(prj_id,doc_id,rev_id,folder_id,reg_id,reg_date)
+		values(#{prj_id},#{doc_id},#{rev_id},#{folder_id},#{reg_id},#{reg_date})
+	</insert>
+	<select id="isDuplicateDocNo" resultType="int" parameterType="PrjDocumentIndexVO">
+		select count(*) from p_prj_document_index where prj_id=#{prj_id} and doc_no=#{doc_no} and (doc_type='DCI' or doc_type='VDCI' or doc_type='SDCI') and del_yn!='Y'
+	</select>
+	<select id="isDuplicateDocNoChange" resultType="int" parameterType="PrjDocumentIndexVO">
+		select count(*) from p_prj_document_index where prj_id=#{prj_id} and doc_no=#{doc_no} and (doc_type='DCI' or doc_type='VDCI' or doc_type='SDCI') and doc_id!=#{doc_id} and (trans_ref_doc_id='' or trans_ref_doc_id is null) and del_yn!='Y'
+	</select>
+	<select id="isDuplicateOtherDocNo" resultType="int" parameterType="PrjDocumentIndexVO">
+		select count(*) from p_prj_document_index where prj_id=#{prj_id} and doc_no=#{doc_no} and folder_id=#{folder_id} and del_yn!='Y'
+	</select>
+	<select id="isDuplicateOtherDocNoChange" resultType="int" parameterType="PrjDocumentIndexVO">
+		select count(*) from p_prj_document_index where prj_id=#{prj_id} and doc_no=#{doc_no} and folder_id=#{folder_id} and doc_id!=#{doc_id} and del_yn!='Y'
+	</select>
+	<select id="getDocIdByDocNo" resultType="PrjDocumentIndexVO" parameterType="PrjDocumentIndexVO">
+		select doc_id from p_prj_document_index where prj_id=#{prj_id} and doc_no=#{doc_no} group by doc_id
+	</select>
+	<select id="isExistDocNo" resultType="PrjDocumentIndexVO" parameterType="PrjDocumentIndexVO">
+		select doc_id,file_type,title,file_size from p_prj_document_index where prj_id=#{prj_id} and doc_no=#{doc_no}
+	</select>
+	<select id="isExistsDocNo" resultType="PrjDocumentIndexVO" parameterType="PrjDocumentIndexVO">
+		select doc_id,file_type,title,file_size from p_prj_document_index where prj_id=#{prj_id} and doc_no=#{doc_no} and del_yn!='Y'
+	</select>
+	<select id="getProcList" resultType="PrjDocumentIndexVO" parameterType="PrjDocumentIndexVO">
+	 	<!-- select a.doc_no,a.folder_id,a.doc_id,a.rev_id,a.title,b.vendor_nm 
+	 	from p_prj_document_index a join p_prj_pro_info b on a.prj_id=b.prj_id and a.doc_id=b.doc_id and a.rev_id=b.rev_id
+	 	where a.prj_id=#{prj_id} -->
+	 	select a.doc_no,a.folder_id,a.doc_id,a.rev_id,a.title,b.vendor_nm 
+	 	from p_prj_document_index a join p_prj_pro_info b on a.prj_id=b.prj_id and a.doc_id=b.doc_id and a.rev_id=b.rev_id,
+					(select doc_id, max(rev_id) as rev_id from p_prj_document_index
+					where prj_id = #{prj_id}
+					and del_yn!='Y'
+					group by doc_id)c
+	 	where a.prj_id=#{prj_id}
+	 	and a.doc_id=c.doc_id
+	 	and a.rev_id=c.rev_id
+		order by a.doc_id desc, a.reg_date desc
+	</select>
+	
+	<delete id="deleteDocumentIndexBydeleteTrIncoming" parameterType="PrjDocumentIndexVO">
+		delete from p_prj_document_index where prj_id=#{prj_id} and doc_no=#{doc_no}
+	</delete>
+	
+	
+	<select id="getDiscipCodeId" resultType="String" parameterType="PrjDocumentIndexVO">
+		SELECT discip_code_id
+		FROM p_prj_discipline_folder_info A RIGHT OUTER JOIN p_prj_folder_info B ON A.discip_folder_id IN (SELECT CONVERT(BIGINT,value) FROM string_split(B.folder_path,'>')) AND A.prj_id = B.prj_id
+		WHERE A.prj_id = #{prj_id} AND B.folder_id = #{folder_id}
+	</select>
+	
+	<select id="getDocument_DocType" resultType="String" parameterType="PrjDocumentIndexVO">
+<!-- 		SELECT doc_type -->
+<!-- 		FROM p_prj_process_info A RIGHT OUTER JOIN p_prj_folder_info B ON A.process_folder_path_id IN (SELECT CONVERT(BIGINT,value) FROM string_split(B.folder_path,'>')) AND A.prj_id = B.prj_id -->
+<!-- 		WHERE A.prj_id = #{prj_id} AND B.folder_id = #{folder_id} -->
+		SELECT doc_type 
+		FROM p_prj_process_info pppi LEFT OUTER JOIN p_prj_folder_info ppfi 
+			ON (pppi.prj_id = ppfi.prj_id AND  CONVERT(NVARCHAR,ppfi.folder_id)  IN (SELECT VALUE FROM STRING_SPLIT(pppi.process_folder_path_id ,'@')) )
+		WHERE pppi.prj_id = #{prj_id} AND ppfi.folder_id = #{folder_id}
+		
+	</select>
+	
+	<select id="getPreInfo" parameterType="PrjDocumentIndexVO" resultType="PrjDocumentIndexVO">
+	 	SELECT *
+	 	FROM ${tbl_type}
+	 	WHERE prj_id = #{prj_id} AND doc_id = #{doc_id} AND rev_id = #{rev_id}
+	</select>
+	<select id="getPreStepInfo" parameterType="PrjDocumentIndexVO" resultType="PrjDocumentIndexVO">
+	 	SELECT *
+	 	FROM ${tbl_type}
+	 	WHERE prj_id = #{prj_id} AND doc_id = #{doc_id} AND rev_id = #{rev_id}
+	</select>
+	
+	<insert id="insertEngNextStep" parameterType="PrjDocumentIndexVO">
+		INSERT INTO p_prj_eng_step(
+			prj_id,
+			doc_id,
+			rev_id,
+			step_code_id,
+			plan_date,
+			actual_date,
+			fore_date,
+			tr_id,
+			rtn_status,
+			step_seq,
+			folder_id,
+			reg_id,
+			reg_date,
+			mod_id,
+			mod_date )
+		VALUES(
+			#{prj_id},
+			#{doc_id},
+			#{rev_id},
+			#{step_code_id},
+			#{plan_date},
+			#{actual_date},
+			#{fore_date},
+			#{tr_id},
+			#{rtn_status},
+			#{step_seq},
+			#{folder_id},
+			#{reg_id},
+			#{reg_date},
+			#{mod_id},
+			#{mod_date}
+			)
+	</insert>
+	
+	<insert id="insertVdrNextStep" parameterType="PrjDocumentIndexVO">
+		INSERT INTO p_prj_vdr_step(
+			prj_id,
+		    doc_id,
+		    rev_id,
+		    step_code_id,
+		    plan_date,
+		    actual_date,
+		    fore_date,
+		    tr_id,
+		    rtn_status,
+		    step_seq,
+		    folder_id,
+		    reg_id,
+		    reg_date,
+		    mod_id,
+		    mod_date
+			 )
+		VALUES(
+			#{prj_id},
+			#{doc_id},
+			#{rev_id},
+			#{step_code_id},
+			#{plan_date},
+			#{actual_date},
+			#{fore_date},
+			#{tr_id},
+			#{rtn_status},
+			#{step_seq},
+			#{folder_id},
+			#{reg_id},
+			#{reg_date},
+			#{mod_id},
+			#{mod_date}
+			)
+	</insert>
+	
+	<insert id="insertSdcNextStep" parameterType="PrjDocumentIndexVO">
+		INSERT INTO p_prj_sdc_step(
+			prj_id,
+			doc_id,
+			rev_id,
+			step_code_id,
+			plan_date,
+			actual_date,
+			fore_date,
+			tr_id,
+			rtn_status,
+			step_seq,
+			folder_id,
+			reg_id,
+			reg_date,
+			mod_id,
+			mod_date )
+		VALUES(
+			#{prj_id},
+			#{doc_id},
+			#{rev_id},
+			#{step_code_id},
+			#{plan_date},
+			#{actual_date},
+			#{fore_date},
+			#{tr_id},
+			#{rtn_status},
+			#{step_seq},
+			#{folder_id},
+			#{reg_id},
+			#{reg_date},
+			#{mod_id},
+			#{mod_date}
+			)
+	</insert>
+	
+	<insert id="insertProNextStep" parameterType="PrjDocumentIndexVO">
+		INSERT INTO p_prj_pro_step(
+			prj_id,
+		    doc_id,
+		    rev_id,
+		    step_code_id,
+		    plan_date,
+		    actual_date,
+		    fore_date,
+		    tr_id,
+		    rtn_status,
+		    step_seq,
+		    folder_id,
+		    reg_id,
+		    reg_date,
+		    mod_id,
+		    mod_date )
+		VALUES(
+			#{prj_id},
+			#{doc_id},
+			#{rev_id},
+			#{step_code_id},
+			#{plan_date},
+			#{actual_date},
+			#{fore_date},
+			#{tr_id},
+			#{rtn_status},
+			#{step_seq},
+			#{folder_id},
+			#{reg_id},
+			#{reg_date},
+			#{mod_id},
+			#{mod_date}
+			)
+	</insert>
+	
+	<select id="getActualDateRuleAtCheckIn" parameterType="PrjDocumentIndexVO" resultType="PrjDocumentIndexVO">
+		SELECT *
+		FROM p_prj_code_settings ppcs
+		WHERE prj_id = #{prj_id} AND set_code_type = #{tbl_type} AND set_code_id = #{step_code_id}
+	</select>
+	
+	<select id="getSubFolder" parameterType="FolderInfoVO" resultType="FolderInfoVO">
+		SELECT *
+		FROM p_prj_folder_info
+		WHERE prj_id = #{prj_id}
+		  AND folder_path 
+			  LIKE (SELECT CONCAT(folder_path,'%')  FROM p_prj_folder_info WHERE prj_id = #{prj_id} AND folder_id = #{folder_id})
+	</select>
+	
+	<delete id="deleteFolderAuth" parameterType="FolderInfoVO">
+		DELETE FROM p_prj_folder_auth 
+		WHERE prj_id = #{prj_id} AND folder_id = #{folder_id}
+			
+	</delete>
+	
+	
+	<select id="isIFCStep_old" parameterType="PrjDocumentIndexVO" resultType="PrjDocumentIndexVO"> 
+		SELECT *
+		FROM ${tbl_type}
+		WHERE prj_id = #{prj_id} AND doc_id = #{doc_id} AND rev_id = #{rev_id}
+			  AND step_code_id = 
+			  	(SELECT set_code_id FROM p_prj_code_settings WHERE prj_id = #{prj_id} AND set_code_type = #{set_code_type} AND ifc_yn = 'Y')
+	</select>
+	
+	<select id="isIFCStep" parameterType="PrjDocumentIndexVO" resultType="String"> 
+		SELECT case when set_code='IFC' then 'Y'
+				else 'N'
+				end ifc_yn
+		FROM p_prj_code_settings 
+		WHERE prj_id=#{prj_id} and set_code_type=#{tr_issue_set_code_type}
+		and set_code_id=(select b.tr_issuepur_code_id from ${tr_file_table} a join ${tr_info_table} b
+		on a.prj_id=b.prj_id and a.tr_id=b.tr_id
+		where a.prj_id=#{prj_id} and a.doc_id=#{doc_id} and a.rev_id=#{rev_id})
+	</select>
+	
+	<select id="checkTRout" parameterType="PrjTrVO" resultType="Integer">
+		SELECT count(*)
+		FROM p_prj_tr_info ppti LEFT OUTER JOIN p_prj_tr_file pptf ON (ppti.tr_id = pptf.tr_id AND ppti.prj_id = pptf.prj_id)
+		WHERE ppti.prj_id=#{prj_id} AND doc_id = #{doc_id} AND rev_id = #{rev_id} AND ppti.inout = 'OUT'
+	</select>
+	
+	<select id="checkVTRout" parameterType="PrjTrVO" resultType="Integer">
+		SELECT count(*)
+		FROM p_prj_vtr_info ppti LEFT OUTER JOIN p_prj_vtr_file pptf ON (ppti.tr_id = pptf.tr_id AND ppti.prj_id = pptf.prj_id)
+		WHERE ppti.prj_id=#{prj_id} AND doc_id = #{doc_id} AND rev_id = #{rev_id} AND ppti.inout = 'OUT'
+	</select>
+	
+	<select id="checkSTRout" parameterType="PrjTrVO" resultType="Integer">
+		SELECT count(*)
+		FROM p_prj_str_info ppti LEFT OUTER JOIN p_prj_str_file pptf ON (ppti.tr_id = pptf.tr_id AND ppti.prj_id = pptf.prj_id)
+		WHERE ppti.prj_id=#{prj_id} AND doc_id = #{doc_id} AND rev_id = #{rev_id} AND ppti.inout = 'OUT'
+	</select>
+	
+	<select id="getUseDrnFolderList" parameterType="String" resultType="String">
+		SELECT process_folder_path_id
+		FROM p_prj_process_info
+		WHERE prj_id = #{value} AND drn_use_yn = 'Y'
+	</select>
+	
+	<select id="getNotUseDrnFolderList" parameterType="String" resultType="String">
+		SELECT process_folder_path_id
+		FROM p_prj_process_info
+		WHERE prj_id = #{value} AND drn_use_yn = 'N'
+	</select>
+	
+	<select id="getFolderPathOfThisFolder" parameterType="PrjDocumentIndexVO" resultType="String">
+		SELECT folder_path
+		FROM p_prj_folder_info 
+		WHERE prj_id = #{prj_id} AND folder_id = #{folder_id}
+	</select>
+	
+	
+	<select id="getFolderPathOfProcessType" parameterType="PrjDocumentIndexVO" resultType="PrjDocumentIndexVO">
+		SELECT process_type, ppfi.folder_path as current_folder_path, pppi.doc_type
+		FROM p_prj_process_info pppi LEFT OUTER JOIN p_prj_folder_info ppfi 
+			ON (pppi.prj_id = ppfi.prj_id AND  CONVERT(NVARCHAR,ppfi.folder_id)  IN (SELECT VALUE FROM STRING_SPLIT(pppi.process_folder_path_id ,'@')) )
+		WHERE ppfi.prj_id = #{prj_id} and process_type IN ('ENGINEERING (ENG)','VENDOR DOC. (VDCI)','PROCUREMENT (POC)','BULK MATERIAL (BMC)','SITE DOC. (SDCI)')
+		ORDER BY current_folder_path desc
+	</select>
+	
+	<select id="getPrevRegDate" parameterType="PrjDocumentIndexVO" resultType="String">
+		select reg_date
+		from p_prj_document_index 
+		where prj_id = #{prj_id} and doc_id = #{doc_id}
+		order by reg_date asc
+	</select>
+	
+	
+	
+	<update id="process_bulk_badwordChg" parameterType="String">
+		UPDATE p_prj_process_info 
+		SET process_type = 'BULK MATERIAL (BMC)'
+		WHERE process_type = 'BULK MITERIAL (BMC)'
+	</update>
+	
+	<update id="bmcToMCI" parameterType="String">
+		update p_prj_process_info 
+		SET doc_type='MCI'
+		WHERE doc_type='BMC'
+	</update>
+	
+	
+	<select id="getFolderList4docDown" parameterType="String" resultType="FolderInfoVO">
+<!-- 		 SELECT pppi.doc_type as process_type, b.discip_code_id , ppfi.* , dbo.fn_getFolderNm(ppfi.prj_id,folder_id) as folder_path_str -->
+<!-- 		 FROM p_prj_folder_info ppfi left JOIN p_prj_process_info pppi  -->
+<!-- 		 	  ON (ppfi.prj_id = pppi.prj_id and pppi.process_folder_path_id IN (SELECT value FROM string_split(ppfi.folder_path ,'>')) ) -->
+<!-- 		 	  join p_prj_discipline_folder_info b -->
+<!-- 		 	  ON (pppi.prj_id = b.prj_id AND b.discip_folder_id IN (SELECT value FROM string_split(ppfi.folder_path ,'>'))) -->
+<!-- 		 WHERE ppfi.prj_id = #{value}  -->
+<!-- 		 		AND ppfi.folder_type = 'DCC'  -->
+<!-- 		 		AND (pppi.doc_type is null or pppi.doc_type != 'Corr') -->
+		SELECT * , dbo.fn_getFolderNm(prj_id,folder_id) as folder_path_str
+		FROM p_prj_folder_info
+		WHERE prj_id = #{value}  AND folder_type = 'DCC'
+	</select>
+	
+	<select id="getDiscipList" parameterType="String" resultType="FolderInfoVO">
+		 SELECT discip_code_id,discip_code,discip_display 
+		 FROM p_prj_discipline_info 
+		 WHERE prj_id = #{value}
+	</select>
+	
+	
+	<select id="getDocDownList" parameterType="PrjDocumentIndexVO" resultType="PrjDocumentIndexVO">
+		SELECT ppfi.folder_path , dbo.fn_getFolderNm(ppfi.prj_id,ppfi.folder_id) as folder_path_str, ppcs.set_code as rev_no , ppdfi.discip_code_id , ppdi2.discip_display, ppdi.*
+		FROM p_prj_document_index ppdi
+			join p_prj_folder_info ppfi ON (ppdi.prj_id = ppfi.prj_id and ppdi.folder_id = ppfi.folder_id)
+			join p_prj_discipline_folder_info ppdfi ON (ppdi.prj_id = ppdfi.prj_id and ppdfi.discip_folder_id IN (SELECT value from STRING_SPLIT(ppfi.folder_path,'>')) )
+			join p_prj_discipline_info ppdi2 ON(ppdfi.prj_id = ppdi2.prj_id and ppdfi.discip_code_id = ppdi2.discip_code_id)
+			join p_prj_code_settings ppcs ON (ppdi.prj_id = ppcs.prj_id AND ppcs.set_code_type = 'REVISION NUMBER' AND ppdi.rev_code_id = ppcs.set_code_id),
+			(select doc_id, max(rev_id) as rev_id from p_prj_document_index
+			  where prj_id = #{prj_id} and del_yn!='Y'
+			  group by doc_id) b
+		WHERE ppdi.prj_id = #{prj_id} AND ppdfi.discip_code_id is not null AND ppdi.del_yn = 'N' and ppcs.set_code is not null and ppdi.doc_id = b.doc_id and ppdi.rev_id = b.rev_id 
+			<if test="folder_id > 0">
+			  AND #{folder_id} IN (SELECT value FROM STRING_SPLIT(folder_path,'>'))
+			</if>
+			<if test="discip_code_id != null">
+			  AND ppdfi.discip_code_id = #{discip_code_id}
+			</if>
+		order by ppfi.folder_path
+<!-- 		GROUP BY ppfi.folder_path,ppcs.set_code,discip_code_id,ppdi.prj_id,ppdi.doc_id,ppdi.rev_id,ppdi.folder_id,ppdi.doc_no,ppdi.doc_type,ppdi.rev_code_id,ppdi.sfile_nm,ppdi.rfile_nm,ppdi.file_type,ppdi.file_size,ppdi.title,ppdi.del_yn,ppdi.unread_yn,ppdi.lock_yn,ppdi.attach_file_date,ppdi.last_rev_yn,ppdi.trans_ref_doc_id,ppdi.reg_id,ppdi.reg_date,ppdi.mod_id,ppdi.mod_date -->
+<!-- 		HAVING ppdi.rev_id = max(ppdi.rev_id) -->
+	</select>
+	
+	<select id="getDocDownList_onlyFolder" parameterType="PrjDocumentIndexVO" resultType="PrjDocumentIndexVO">
+		SELECT ppfi.folder_path , dbo.fn_getFolderNm(ppfi.prj_id,ppfi.folder_id) as folder_path_str, ppcs.set_code as rev_no , ppdi.*
+		FROM p_prj_document_index ppdi
+			 left outer join p_prj_folder_info ppfi ON (ppdi.prj_id = ppfi.prj_id and ppdi.folder_id = ppfi.folder_id)
+			 left outer join p_prj_code_settings ppcs ON (ppdi.prj_id = ppcs.prj_id AND ppcs.set_code_type = 'REVISION NUMBER' AND ppdi.rev_code_id = ppcs.set_code_id),
+			(select doc_id, max(rev_id) as rev_id from p_prj_document_index
+			  where prj_id = #{prj_id} and del_yn!='Y'
+			  group by doc_id) b
+		WHERE ppdi.prj_id = #{prj_id} and ppdi.doc_id = b.doc_id and ppdi.rev_id = b.rev_id
+			 AND #{folder_id} IN (SELECT value FROM STRING_SPLIT(folder_path,'>'))
+			 order by ppfi.folder_path 
+	</select>
+	
+	
+	
+	
+</mapper>

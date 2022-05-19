@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="securityLogSqlMap">
+	<!-- 로그인시 필요한 유저 정보 가져오기 -->
+	<select id="getLoginUser" resultType="UsersVO" parameterType="UsersVO">
+		select user_kor_nm, last_con_prj_id from p_users
+		where user_id = #{user_id}
+	</select>
+	<select id="getSystemLogList" resultType="SecurityLogVO">
+		select reg_date, pgm_nm, method, reg_id, reg_nm, remote_ip
+		from p_prj_sys_log
+		order by reg_date desc
+	</select>
+	<!-- 마지막 값 가져와서 중복키 체크 -->
+	<select id="getCheckSystemLog" resultType="SecurityLogVO" parameterType="SecurityLogVO">
+		select top 1 prj_id, reg_date, pgm_nm
+		from p_prj_sys_log
+		order by reg_date desc
+	</select>
+	<!-- 폴더 이름 가져오기 -->
+	<select id="getFolder_nm" resultType="SecurityLogVO" parameterType="SecurityLogVO">
+		select folder_nm from p_prj_folder_info
+		where prj_id = #{prj_id}
+		and folder_id = #{folder_id}
+	</select>
+	
+	<insert id="insertSystemLog" parameterType="SecurityLogVO">
+		insert into p_prj_sys_log (prj_id, 
+								   reg_date, 
+								   pgm_nm, 
+								   reg_id, 
+								   reg_nm, 
+								   remote_ip, 
+								   method)
+		values(#{prj_id},
+				#{reg_date},
+				#{pgm_nm},
+				#{reg_id},
+				#{reg_nm},
+				#{remote_ip},
+				#{method})
+	</insert>
+	
+	<select id="searchSystemLogList" resultType="SecurityLogVO" parameterType="SecurityLogVO">
+		select *
+		from p_prj_sys_log			
+		<if test="from != '' ">
+			where substring(reg_date,1,8) between #{from} and #{to}
+		</if>
+		<if test="searchPrjLogAtc != 'all'">
+			and prj_id = #{searchPrjLogAtc}
+		</if>
+		<if test="searchPrjLogAtc == 'all'">
+			and prj_id like concat('%','%')
+		</if>
+		<if test="searchLogAtc == 'all'">
+			and (reg_id like concat('%',#{textLogAtc},'%')
+			or reg_nm like concat('%',#{textLogAtc},'%')
+			or remote_ip like concat('%',#{textLogAtc},'%')
+			or method like concat('%',#{textLogAtc},'%'))
+		</if>
+		<if test="searchLogAtc != 'all'">
+			<if test="searchLogAtc == 'userId'">
+				and reg_id like concat('%',#{textLogAtc},'%')
+			</if>
+			<if test="searchLogAtc == 'userName'">
+				and reg_nm like concat('%',#{textLogAtc},'%')
+			</if>
+			<if test="searchLogAtc == 'userIp'">
+				and remote_ip like concat('%',#{textLogAtc},'%')
+			</if>
+			<if test="searchLogAtc == 'method'">
+				and method like concat('%',#{textLogAtc},'%')
+			</if>
+		</if>
+		order by reg_date desc
+	</select>
+	
+	<select id="getDocumentLogList" resultType="SecurityLogVO" parameterType="SecurityLogVO">
+		select * 
+		from p_prj_access_info_hist
+		<if test="from != '' ">
+			where substring(reg_date,1,8) between #{from} and #{to}
+		</if>
+		<if test="searchPrjLogAtc != 'all'">
+			and prj_id = #{searchPrjLogAtc}
+		</if>
+		<if test="searchPrjLogAtc == 'all'">
+			and prj_id like concat('%','%')
+		</if>
+		<if test="searchLogAtc == 'all'">
+			and (reg_id like concat('%',#{textLogAtc},'%')
+			or reg_nm like concat('%',#{textLogAtc},'%')
+			or remote_ip like concat('%',#{textLogAtc},'%')
+			or method like concat('%',#{textLogAtc},'%')
+			or doc_no like concat('%',#{textLogAtc},'%')
+			or doc_title like concat('%',#{textLogAtc},'%')
+			or folder_path like concat('%',#{textLogAtc},'%'))
+		</if>
+		<if test="searchLogAtc != 'all'">
+			<if test="searchLogAtc == 'userId'">
+				and reg_id like concat('%',#{textLogAtc},'%')
+			</if>
+			<if test="searchLogAtc == 'userName'">
+				and reg_nm like concat('%',#{textLogAtc},'%')
+			</if>
+			<if test="searchLogAtc == 'userIp'">
+				and remote_ip like concat('%',#{textLogAtc},'%')
+			</if>
+			<if test="searchLogAtc == 'method'">
+				and method like concat('%',#{textLogAtc},'%')
+			</if>
+			<if test="searchLogAtc == 'docNo'">
+				and doc_no like concat('%',#{textLogAtc},'%')
+			</if>
+			<if test="searchLogAtc == 'docTitle'">
+				and doc_title like concat('%',#{textLogAtc},'%')
+			</if>
+			<if test="searchLogAtc == 'path'">
+				and folder_path like concat('%',#{textLogAtc},'%')
+			</if>
+		</if>
+		order by reg_date desc
+	</select>
+</mapper>

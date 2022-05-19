@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="prjAccessSqlMap">
+	<select id="getAccHisList" resultType="SecurityLogVO" parameterType="SecurityLogVO">
+		select * 
+		from p_prj_access_info_hist
+		where prj_id = #{prj_id}		
+		and doc_id = #{doc_id}
+		order by reg_date desc
+	</select>
+	<select id="getAccFolderPath" resultType="SecurityLogVO" parameterType="SecurityLogVO">
+		select folder_path from p_prj_folder_info
+		where prj_id = #{prj_id}
+		and folder_id = #{folder_id}
+	</select>
+	<select id="getAccPrjNoNm" resultType="SecurityLogVO" parameterType="SecurityLogVO">
+		select prj_no, prj_nm from p_prj_info
+		where prj_id = #{prj_id}
+	</select>
+	<insert id="insertAccHis" parameterType="SecurityLogVO">
+		insert 
+		into p_prj_access_info_hist (prj_id, 
+									doc_id, 
+									rev_id, 
+									reg_date,
+									prj_no,
+									prj_nm,
+									doc_no,
+									doc_title,
+									folder_id,
+									folder_path,
+									file_size,
+									reg_id, 
+									reg_nm, 
+									remote_ip, 
+									method)
+		values(#{prj_id},
+			   #{doc_id},
+			   #{rev_id},
+			   #{reg_date},
+			   #{prj_no},
+			   #{prj_nm},
+			   #{doc_no},
+			   #{doc_title},
+			   #{folder_id},
+			   #{folder_path},
+			   #{file_size},
+			   #{reg_id},
+			   #{reg_nm},
+			   #{remote_ip},
+			   #{method})
+	</insert>
+</mapper>

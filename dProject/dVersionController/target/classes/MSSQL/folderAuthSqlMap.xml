@@ -1,0 +1,317 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="folderAuthSqlMap">	
+	
+	<select id="auth_getFolderPath" parameterType="FolderAuthVO" resultType="String">
+		SELECT dbo.fn_getFolderNm(prj_id,folder_id) as group_desc
+		FROM p_prj_folder_info
+		WHERE prj_id = #{prj_id} AND folder_id=#{folder_id}
+	</select>
+	
+	<select id="auth_getOrg" parameterType="FolderAuthVO" resultType="FolderAuthVO">
+		SELECT p.prj_id,p.user_id,U.user_kor_nm,p.dcc_yn,a.org_id,b.org_parent_id,org_nm,org_type,org_path ,dbo.fn_getGrpNm(a.org_id) as org_full_nm
+		FROM (p_prj_member P LEFT OUTER JOIN p_organization_user A on P.user_id = A.user_id LEFT OUTER JOIN p_users U ON A.user_id = U.user_id) LEFT OUTER JOIN p_organization B ON A.org_id = B.org_id
+		WHERE prj_id = #{prj_id}
+	</select>
+	
+	<select id="auth_getGrList" parameterType="FolderAuthVO" resultType="FolderAuthVO">
+		SELECT ppgm.group_id , ppcs.set_code as group_name
+		FROM p_prj_group_member ppgm left join p_prj_code_settings ppcs 
+			ON (ppgm.prj_id = ppcs.prj_id and ppgm.group_id = ppcs.set_code_id AND ppcs.set_code_type = 'GROUP MEMBER')
+		WHERE ppgm.prj_id = #{prj_id}
+		GROUP BY ppgm.group_id, ppcs.set_code
+		
+<!-- 		SELECT group_id,group_desc -->
+<!-- 		FROM p_prj_group_member -->
+<!-- 		WHERE prj_id = #{prj_id} -->
+<!-- 		GROUP BY group_id,group_desc -->
+
+	</select>
+	
+	<select id="auth_getGrMember" parameterType="FolderAuthVO" resultType="FolderAuthVO">
+		SELECT *, user_kor_nm
+		FROM p_prj_group_member A LEFT OUTER JOIN p_users B ON A.user_id = B.user_id
+		WHERE prj_id = #{prj_id}
+	</select>
+	
+	<select id="getAuthInfoList" parameterType="FolderAuthVO" resultType="FolderAuthVO">
+		SELECT *
+		FROM p_prj_folder_auth
+		WHERE prj_id = #{prj_id} AND folder_id = #{folder_id} AND auth_lvl1 != 'F'
+		
+<!-- 		SELECT A.*, U.user_kor_nm, O2.org_nm, g.group_id -->
+<!-- 		FROM p_prj_folder_auth A LEFT OUTER JOIN  -->
+<!-- 			( (p_organization_user O1 LEFT OUTER JOIN p_users U ON O1.user_id = U.user_id)  -->
+<!-- 				LEFT OUTER JOIN p_organization O2 ON o1.org_id = O2.org_id) ON A.auth_val = U.user_id -->
+<!-- 			LEFT OUTER JOIN p_prj_group_member G ON A.auth_val = G.user_id -->
+<!-- 		WHERE A.prj_id = #{prj_id} AND A.folder_id = #{folder_id} AND A.auth_lvl1 = #{auth_lvl1} -->
+	</select>
+	
+	<select id="getAuthInfo" parameterType="FolderAuthVO" resultType="FolderAuthVO">
+		SELECT *
+		FROM p_prj_folder_auth 
+		WHERE prj_id = #{prj_id} AND 
+			  folder_id = #{folder_id} AND 
+			  auth_lvl1 = #{auth_lvl1} AND
+			  auth_val = #{auth_val}
+	</select>
+	
+	<insert id="insertInfo" parameterType="FolderAuthVO">
+		INSERT INTO p_prj_folder_auth(
+		    prj_id,
+		    folder_id,
+		    auth_lvl1,
+		    auth_val,
+		    folder_auth_add_yn,
+		    parent_folder_inheri_yn,
+		    read_auth_yn,
+		    write_auth_yn,
+		    delete_auth_yn,
+		    reg_id,
+		    reg_date
+		)
+		VALUES(
+			#{prj_id},
+			#{folder_id},
+			#{auth_lvl1},
+			#{auth_val},
+			#{folder_auth_add_yn},
+			#{parent_folder_inheri_yn},
+			#{read_auth_yn},
+			#{write_auth_yn},
+			#{delete_auth_yn},
+			#{reg_id},
+			#{reg_date}
+		)
+	</insert>
+	
+	<select id="isPrjMember" parameterType="FolderAuthVO" resultType="int">
+		SELECT count(*)
+		from p_prj_member 
+		where prj_id = #{prj_id} and user_id = #{user_id}
+	</select>
+	
+	
+	<select id="getOrgInfo" parameterType="FolderAuthVO" resultType="FolderAuthVO">
+		SELECT * 
+		FROM p_organization po
+		WHERE org_id = #{org_id}
+	</select>
+	
+	<select id="getGrpInfo" parameterType="FolderAuthVO" resultType="FolderAuthVO">
+		SELECT ppgm.group_id , ppcs.set_code as group_name
+		FROM p_prj_group_member ppgm left join p_prj_code_settings ppcs 
+			ON (ppgm.prj_id = ppcs.prj_id and ppgm.group_id = ppcs.set_code_id AND ppcs.set_code_type = 'GROUP MEMBER')
+		WHERE ppgm.prj_id = #{prj_id} AND ppgm.group_id = #{auth_val}
+		GROUP BY ppgm.group_id, ppcs.set_code
+		
+		
+<!-- 		SELECT ppgm.group_id , ppcs.set_code as group_name -->
+<!-- 		FROM p_prj_group_member ppgm left join p_prj_code_settings ppcs  -->
+<!-- 			ON (ppgm.prj_id = ppcs.prj_id and ppgm.group_id = ppcs.set_code_id AND ppcs.set_code_type = 'GROUP MEMBER') -->
+<!-- 		WHERE ppgm.prj_id = #{prj_id} -->
+<!-- 		GROUP BY ppgm.group_id, ppcs.set_code -->
+	</select>
+	
+	<select id="getUserInfo" parameterType="FolderAuthVO" resultType="FolderAuthVO">
+		SELECT user_id,user_kor_nm,user_eng_nm
+		FROM p_users pu
+		WHERE user_id = #{user_id}
+	</select>
+	
+	
+	<update id="updateInfo" parameterType="FolderAuthVO">
+		UPDATE p_prj_folder_auth
+		SET prj_id  = #{prj_id},
+			folder_id = #{folder_id},
+			auth_lvl1 = #{auth_lvl1},
+			auth_val = #{auth_val},
+			folder_auth_add_yn = #{folder_auth_add_yn},
+			parent_folder_inheri_yn = #{parent_folder_inheri_yn},
+			read_auth_yn = #{read_auth_yn},
+			write_auth_yn = #{write_auth_yn},
+			delete_auth_yn = #{delete_auth_yn},
+			mod_id = #{mod_id},
+			mod_date = #{mod_date}					
+		WHERE prj_id = #{prj_id} AND
+		      folder_id = #{folder_id} AND
+		      auth_lvl1 = #{auth_lvl1} AND
+		      auth_val = #{auth_val}
+	</update>
+	
+	
+	<delete id="deleteInfo" parameterType="FolderAuthVO">
+	    DELETE FROM p_prj_folder_auth
+		WHERE prj_id = #{prj_id} AND 
+			  folder_id = #{folder_id} AND
+		      auth_lvl1 = #{auth_lvl1} AND
+		      auth_val = #{auth_val}
+	</delete>
+	
+	<delete id="clearAuth" parameterType="FolderAuthVO">
+	    DELETE FROM p_prj_folder_auth
+		WHERE prj_id = #{prj_id} AND 
+			  folder_id = #{folder_id} AND
+		      auth_lvl1 != 'F'
+	</delete>
+	
+	
+	
+	<delete id="deleteInfoInherit" parameterType="FolderAuthVO">
+	    DELETE FROM p_prj_folder_auth
+		WHERE prj_id = #{prj_id} AND 
+			  folder_id = #{folder_id} AND
+		      auth_lvl1 = #{auth_lvl1} AND
+		      auth_val = #{auth_val}   AND
+		      parent_folder_inheri_yn = 'Y'
+	</delete>
+	
+	
+	
+	<select id="getOrgNm" parameterType="Long" resultType="String">
+		SELECT org_nm
+		FROM p_organization
+		WHERE org_id = #{value}
+	</select>
+	
+	
+	<select id="getDefaultAuth" parameterType="FolderAuthVO" resultType="FolderAuthVO">
+		SELECT *
+		FROM p_prj_folder_auth
+		WHERE prj_id = #{prj_id} AND folder_id = #{folder_id}
+	</select>
+	
+	
+	<select id="getFolderIdList" parameterType="String" resultType="Long">
+		SELECT folder_id
+		FROM p_prj_folder_info
+		WHERE prj_id = #{value}
+	</select>
+	
+	<select id="getRootFolderIdList" parameterType="String" resultType="FolderInfoVO">
+		SELECT folder_id,folder_type
+		FROM p_prj_folder_info
+		WHERE prj_id = #{value} AND folder_id = parent_folder_id
+	</select>
+	
+	
+	
+	<select id="getHHI_orgRootId" resultType="Long">
+		SELECT org_id
+		FROM p_organization
+		WHERE org_id = org_parent_id AND org_type = 'H'
+	</select>
+	
+	<select id="getFolderPath" resultType="String" parameterType="FolderAuthVO">
+		SELECT folder_path
+		FROM p_prj_folder_info
+		WHERE prj_id = #{prj_id} AND folder_id = #{folder_id}
+	</select>
+		
+	<select id="getSubFolderList" resultType="Long" parameterType="FolderAuthVO">
+		SELECT folder_id
+		FROM p_prj_folder_info
+		WHERE prj_id = #{prj_id} AND folder_path LIKE #{_auth_val}
+	</select>
+	
+	<select id="getParentAuths" resultType="FolderAuthVO" parameterType="FolderInfoVO">
+		SELECT *
+		FROM p_prj_folder_auth
+		WHERE prj_id = #{prj_id} AND folder_id = #{parent_folder_id}
+	</select>
+	
+	<select id="getGrpMemberList" resultType="UsersVO" parameterType="FolderAuthVO">
+		SELECT *
+		FROM p_prj_group_member ppgm LEFT OUTER JOIN p_users pu ON ppgm.user_id = pu.user_id
+		WHERE prj_id = #{prj_id} AND group_id = #{group_id}
+	</select>
+	
+	<select id="getGrpProjectMemberList" resultType="UsersVO" parameterType="FolderAuthVO">
+		SELECT *
+		FROM p_prj_group_member ppgm LEFT OUTER JOIN p_users pu ON ppgm.user_id = pu.user_id
+		WHERE prj_id = #{prj_id}
+	</select>
+	
+	<select id="getFolderAuth" resultType="FolderAuthVO" parameterType="FolderAuthVO">
+		SELECT *
+		FROM p_prj_folder_auth
+		WHERE prj_id = #{prj_id} AND folder_id = #{folder_id} AND auth_lvl1 = 'F' AND auth_val = folder_id
+	</select>
+	
+	
+	<insert id="insertFolderAuth" parameterType="FolderAuthVO">
+		INSERT INTO p_prj_folder_auth(
+		    prj_id,
+		    folder_id,
+		    auth_lvl1,
+		    auth_val,
+		    folder_auth_add_yn,
+		    parent_folder_inheri_yn,
+		    read_auth_yn,
+		    write_auth_yn,
+		    delete_auth_yn,
+		    reg_id,
+		    reg_date
+		)
+		VALUES(
+			#{prj_id},
+			#{folder_id},
+			'F',
+			#{folder_id},
+			#{folder_auth_add_yn},
+			#{parent_folder_inheri_yn},
+			#{read_auth_yn},
+			#{write_auth_yn},
+			#{delete_auth_yn},
+			#{reg_id},
+			#{reg_date}
+		)
+	</insert>
+	
+	<update id="updateFolderAuth" parameterType="FolderAuthVO">
+		UPDATE p_prj_folder_auth
+		SET prj_id  = #{prj_id},
+			folder_id = #{folder_id},
+			auth_val = #{folder_id},
+			folder_auth_add_yn = #{folder_auth_add_yn},
+			parent_folder_inheri_yn = #{parent_folder_inheri_yn},
+			read_auth_yn = #{read_auth_yn},
+			write_auth_yn = #{write_auth_yn},
+			delete_auth_yn = #{delete_auth_yn},
+			mod_id = #{mod_id},
+			mod_date = #{mod_date}					
+		WHERE prj_id = #{prj_id} AND
+		      folder_id = #{folder_id} AND
+		      auth_lvl1 = 'F'
+	</update>
+	
+	
+	<select id="getAuthInThisFolder" parameterType="FolderAuthVO" resultType="FolderAuthVO">
+		SELECT *
+		FROM p_prj_folder_auth
+		WHERE prj_id = #{prj_id} 
+		  AND folder_id = #{folder_id}
+		  AND auth_lvl1 != 'F'
+		 order by auth_val desc
+	</select>
+	
+	<select id="getPrjIdList" resultType="String">
+		SELECT prj_id
+		FROM p_prj_info
+		WHERE prj_hidden_yn = 'N'
+	</select>
+	
+	<select id="memberSearch" resultType="FolderAuthVO" parameterType="FolderAuthVO">
+		SELECT 'P' as auth_lvl1 , user_id as auth_val, user_kor_nm
+		FROM p_users 
+		WHERE ${auth_lvl1} LIKE #{auth_val}  AND user_st != 'D'
+	</select>
+	
+	<delete id="delAuthAdd" parameterType="FolderAuthVO">
+		DELETE FROM p_prj_folder_auth 
+		WHERE prj_id = #{prj_id} AND folder_id = #{folder_id} AND auth_lvl1 != 'F'
+	</delete>
+	
+	
+</mapper>
