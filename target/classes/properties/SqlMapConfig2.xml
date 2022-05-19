@@ -6,9 +6,9 @@
 		<typeAlias alias="map" type="java.util.Map" />
 		<typeAlias alias="list" type="java.util.List" />
 		
-		<typeAlias alias="OracleUsersVO" type="kr.co.hhi.model.UsersVO" />
-		<typeAlias alias="OraclePrjDocumentIndexVO" type="kr.co.hhi.model.PrjDocumentIndexVO" />
-		<typeAlias alias="OraclePrjInfoVO" type="kr.co.hhi.model.PrjInfoVO" />
+		<typeAlias alias="OracleUsersVO" type="kr.co.doiloppa.model.UsersVO" />
+		<typeAlias alias="OraclePrjDocumentIndexVO" type="kr.co.doiloppa.model.PrjDocumentIndexVO" />
+		<typeAlias alias="OraclePrjInfoVO" type="kr.co.doiloppa.model.PrjInfoVO" />
 		
 	</typeAliases>
  

@@ -68,7 +68,7 @@
 	
 	<!-- Transaction 설정 -->
     <aop:config proxy-target-class="true">
-        <aop:pointcut id="requiredTx" expression="execution(public * kr.co.hhi..*Service.*(..))"/>
+        <aop:pointcut id="requiredTx" expression="execution(public * kr.co.doiloppa..*Service.*(..))"/>
         <aop:advisor advice-ref="txAdvice" pointcut-ref="requiredTx" />
     </aop:config>
     
@@ -115,7 +115,7 @@
 	</tx:advice>
 	<!-- Transaction 설정 -->
     <aop:config proxy-target-class="true">
-        <aop:pointcut id="requiredTx" expression="execution(public * kr.co.hhi..*Service.*(..))"/>
+        <aop:pointcut id="requiredTx" expression="execution(public * kr.co.doiloppa..*Service.*(..))"/>
         <aop:advisor advice-ref="txAdvice2" pointcut-ref="requiredTx" />
     </aop:config>
 </beans>

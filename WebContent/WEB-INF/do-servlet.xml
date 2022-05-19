@@ -16,7 +16,7 @@
 
 
     <!-- Context 전체 설정 -->
-   	<context:component-scan base-package="kr.co.hhi">
+   	<context:component-scan base-package="kr.co.doiloppa">
 		<context:include-filter type="annotation" expression="org.springframework.stereotype.Controller" />
 <!-- 		<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Repository" /> -->
 <!-- 		<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Service" /> -->
@@ -86,11 +86,11 @@
 		</property>
 	</bean>
 	
-  <bean id="SessionInterceptor" class="kr.co.hhi.interceptor.SessionInterceptor"></bean>
-  <bean id="LoginInterceptor" class="kr.co.hhi.interceptor.LoginInterceptor"></bean>
-  <bean id="ReadAuthInterceptor" class="kr.co.hhi.interceptor.ReadAuthInterceptor"></bean>
-  <bean id="WriteAuthInterceptor" class="kr.co.hhi.interceptor.WriteAuthInterceptor"></bean>
-  <bean id="DeleteAuthInterceptor" class="kr.co.hhi.interceptor.DeleteAuthInterceptor"></bean>
+  <bean id="SessionInterceptor" class="kr.co.doiloppa.interceptor.SessionInterceptor"></bean>
+  <bean id="LoginInterceptor" class="kr.co.doiloppa.interceptor.LoginInterceptor"></bean>
+  <bean id="ReadAuthInterceptor" class="kr.co.doiloppa.interceptor.ReadAuthInterceptor"></bean>
+  <bean id="WriteAuthInterceptor" class="kr.co.doiloppa.interceptor.WriteAuthInterceptor"></bean>
+  <bean id="DeleteAuthInterceptor" class="kr.co.doiloppa.interceptor.DeleteAuthInterceptor"></bean>
   <mvc:interceptors>
   
 <!--   		<mvc:interceptor> -->

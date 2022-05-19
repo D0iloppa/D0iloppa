@@ -44,16 +44,16 @@
 		<property name="order" value="1" />
 	</bean>
 	
-	<bean id="fileDownload" class="kr.co.hhi.excel.DownloadView"/>
+	<bean id="fileDownload" class="kr.co.doiloppa.excel.DownloadView"/>
 
     <!-- Context 전체 설정 -->
    	<!-- <context:component-scan base-package="com.wellconn"> -->
-   	<context:component-scan base-package="kr.co.hhi">
+   	<context:component-scan base-package="kr.co.doiloppa">
 		<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller" />
 	</context:component-scan>
 	
 	<!-- scheduleJob bean -->
-    <bean id="scheduleJob" class="kr.co.hhi.common.schedule.Schedule">
+    <bean id="scheduleJob" class="kr.co.doiloppa.common.schedule.Schedule">
     	<!-- <property name="mailer" ref="mailer" />  -->
     </bean>
     	
