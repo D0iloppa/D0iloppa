@@ -1,0 +1,36 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- <script type="module" src="/script/compressorjs.js"></script> -->
+    <script type="text/javascript" src="/script/compressorjs.js"></script>
+    <script type="text/javascript" src="/script/demoSample.js"></script>
+    <title>Doil dev TEST</title>
+</head>
+
+<body>
+    <div style="margin-bottom: 10px;">
+        <h1>Doil Image Compressor</h1>
+    </div>
+
+
+    <div>
+        <input type="file" id="file" accept="image/*">
+    </div>
+
+    <div style="display: flex; width:100%">
+        <div class="uploadResult" id="org_div" style="width:50%; padding:10px">
+            <span id="org_label">원본</span>
+            <img id="org_img" style="width:100%">
+        </div>
+        <div class="uploadResult" id="comp_div" style="width:50%; padding:10px">
+            <span id="comp_label">압축</span>
+            <img id="compressd_img" style="width:100%">
+        </div>
+    </div>
+</body>
+</html>
