@@ -23,7 +23,6 @@ function getServerIp() {
 }
 
 // 정적 파일 불러오기
-app.use('/script',express.static(__dirname + "/res/script"));
 app.use(express.static(__dirname + "/public"));
 
 // 라우팅 정의
