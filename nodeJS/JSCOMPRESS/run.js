@@ -27,7 +27,6 @@ app.use(express.static(__dirname + "/public"));
 
 // 라우팅 정의
 app.get("/", (req, res) => {
-  //res.sendFile(__dirname + "/index.html");
   res.sendFile(__dirname + "/index.html");
 });
 
